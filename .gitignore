@@ -115,3 +115,7 @@ ENV/
 # Exclude data
 
 
+# Exclude external reference scripts
+scripts/
+
+
