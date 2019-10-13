@@ -28,7 +28,10 @@ forced_file_error = False
 
 NAS_raw_data = Path('R:\\Financial Data\\Historical Prices Raw Data')
 
-sources_dict = {'axitrader': {'name': 'axitrader',
+sources_dict = {'alphavantage': {'name': 'alphavantage',
+                                 'directory': 'alphavantage',
+                                 'format': 'alphavantage'},
+                'axitrader': {'name': 'axitrader',
                               'directory': 'axitrader-mt4',
                               'format': 'mt4'},
                 'xm-com': {'name': 'xm-com',
@@ -44,6 +47,8 @@ sources_dict = {'axitrader': {'name': 'axitrader',
                          'directory': 'wsj',
                          'format': 'wsj'},
                 }
+
+
 
 # --------------------------------------------------------------------------------------------------------------------
 # --- Load config files and save in config dictionary (https://docs.python.org/3.4/library/configparser.html)
@@ -190,7 +195,7 @@ def safe_sampling(df, first=None, last=None):
 # ----------------------------------
 
 
-def get_price_dict_from_alphavantage(ticker='*', timeframe='*', target_directory=None, verbose=False):
+def get_price_dict_from_alphavantage(ticker='*', timeframe='*', timefilter='', target_directory=None, verbose=False):
     """
     Returns Dict w/ all price information (alphavantage) from 'target_directory', filtered by 'ticker' and 'timeframe'.
 
@@ -207,6 +212,7 @@ def get_price_dict_from_alphavantage(ticker='*', timeframe='*', target_directory
     ticker :            (str) Name of the ticker for which to load prices, or wilcard *
     timeframe :         (str) Name of the timeframe considered: FX_INTRADAY_60min/30min/15min/5min/1min
                               FX_DAILY, FX_WEEKLY, FX_MONTHLY or wildcard *
+    timefilter :        (str) pattern to select a subset of the files based on date: '', 'YYYY', 'YYYY-MM'
     target_directory :  (Path) (Optional) path to the directory where the price files are stored
                         Default is 'data/raw-data/alphavantage'
     verbose :           (boolean) Set True to print more log comment. Default is False
@@ -218,7 +224,7 @@ def get_price_dict_from_alphavantage(ticker='*', timeframe='*', target_directory
     if target_directory is None:
         target_directory = get_module_root_path() / 'data/raw-data/alphavantage'
 
-    selection_pattern = remove_multiple_wildcards(ticker + '_' + timeframe + '_*.csv')
+    selection_pattern = remove_multiple_wildcards(f'{ticker}_{timeframe}_{timefilter}*.csv')
     target_files_list = list(target_directory.glob(selection_pattern))
     price_dict = {}
     for file in target_files_list:
@@ -492,6 +498,79 @@ def consolidate_price_files_mt4(ticker='EURUSD', timeframe='1440',
     print('\n')
 
     return all_prices
+
+
+def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, timefilter=None,
+                                       data_source=None, drive=None, type='alphavantage', verbose=False):
+    if timeframe_list is None:
+        timeframe_list = ['FX_DAILY', 'FX_WEEKLY', 'FX_MONTHLY', 'FX_INTRADAY_60min', 'FX_INTRADAY_30min']
+    if ticker_list is None:
+        ticker_list = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCHF',
+                       'EURGBP', 'EURJPY', 'EURSGD', 'EURUSD',
+                       'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPUSD', 'SGDJPY',
+                       'USDCAD', 'USDCHF', 'USDHKD', 'USDILS', 'USDJPY', 'USDKRW', 'USDPLN', 'USDSGD', 'USDTHB']
+    if timefilter is None:
+        timefilter = ''
+    if data_source is None:
+        data_source = 'alphavantage'
+
+    if drive is None:
+        drive = 'project'
+    if drive == 'NAS':
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+    elif drive == 'project':
+        project_root = get_module_root_path()
+        prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
+        datasets_dir = project_root / 'data' / 'datasets' / sources_dict[data_source]['directory']
+    else:
+        msg = f'value for drive: {drive} is not recognized'
+        raise ValueError(msg)
+
+    def exclude_idx_in_dataset(dataset, df):
+        ds_idx = dataset.index
+        df_idx = df.index
+        filtered_idx = list(set(df_idx).difference(set(ds_idx)))
+        return df.loc[filtered_idx, :]
+
+    for ticker in ticker_list:
+        for timeframe in timeframe_list:
+            print_log(f'Handling {ticker} for {timeframe}')
+
+            dataset_file_name = f'{data_source}-{ticker}-{timeframe}.csv'
+            path2dataset = datasets_dir / dataset_file_name
+
+            alphadict = get_price_dict_from_alphavantage(ticker=ticker, timeframe=timeframe, timefilter=timefilter,
+                                                         target_directory=prices_source_dir)
+            list_of_files = list(alphadict)
+
+            if path2dataset.exists():
+                print_log(f' - Loading existing dataset from {dataset_file_name}')
+                alpha_full_ds = pd.read_csv(path2dataset,
+                                            sep=',',
+                                            index_col=0,
+                                            header=None,
+                                            skiprows=1,
+                                            parse_dates=[0],
+                                            infer_datetime_format=True,
+                                            names=['Date', 'Open', 'High', 'Low', 'Close'],
+                                            na_values=['nan', 'null', 'NULL']
+                                            )
+            else:
+                print_log(f' - Creating a new dataset for {dataset_file_name}')
+                alpha_full_ds = pd.DataFrame(columns=alphadict[list_of_files[0]].columns)
+
+            for file_name, df in alphadict.items():
+                filtered_df = exclude_idx_in_dataset(alpha_full_ds, df.iloc[:-1, :])
+                print_log(f' - Updating with {file_name}')
+                print_log(f'   Dataset: {alpha_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
+                alpha_full_ds = alpha_full_ds.append(filtered_df, verify_integrity=True, sort=False)
+                alpha_full_ds.sort_index(ascending=True, inplace=True)
+
+            assert all(alpha_full_ds.isna()) is True, f'Some values in the dataset (alpha_full_ds) are NaN.'
+
+            print_log(f' - Saving updated dataset into {dataset_file_name}')
+            alpha_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
 
 
 # --------------------------------------------------------------------------------------------------------------------
