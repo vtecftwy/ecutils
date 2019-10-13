@@ -1,3 +1,12 @@
+"""
+Master Historical Prices Utility Functions
+
+Includes all stable utility functions for handling historical prices.
+Link to this scrip by using a Symlink:
+ - mklink /D "D:\PyProjects\project_folder\src\symlink_name" "D:\PyProjects\ec-utils"
+ More info here: https://www.maketecheasier.com/create-symbolic-links-windows10/
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
