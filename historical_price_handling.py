@@ -1105,7 +1105,7 @@ def autocorrelation_ohlv(series, max_lag, ohlc='Close', **kwarg):
 # -----------------------------------
 
 
-def candlestick_plot(df, width=950, height=600):
+def candlestick_plot(df, width=950, height=600, chart_title=''):
     """Create a Bokeh candlestick chart based on the DataFrame provided as parameter.
 
        Parameters
@@ -1119,7 +1119,7 @@ def candlestick_plot(df, width=950, height=600):
 
     """
 
-    p = figure(plot_width=width, plot_height=height, x_axis_type="datetime")
+    p = figure(plot_width=width, plot_height=height, title=chart_title, x_axis_type="datetime")
     p.xaxis.major_label_orientation = 3.1415 / 4
     p.grid.grid_line_alpha = 0.5
 
