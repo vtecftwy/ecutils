@@ -690,7 +690,7 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
                 'USDHKD',
                 'USDILS',
                 'USDJPY',
-                # 'USDKRW',
+                'USDKRW',
                 'USDPLN',
                 'USDSGD',
                 'USDTHB',
