@@ -232,15 +232,14 @@ def get_price_dict_from_alphavantage(ticker='*', timeframe='*', timefilter='', t
         file_absolute_path_str = str(file.absolute())
         if verbose:
             print(file_absolute_path_str)
-        # ToDo: modify parse as {'Bar': [0]} in order to name index as Bar
         prices_df = pd.read_csv(file_absolute_path_str,
                                 sep=',',
                                 index_col=0,
                                 header=None,
                                 skiprows=1,
-                                parse_dates=[0],
+                                parse_dates={'Bar': [0]},
                                 infer_datetime_format=True,
-                                names=['Date', 'Open', 'High', 'Low', 'Close'],
+                                names=['timestamp', 'Open', 'High', 'Low', 'Close'],
                                 na_values=['nan', 'null', 'NULL']
                                 )
         prices_df = fill_nan(prices_df)
