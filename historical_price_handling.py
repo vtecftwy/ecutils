@@ -14,6 +14,7 @@ import urllib.request
 import time
 import configparser
 import logging
+import os
 
 from datetime import datetime
 from pathlib import Path
@@ -231,6 +232,7 @@ def get_price_dict_from_alphavantage(ticker='*', timeframe='*', timefilter='', t
         file_absolute_path_str = str(file.absolute())
         if verbose:
             print(file_absolute_path_str)
+        # ToDo: modify parse as {'Bar': [0]} in order to name index as Bar
         prices_df = pd.read_csv(file_absolute_path_str,
                                 sep=',',
                                 index_col=0,
@@ -260,6 +262,7 @@ def get_price_dict_from_mt4(ticker='*', timeframe='*', target_directory=None, ve
     -----------
     ticker :            (str) Name of the ticker for which to load prices, or wilcard *
     timeframe :         (str) Name of the timeframe considered: 60, 240, 1440 or wildcard *
+    timefilter :        (str) pattern to select a subset of the files based on date: '', 'YYYY', 'YYYY-MM'
     target_directory :  (Path) (Optional) path to the directory where the price files are stored
                         Default is 'data/raw-data/data/metatrader-mt4'
     verbose :           (boolean) Set True to print more log comment. Default is False
@@ -283,7 +286,7 @@ def get_price_dict_from_mt4(ticker='*', timeframe='*', target_directory=None, ve
                                 sep=',',
                                 header=None,
                                 index_col=0,
-                                parse_dates=[[0, 1]],
+                                parse_dates={'Bar': [0,1]},
                                 infer_datetime_format=True,
                                 names=['Date', 'Time', 'Open', 'High', 'Low', 'Close', 'Volume'],
                                 na_values=['nan', 'null', 'NULL']
@@ -571,6 +574,102 @@ def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, ti
 
             print_log(f' - Saving updated dataset into {dataset_file_name}')
             alpha_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
+
+
+def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
+                              data_source=None, drive=None, type='mt4', verbose=False):
+    PROCESSED_FILE_FLAG = '_processed_into_ds'
+
+    # Define standard lists for MT4
+    tickers_forex = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCHF',
+                     'EURGBP', 'EURJPY', 'EURSGD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPUSD',
+                     'NZDUSD', 'SGDJPY', 'USDCAD', 'USDCHF', 'USDCNH', 'USDHKD', 'USDILS', 'USDJPY', 'USDPLN',
+                     'USDSGD', 'USDTHB']
+
+    tickers_indices_cash = ['CN50', 'EU50', 'FRA40', 'GER30', 'UK100', 'US30', 'US500', 'USTECH']
+    tickers_indices_future = ['CAC40.fs', 'CHINA50.fs', 'DAX30.fs', 'DJ30.fs', 'EUSTX50.fs', 'FT100.fs',
+                              'NAS100.fs', 'S&P.fs']
+
+    tickers_commodities_cash = ['UKOIL', 'USOIL', 'XAGUSD', 'XAUUSD']
+    tickers_commodities_future = ['BRENT.fs', 'COCOA.fs', 'COFFEE.fs', 'COPPER.fs', 'GOLD.fs', 'NATGAS.fs',
+                                  'SILVER.fs', 'SOYBEAN.fs', 'WTI.fs']
+
+    tickers_others = ['BTCUSD']
+
+    tickers_non_forex = tickers_indices_cash + tickers_indices_future + \
+                        tickers_commodities_cash + tickers_commodities_future + \
+                        tickers_others
+
+    if timeframe_list is None:
+        timeframe_list = ['60', '240', '1440']
+    if ticker_list is None:
+        ticker_list = tickers_non_forex
+    if data_source is None:
+        data_source = 'axitrader'
+    if drive is None:
+        drive = 'project'
+    if drive == 'NAS':
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+    elif drive == 'project':
+        project_root = get_module_root_path()
+        prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
+        datasets_dir = project_root / 'data' / 'datasets' / sources_dict[data_source]['directory']
+    else:
+        msg = f'value for drive: {drive} is not recognized'
+        raise ValueError(msg)
+
+    def exclude_idx_in_dataset(dataset, df):
+    # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
+        ds_idx = dataset.index
+        df_idx = df.index
+        filtered_idx = list(set(df_idx).difference(set(ds_idx)))
+        return df.loc[filtered_idx, :]
+
+    for ticker in ticker_list:
+        for timeframe in timeframe_list:
+            print_log(f'Handling {ticker} for {timeframe}')
+
+            dataset_file_name = f'{data_source}-{ticker}-{timeframe}.csv'
+            path2dataset = datasets_dir / dataset_file_name
+
+            mt4dict = get_price_dict_from_mt4(ticker=ticker, timeframe=timeframe, target_directory=prices_source_dir)
+            files_to_process = [f for f in list(mt4dict) if PROCESSED_FILE_FLAG not in f]
+
+            if path2dataset.exists():
+                print_log(f' - Loading existing dataset from {dataset_file_name}')
+                mt4_full_ds = pd.read_csv(path2dataset,
+                                          sep=',',
+                                          index_col=0,
+                                          header=None,
+                                          skiprows=1,
+                                          parse_dates=[0],
+                                          infer_datetime_format=True,
+                                          names=['Bar', 'Open', 'High', 'Low', 'Close', 'Volume'],
+                                          na_values=['nan', 'null', 'NULL']
+                                          )
+            else:
+                print_log(f' - Creating a new dataset for {dataset_file_name}')
+                mt4_full_ds = pd.DataFrame(columns=mt4dict[files_to_process[0]].columns)
+
+            for file_name in files_to_process:
+                df = mt4dict[file_name]
+                filtered_df = exclude_idx_in_dataset(mt4_full_ds, df)
+                print_log(f' - Updating with {file_name}')
+                print_log(f'   Dataset: {mt4_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
+                mt4_full_ds = mt4_full_ds.append(filtered_df, verify_integrity=True, sort=False)
+                mt4_full_ds.sort_index(ascending=True, inplace=True)
+
+                process_flag = PROCESSED_FILE_FLAG + f'_on_{datetime.today().strftime("%Y-%m-%d")}'
+                new_file_name = file_name[0:-4] + process_flag + '.csv'
+                os.rename(prices_source_dir/file_name, prices_source_dir/new_file_name)
+
+            assert all(mt4_full_ds.isna()) is True, f'Some values in the dataset (alpha_full_ds) are NaN.'
+
+            print_log(f' - Saving updated dataset into {dataset_file_name}')
+            mt4_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
+
+
 
 
 # --------------------------------------------------------------------------------------------------------------------
