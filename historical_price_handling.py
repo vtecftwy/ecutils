@@ -19,6 +19,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from matplotlib import style
+from IPython.display import display
 from bokeh.plotting import figure, show, output_file
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -257,6 +258,7 @@ def safe_sampling(df, first=None, last=None):
 # ---- Price file handling functions
 # ----------------------------------
 # ToDo: refactor these functions to only have one function or class and use parameters for different sources
+
 
 def get_price_dict_from_alphavantage(ticker='*', timeframe='*', timefilter='', target_directory=None, verbose=False):
     """
@@ -1361,9 +1363,10 @@ def candlestick_plot(df, width=950, height=600, chart_title='', fig=None):
 
        Parameters
        ----------
-       df : DataFrame with datetime index, and at least the following columns ['Open', 'High', 'Low', 'Close', 'Volume']
+       df: DataFrame with datetime index, and at least the following columns ['Open', 'High', 'Low', 'Close', 'Volume']
        width, height: sizes of the plot figure
-       fig: optional figure to allow superposition of other lines on candlestick plot
+       chart_title: optional. String to be used as title of the chart
+       fig: optional. Figure to allow superposition of other lines on candlestick plot
 
        Returns
        ----------
@@ -1471,7 +1474,7 @@ def multi_plot(time_series_dict, fctn, *args, **kwargs):
         print_log('Entered set_plot_ax for {plot_title}-{row}-{col}-{count}', verbose=verbose)
 
         axes = figure.add_subplot(row, col, count)
-        axes.plot(data_to_plot,alpha=0.75)
+        axes.plot(data_to_plot, alpha=0.75)
 
         axes.set_title(plot_title, fontsize=ft_titles)
         axes.set_xlabel(x_label, fontsize=ft_axis)
@@ -1479,7 +1482,8 @@ def multi_plot(time_series_dict, fctn, *args, **kwargs):
 
         max_value = data_to_plot.abs().max()
         y_limit = max(0.25,max_value)
-        axes.set_ylim((-y_limit,+y_limit))
+        # axes.set_ylim((-y_limit,+y_limit)) modified into following line on Nov 15, 2019
+        axes.set_ylim(-y_limit,+y_limit)
 
         for label in axes.xaxis.get_ticklabels():
             label.set_fontsize(ft_axis)
