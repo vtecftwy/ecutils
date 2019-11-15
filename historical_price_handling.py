@@ -35,6 +35,9 @@ sources_dict = {'alphavantage': {'name': 'alphavantage',
                 'axitrader': {'name': 'axitrader',
                               'directory': 'axitrader-mt4',
                               'format': 'mt4'},
+                'yahoo': {'name': 'yahoo',
+                          'directory': 'yahoo',
+                          'format': 'yahoo'},
                 'xm-com': {'name': 'xm-com',
                            'directory': 'xm-com-mt4',
                            'format': 'mt4'},
@@ -49,7 +52,66 @@ sources_dict = {'alphavantage': {'name': 'alphavantage',
                          'format': 'wsj'},
                 }
 
+ticker_dict = {'S&P500':      {'name': 'S&P500',
+                               'type': 'index',
+                               'description': 'Standard and Poor 500',
+                               'axitrader': 'US500',
+                               'wsj': 'SPX',
+                               'yahoo': '^GSPC',
+                               },
+               'DJ30':        {'name': 'Dow Jones 30',
+                               'type': 'index',
+                               'description': 'Nyse Composite',
+                               'axitrader': 'US30',
+                               'wsj': 'NYA',
+                               'yahoo': '^NYA',
+                               },
+               'NASDAQ100':   {'name': 'NASDAQ 100',
+                               'type': 'index',
+                               'description': 'NASDAQ 100',
+                               'axitrader': 'USTECH',
+                               'wsj': 'NDX',
+                               'yahoo': '^NDX',
+                               },
+               'EUSTOXX50':   {'name': 'Euro Stoxx 50',
+                               'type': 'index',
+                               'description': 'Euro Stoxx 50 components',
+                               'axitrader': 'EU50',
+                               'wsj': 'SX5E',
+                               'yahoo': '^STOXX50E',
+                               },
+               'FTSE100':     {'name': 'FTSE 100',
+                               'type': 'index',
+                               'description': 'FTSE Index 100',
+                               'axitrader': 'UK100',
+                               'wsj': 'UKX',
+                               'yahoo': '^FTSE',
+                               },
 
+               'Russel2000':  {'name': 'Russel 2000',
+                               'type': 'index',
+                               'description': 'Russel 2000 index',
+                               'axitrader': 'US2000',
+                               'wsj': 'RUT',
+                               'yahoo': '^RUT',
+                               },
+
+               'DAX30':       {'name': 'DAX 30',
+                               'type': 'index',
+                               'description': 'Germany DAX 30 index',
+                               'axitrader': 'GER30',
+                               'wsj': 'DAX',
+                               'yahoo': '^GDAXI',
+                               },
+
+               'CAC40':       {'name': 'CAC 40',
+                               'type': 'index',
+                               'description': 'France CAC 40',
+                               'axitrader': 'FRA40',
+                               'wsj': 'PX1',
+                               'yahoo': '^FCHI',
+                               },
+               }
 
 # --------------------------------------------------------------------------------------------------------------------
 # --- Load config files and save in config dictionary (https://docs.python.org/3.4/library/configparser.html)
@@ -194,7 +256,7 @@ def safe_sampling(df, first=None, last=None):
 # --------------------------------------------------------------------------------------------------------------------
 # ---- Price file handling functions
 # ----------------------------------
-
+# ToDo: refactor these functions to only have one function or class and use parameters for different sources
 
 def get_price_dict_from_alphavantage(ticker='*', timeframe='*', timefilter='', target_directory=None, verbose=False):
     """
@@ -275,6 +337,7 @@ def get_price_dict_from_mt4(ticker='*', timeframe='*', target_directory=None, ve
         target_directory = get_module_root_path() / 'data' / 'raw-data' / 'axitrader-mt4'
 
     selection_pattern = remove_multiple_wildcards('*' + ticker + timeframe + '*.csv')
+
     target_files_list = list(target_directory.glob(selection_pattern))
     price_dict = {}
     for file in target_files_list:
@@ -284,6 +347,7 @@ def get_price_dict_from_mt4(ticker='*', timeframe='*', target_directory=None, ve
         prices_df = pd.read_csv(file_absolute_path_str,
                                 sep=',',
                                 header=None,
+                                skiprows=1,
                                 index_col=0,
                                 parse_dates={'Bar': [0,1]},
                                 infer_datetime_format=True,
@@ -297,55 +361,54 @@ def get_price_dict_from_mt4(ticker='*', timeframe='*', target_directory=None, ve
 
 def get_price_dict_from_wsj(ticker='*', timeframe='*', target_directory=None, verbose=False):
     """
-    Get price data (wsj download files) from folder into a Dict of DataFrame. Return the Dict.
+    Get price data (wsj download) from folder into a Dict of DataFrame. Return the Dict.
 
-    Read price data from wsj format file for ALL the files in 'price files' directory matching
+    Read price data from yahoo format file for ALL the files in 'price files' directory matching
     passed 'ticker' and 'timeframe' (wildcard * is permitted for both 'ticker' and 'timeframe').
     Store price data into a DataFrame for each selected file
     Clean the data (take out nan)
-    Store price DataFrame into a dictionary with key = source price file name
+    Store price DataFrame into a dictionay with key = source price file name
 
     Parameters:
     -----------
     ticker :            (str) Name of the ticker for which to load prices, or wilcard *
-    timeframe :         (str) Name of the timeframe considered: 60, 240, 1440 or wildcard *
+    timeframe :         (str) Name of the timeframe considered: 60, 240, 1440, w, m or wildcard *
     target_directory :  (Path) (Optional) path to the directory where the price files are stored
-                        Default is 'data/raw-data/data/metatrader-mt4'
+                        Default is 'data/raw-data/alphavantage'
     verbose :           (boolean) Set True to print more log comment. Default is False
 
     Return:
     ------
     price_dict :        (dict) dictionary with all uploaded price DataFrame
-    :return: price_dict: (dict) dictionary with all uploaded price DataFrame
     """
     if target_directory is None:
         target_directory = get_module_root_path() / 'data' / 'raw-data' / 'wsj'
 
-    selection_pattern = remove_multiple_wildcards('*' + ticker + '-' + timeframe + '*.csv')
+    selection_pattern = remove_multiple_wildcards(ticker + timeframe + '*.csv')
     target_files_list = list(target_directory.glob(selection_pattern))
     price_dict = {}
     for file in target_files_list:
-        if verbose:
-            print(f'load df from {file.name}')
-        prices_df = pd.read_csv(file,
+        file_absolute_path_str = str(file.absolute())
+        print_log(file_absolute_path_str, verbose)
+        prices_df = pd.read_csv(file_absolute_path_str,
                                 sep=',',
-                                header=0,
+                                header=None,
+                                skiprows=1,
                                 index_col=0,
-                                parse_dates=[0],
+                                parse_dates={'Bar': [0]},
                                 infer_datetime_format=True,
+                                # usecols=['Date', 'Open', 'High', 'Low', 'Close'],
                                 names=['Date', 'Open', 'High', 'Low', 'Close'],
                                 na_values=['nan', 'null', 'NULL']
                                 )
-        prices_df = fill_nan(prices_df).sort_index(ascending=True)
+        prices_df = prices_df.sort_index()
+        prices_df = fill_nan(prices_df)
         price_dict[str(file.name)] = prices_df
-        if verbose:
-            print(f'dataframe info:')
-            display(prices_df.info())       # only used with jupyter where display() is defined
-
+        # price_dict[str(file.name)] = prices_df
     return price_dict
 
 
-def get_price_dict_from_yahoo(ticker='*', timeframe='*', verbose=False):
+def get_price_dict_from_yahoo(ticker='*', timeframe='*', target_directory=None, verbose=False):
     """
     Get price data (yahoo download) from folder into a Dict of DataFrame. Return the Dict.
     
@@ -367,8 +430,9 @@ def get_price_dict_from_yahoo(ticker='*', timeframe='*', verbose=False):
     ------
     price_dict :        (dict) dictionary with all uploaded price DataFrame
     """
-    # TODO: check yahoo price download function or kill it
-    target_directory = get_module_root_path() / 'data/raw-data-yahoo/yahoo'
+    if target_directory is None:
+        target_directory = get_module_root_path() / 'data' / 'raw-data' / 'yahoo'
+
     selection_pattern = remove_multiple_wildcards(ticker + timeframe + '*.csv')
     target_files_list = list(target_directory.glob(selection_pattern))
     price_dict = {}
@@ -379,9 +443,9 @@ def get_price_dict_from_yahoo(ticker='*', timeframe='*', verbose=False):
                                 sep=',',
                                 header=0,
                                 index_col=0,
-                                parse_dates=[0],
+                                parse_dates={'Bar': [0]},
                                 infer_datetime_format=True,
-                                usecols=['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close'],
+                                usecols=['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'],
                                 # names=['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'],
                                 na_values=['nan', 'null', 'NULL']
                                 )
@@ -668,7 +732,96 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
             print_log(f' - Saving updated dataset into {dataset_file_name}')
             mt4_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
 
+# ToDo: make function to update datasets wsj
 
+
+def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
+                                data_source=None, drive=None, type='mt4', verbose=False):
+    PROCESSED_FILE_FLAG = '_processed_into_ds'
+
+    # Define standard lists for MT4
+    tickers_forex = []
+
+    tickers_indices_cash = ['FCHI', 'GDAXI', 'GSPC', 'NDX', 'NYA', 'RUT', 'STOXX50E']
+    tickers_indices_future = []
+
+    tickers_commodities_cash = []
+    tickers_commodities_future = []
+
+    tickers_others = []
+
+    tickers_non_forex = tickers_indices_cash + tickers_indices_future + \
+                        tickers_commodities_cash + tickers_commodities_future + \
+                        tickers_others
+
+    if timeframe_list is None:
+        timeframe_list = ['1440']
+    if ticker_list is None:
+        ticker_list = tickers_non_forex
+    if data_source is None:
+        data_source = 'yahoo'
+    if drive is None:
+        drive = 'project'
+    if drive == 'NAS':
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+    elif drive == 'project':
+        project_root = get_module_root_path()
+        prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
+        datasets_dir = project_root / 'data' / 'datasets' / sources_dict[data_source]['directory']
+    else:
+        msg = f'value for drive: {drive} is not recognized'
+        raise ValueError(msg)
+
+    def exclude_idx_in_dataset(dataset, df):
+    # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
+        ds_idx = dataset.index
+        df_idx = df.index
+        filtered_idx = list(set(df_idx).difference(set(ds_idx)))
+        return df.loc[filtered_idx, :]
+
+    for ticker in ticker_list:
+        for timeframe in timeframe_list:
+            print_log(f'Handling {ticker} for {timeframe}')
+
+            dataset_file_name = f'{data_source}-{ticker}-{timeframe}.csv'
+            path2dataset = datasets_dir / dataset_file_name
+
+            yhodict = get_price_dict_from_yahoo(ticker=ticker, timeframe=timeframe, target_directory=prices_source_dir)
+            files_to_process = [f for f in list(yhodict) if PROCESSED_FILE_FLAG not in f]
+
+            if path2dataset.exists():
+                print_log(f' - Loading existing dataset from {dataset_file_name}')
+                yho_full_ds = pd.read_csv(path2dataset,
+                                          sep=',',
+                                          index_col=0,
+                                          header=None,
+                                          skiprows=1,
+                                          parse_dates=[0],
+                                          infer_datetime_format=True,
+                                          names=['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'],
+                                          na_values=['nan', 'null', 'NULL']
+                                          )
+            else:
+                print_log(f' - Creating a new dataset for {dataset_file_name}')
+                yho_full_ds = pd.DataFrame(columns=yhodict[files_to_process[0]].columns)
+
+            for file_name in files_to_process:
+                df = yhodict[file_name]
+                filtered_df = exclude_idx_in_dataset(yho_full_ds, df)
+                print_log(f' - Updating with {file_name}')
+                print_log(f'   Dataset: {yho_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
+                yho_full_ds = yho_full_ds.append(filtered_df, verify_integrity=True, sort=False)
+                yho_full_ds.sort_index(ascending=True, inplace=True)
+
+                process_flag = PROCESSED_FILE_FLAG + f'_on_{datetime.today().strftime("%Y-%m-%d")}'
+                new_file_name = file_name[0:-4] + process_flag + '.csv'
+                os.rename(prices_source_dir/file_name, prices_source_dir/new_file_name)
+
+            assert all(yho_full_ds.isna()) is True, f'Some values in the dataset (alpha_full_ds) are NaN.'
+
+            print_log(f' - Saving updated dataset into {dataset_file_name}')
+            yho_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
 
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -1203,21 +1356,24 @@ def autocorrelation_ohlv(series, max_lag, ohlc='Close', **kwarg):
 # -----------------------------------
 
 
-def candlestick_plot(df, width=950, height=600, chart_title=''):
+def candlestick_plot(df, width=950, height=600, chart_title='', fig=None):
     """Create a Bokeh candlestick chart based on the DataFrame provided as parameter.
 
        Parameters
        ----------
        df : DataFrame with datetime index, and at least the following columns ['Open', 'High', 'Low', 'Close', 'Volume']
        width, height: sizes of the plot figure
+       fig: optional figure to allow superposition of other lines on candlestick plot
 
        Returns
        ----------
        Nothing
 
     """
-
-    p = figure(plot_width=width, plot_height=height, title=chart_title, x_axis_type="datetime")
+    if fig is None:
+        p = figure(plot_width=width, plot_height=height, title=chart_title, x_axis_type="datetime")
+    else:
+        p = fig
     p.xaxis.major_label_orientation = 3.1415 / 4
     p.grid.grid_line_alpha = 0.5
 
@@ -1225,8 +1381,8 @@ def candlestick_plot(df, width=950, height=600, chart_title=''):
     # note: sometimes, the two first bars are not contiguous (e.g. bar[0]=Fri and bar[1]=Mon)
     # in such case, if interval(bar[1],bar[0]) > interval(contiguous bars). .
     # instead of taking the first interval, we take the min interval across the full index
-    intervals = df.index.to_series() - df.index.to_series().shift(1)
-    interval_in_ms = intervals.min().total_seconds() * 1000
+    intervals = df.index.unique().to_series() - df.index.unique().to_series().shift(1)
+    interval_in_ms = intervals[1:-1].min().total_seconds() * 1000
     ratio = 0.60
 
     inc = df['Close'] > df['Open']
@@ -1256,7 +1412,8 @@ def candlestick_plot(df, width=950, height=600, chart_title=''):
            fill_color="black",
            line_color="black")
 
-    show(p)
+    if fig is None:
+        show(p)
 
 
 def multi_plot(time_series_dict, fctn, *args, **kwargs):
@@ -1371,6 +1528,10 @@ def multi_plot(time_series_dict, fctn, *args, **kwargs):
 
 
 if __name__ == '__main__':
+
+    price_dict = get_price_dict_from_wsj(ticker='NYA', timeframe='1440', verbose=True)
+    print(list(price_dict))
+    # update_price_datasets_yahoo(['AAAA'])
 
     # raw_data = get_module_root_path() / 'data/raw-data/'
     # axitrader = raw_data / 'axitrader-mt4'
