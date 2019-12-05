@@ -28,7 +28,8 @@ verbose = True
 test_mode = True
 forced_file_error = False
 
-NAS_raw_data = Path('R:\\Financial Data\\Historical Prices Raw Data')
+NAS_raw_data = Path('R:\\Financial Data\\Historical Prices Raw Data\\alphavantage')
+NAS_datasets = Path('R:\\Financial Data\\Historical Prices Datasets\\alphavantage')
 
 sources_dict = {'alphavantage': {'name': 'alphavantage',
                                  'directory': 'alphavantage',
