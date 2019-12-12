@@ -991,7 +991,7 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
         print_log(string_to_print, verbose=verbose)
 
         for counter, pair in enumerate(pairs, 1):
-            string_to_print = f'\n  Starting process for {pair} (pair {counter} of {number_pairs})'
+            string_to_print = f'\n  Starting process for {pair} - {tf} (pair {counter} of {number_pairs})'
             print_log(string_to_print, verbose=verbose)
 
             target_currency = pair[0:3]
