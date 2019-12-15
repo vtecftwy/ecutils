@@ -19,8 +19,10 @@ import os
 from datetime import datetime
 from pathlib import Path
 from matplotlib import style
-from IPython.display import display
 from bokeh.plotting import figure, show, output_file
+from IPython.display import display
+
+from fx_utilities.historical_price_configs import NAS_raw_data, NAS_datasets, sources_dict, ticker_dict
 
 # --------------------------------------------------------------------------------------------------------------------
 # --- Set general parameter for current file
@@ -28,97 +30,9 @@ verbose = True
 test_mode = True
 forced_file_error = False
 
-NAS_raw_data = Path('R:\\Financial Data\\Historical Prices Raw Data\\alphavantage')
-NAS_datasets = Path('R:\\Financial Data\\Historical Prices Datasets\\alphavantage')
-
-sources_dict = {'alphavantage': {'name': 'alphavantage',
-                                 'directory': 'alphavantage',
-                                 'format': 'alphavantage'},
-                'axitrader': {'name': 'axitrader',
-                              'directory': 'axitrader-mt4',
-                              'format': 'mt4'},
-                'yahoo': {'name': 'yahoo',
-                          'directory': 'yahoo',
-                          'format': 'yahoo'},
-                'xm-com': {'name': 'xm-com',
-                           'directory': 'xm-com-mt4',
-                           'format': 'mt4'},
-                'metatrader': {'name': 'metatrader',
-                               'directory': 'metatrader-mt4',
-                               'format': 'mt4'},
-                'mixed-mt4': {'name': 'mixed-mt4',
-                              'directory': 'mixed-mt4',
-                              'format': 'mt4'},
-                'wsj':  {'name': 'wsj',
-                         'directory': 'wsj',
-                         'format': 'wsj'},
-                }
-
-ticker_dict = {'S&P500':      {'name': 'S&P500',
-                               'type': 'index',
-                               'description': 'Standard and Poor 500',
-                               'axitrader': 'US500',
-                               'wsj': 'SPX',
-                               'yahoo': '^GSPC',
-                               },
-               'DJ30':        {'name': 'Dow Jones 30',
-                               'type': 'index',
-                               'description': 'Nyse Composite',
-                               'axitrader': 'US30',
-                               'wsj': 'NYA',
-                               'yahoo': '^NYA',
-                               },
-               'NASDAQ100':   {'name': 'NASDAQ 100',
-                               'type': 'index',
-                               'description': 'NASDAQ 100',
-                               'axitrader': 'USTECH',
-                               'wsj': 'NDX',
-                               'yahoo': '^NDX',
-                               },
-               'EUSTOXX50':   {'name': 'Euro Stoxx 50',
-                               'type': 'index',
-                               'description': 'Euro Stoxx 50 components',
-                               'axitrader': 'EU50',
-                               'wsj': 'SX5E',
-                               'yahoo': '^STOXX50E',
-                               },
-               'FTSE100':     {'name': 'FTSE 100',
-                               'type': 'index',
-                               'description': 'FTSE Index 100',
-                               'axitrader': 'UK100',
-                               'wsj': 'UKX',
-                               'yahoo': '^FTSE',
-                               },
-
-               'Russel2000':  {'name': 'Russel 2000',
-                               'type': 'index',
-                               'description': 'Russel 2000 index',
-                               'axitrader': 'US2000',
-                               'wsj': 'RUT',
-                               'yahoo': '^RUT',
-                               },
-
-               'DAX30':       {'name': 'DAX 30',
-                               'type': 'index',
-                               'description': 'Germany DAX 30 index',
-                               'axitrader': 'GER30',
-                               'wsj': 'DAX',
-                               'yahoo': '^GDAXI',
-                               },
-
-               'CAC40':       {'name': 'CAC 40',
-                               'type': 'index',
-                               'description': 'France CAC 40',
-                               'axitrader': 'FRA40',
-                               'wsj': 'PX1',
-                               'yahoo': '^FCHI',
-                               },
-               }
-
 # --------------------------------------------------------------------------------------------------------------------
 # --- Load config files and save in config dictionary (https://docs.python.org/3.4/library/configparser.html)
 # --- min expected keys: 'module_root_directory', 'alphavantage'
-
 
 def load_config(cwdir):
     """Walk up folder tree till config.cfg file is found, load any *.cfg file and return config dictionary
@@ -150,6 +64,7 @@ def load_config(cwdir):
 
 config = load_config(Path().cwd())
 
+
 # --------------------------------------------------------------------------------------------------------------------
 # --- General Utility Functions
 # ------------------------------
@@ -169,6 +84,7 @@ def print_log(text2print=None, verbose=False):
     Does not return anything
     """
     logging.info(text2print)
+    # print(text2print)
 
 
 def get_module_root_path(module_root=None):
@@ -236,7 +152,7 @@ def display_df(df, mrows=None, show_info=False):
     elif mrows <= 3:
         mrows = 3
     pd.set_option('display.max_rows', mrows)
-    display(df)             # only used with jupyter where display() is defined
+    display(df)  # only used with jupyter where display() is defined
     pd.set_option('display.max_rows', default_max_rows)
 
 
@@ -254,6 +170,7 @@ def safe_sampling(df, first=None, last=None):
         last = latest
     sample = df.loc[max(first, earliest):min(last, latest), :].copy()
     return sample
+
 
 # --------------------------------------------------------------------------------------------------------------------
 # ---- Price file handling functions
@@ -352,7 +269,7 @@ def get_price_dict_from_mt4(ticker='*', timeframe='*', target_directory=None, ve
                                 header=None,
                                 skiprows=1,
                                 index_col=0,
-                                parse_dates={'Bar': [0,1]},
+                                parse_dates={'Bar': [0, 1]},
                                 infer_datetime_format=True,
                                 names=['Date', 'Time', 'Open', 'High', 'Low', 'Close', 'Volume'],
                                 na_values=['nan', 'null', 'NULL']
@@ -474,8 +391,8 @@ def compare_df(df_to_compare, display_diff=False, display_info=True):
     sdf1 = sdf1[bar_range_to_compare[0]:bar_range_to_compare[1]]
     sdf2 = sdf2[bar_range_to_compare[0]:bar_range_to_compare[1]]
     diff = (sdf1 - sdf2).loc[(sdf1 - sdf2).apply(
-                             lambda x: True if any(x[col] > 0.0001 for col in ['Open', 'High', 'Low', 'Close']) else False,
-                             axis='columns')]
+        lambda x: True if any(x[col] > 0.0001 for col in ['Open', 'High', 'Low', 'Close']) else False,
+        axis='columns')]
 
     if diff.shape[0] == 0:
         no_bar_conflict = True
@@ -494,7 +411,7 @@ def compare_df(df_to_compare, display_diff=False, display_info=True):
             print(sdf1.loc[diff.index, :])
             print(sdf2.loc[diff.index, :])
     if display_diff:
-        display(diff)           # only used with jupyter where display() is defined
+        display(diff)  # only used with jupyter where display() is defined
 
     return no_bar_conflict
 
@@ -537,7 +454,8 @@ def consolidate_price_files_mt4(ticker='EURUSD', timeframe='1440',
         drive = 'project'
 
     if drive == 'NAS':
-        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source][
+            'directory']
     elif drive == 'project':
         prices_source_dir = get_module_root_path() / 'data' / 'raw-data' / sources_dict[data_source]['directory']
     else:
@@ -586,7 +504,8 @@ def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, ti
     if drive is None:
         drive = 'project'
     if drive == 'NAS':
-        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source][
+            'directory']
         datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
     elif drive == 'project':
         project_root = get_module_root_path()
@@ -632,14 +551,15 @@ def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, ti
             for file_name, df in alphadict.items():
                 filtered_df = exclude_idx_in_dataset(alpha_full_ds, df.iloc[:-1, :])
                 print_log(f' - Updating with {file_name}')
-                print_log(f'   Dataset: {alpha_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
+                print_log(
+                    f'   Dataset: {alpha_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
                 alpha_full_ds = alpha_full_ds.append(filtered_df, verify_integrity=True, sort=False)
                 alpha_full_ds.sort_index(ascending=True, inplace=True)
 
             assert all(alpha_full_ds.isna()) is True, f'Some values in the dataset (alpha_full_ds) are NaN.'
 
             print_log(f' - Saving updated dataset into {dataset_file_name}')
-            alpha_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
+            alpha_full_ds.to_csv(path_or_buf=datasets_dir / dataset_file_name, index_label='timestamp')
 
 
 def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
@@ -652,7 +572,7 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
                      'NZDUSD', 'SGDJPY', 'USDCAD', 'USDCHF', 'USDCNH', 'USDHKD', 'USDILS', 'USDJPY', 'USDPLN',
                      'USDSGD', 'USDTHB']
 
-    tickers_indices_cash = ['CN50', 'EU50', 'FRA40', 'GER30', 'UK100', 'US30', 'US500', 'USTECH']
+    tickers_indices_cash = ['CN50', 'EU50', 'FRA40', 'GER30', 'UK100', 'US30', 'US500', 'US2000', 'USTECH']
     tickers_indices_future = ['CAC40.fs', 'CHINA50.fs', 'DAX30.fs', 'DJ30.fs', 'EUSTX50.fs', 'FT100.fs',
                               'NAS100.fs', 'S&P.fs']
 
@@ -675,7 +595,8 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
     if drive is None:
         drive = 'project'
     if drive == 'NAS':
-        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source][
+            'directory']
         datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
     elif drive == 'project':
         project_root = get_module_root_path()
@@ -686,7 +607,7 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
         raise ValueError(msg)
 
     def exclude_idx_in_dataset(dataset, df):
-    # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
+        # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
         ds_idx = dataset.index
         df_idx = df.index
         filtered_idx = list(set(df_idx).difference(set(ds_idx)))
@@ -722,18 +643,20 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
                 df = mt4dict[file_name]
                 filtered_df = exclude_idx_in_dataset(mt4_full_ds, df)
                 print_log(f' - Updating with {file_name}')
-                print_log(f'   Dataset: {mt4_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
+                print_log(
+                    f'   Dataset: {mt4_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
                 mt4_full_ds = mt4_full_ds.append(filtered_df, verify_integrity=True, sort=False)
                 mt4_full_ds.sort_index(ascending=True, inplace=True)
 
                 process_flag = PROCESSED_FILE_FLAG + f'_on_{datetime.today().strftime("%Y-%m-%d")}'
                 new_file_name = file_name[0:-4] + process_flag + '.csv'
-                os.rename(prices_source_dir/file_name, prices_source_dir/new_file_name)
+                os.rename(prices_source_dir / file_name, prices_source_dir / new_file_name)
 
             assert all(mt4_full_ds.isna()) is True, f'Some values in the dataset (alpha_full_ds) are NaN.'
 
             print_log(f' - Saving updated dataset into {dataset_file_name}')
-            mt4_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
+            mt4_full_ds.to_csv(path_or_buf=datasets_dir / dataset_file_name, index_label='timestamp')
+
 
 # ToDo: make function to update datasets wsj
 
@@ -766,7 +689,8 @@ def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
     if drive is None:
         drive = 'project'
     if drive == 'NAS':
-        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source][
+            'directory']
         datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
     elif drive == 'project':
         project_root = get_module_root_path()
@@ -777,7 +701,7 @@ def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
         raise ValueError(msg)
 
     def exclude_idx_in_dataset(dataset, df):
-    # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
+        # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
         ds_idx = dataset.index
         df_idx = df.index
         filtered_idx = list(set(df_idx).difference(set(ds_idx)))
@@ -813,19 +737,80 @@ def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
                 df = yhodict[file_name]
                 filtered_df = exclude_idx_in_dataset(yho_full_ds, df)
                 print_log(f' - Updating with {file_name}')
-                print_log(f'   Dataset: {yho_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
+                print_log(
+                    f'   Dataset: {yho_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
                 yho_full_ds = yho_full_ds.append(filtered_df, verify_integrity=True, sort=False)
                 yho_full_ds.sort_index(ascending=True, inplace=True)
 
                 process_flag = PROCESSED_FILE_FLAG + f'_on_{datetime.today().strftime("%Y-%m-%d")}'
                 new_file_name = file_name[0:-4] + process_flag + '.csv'
-                os.rename(prices_source_dir/file_name, prices_source_dir/new_file_name)
+                os.rename(prices_source_dir / file_name, prices_source_dir / new_file_name)
 
             assert all(yho_full_ds.isna()) is True, f'Some values in the dataset (alpha_full_ds) are NaN.'
 
             print_log(f' - Saving updated dataset into {dataset_file_name}')
-            yho_full_ds.to_csv(path_or_buf=datasets_dir/dataset_file_name, index_label='timestamp')
+            yho_full_ds.to_csv(path_or_buf=datasets_dir / dataset_file_name, index_label='timestamp')
 
+
+def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=None, verbose=False):
+    """
+
+    """
+    # Define standard lists for MT4
+    tickers_forex = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCHF',
+                     'EURGBP', 'EURJPY', 'EURSGD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPUSD',
+                     'NZDUSD', 'SGDJPY', 'USDCAD', 'USDCHF', 'USDCNH', 'USDHKD', 'USDILS', 'USDJPY', 'USDPLN',
+                     'USDSGD', 'USDTHB']
+
+    tickers_indices_cash = ['CN50', 'EU50', 'FRA40', 'GER30', 'UK100', 'US30', 'US500', 'USTECH']
+    tickers_indices_future = ['CAC40.fs', 'CHINA50.fs', 'DAX30.fs', 'DJ30.fs', 'EUSTX50.fs', 'FT100.fs',
+                              'NAS100.fs', 'S&P.fs']
+    tickers_commodities_cash = ['UKOIL', 'USOIL', 'XAGUSD', 'XAUUSD']
+    tickers_commodities_future = ['BRENT.fs', 'COCOA.fs', 'COFFEE.fs', 'COPPER.fs', 'GOLD.fs', 'NATGAS.fs',
+                                  'SILVER.fs', 'SOYBEAN.fs', 'WTI.fs']
+    tickers_others = ['BTCUSD']
+    tickers_active = tickers_indices_cash + tickers_indices_future + \
+                     tickers_commodities_cash + tickers_commodities_future + \
+                     tickers_others
+
+    if timeframe is None:
+        timeframe = '1440'
+    if ticker is None:
+        ticker = 'US500'
+    if data_source is None:
+        data_source = 'axitrader'
+    if drive is None:
+        drive = 'project'
+    if drive == 'NAS':
+        prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+    elif drive == 'project':
+        project_root = get_module_root_path()
+        prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
+        datasets_dir = project_root / 'data' / 'datasets' / sources_dict[data_source]['directory']
+    else:
+        msg = f'value for drive: {drive} is not recognized'
+        raise ValueError(msg)
+
+    dataset_file_name = f'{data_source}-{ticker}-{timeframe}.csv'
+    path2dataset = datasets_dir / dataset_file_name
+
+    if path2dataset.exists():
+        print_log(f'Loading Dataset for {ticker} for {timeframe}',verbose=verbose)
+        ds = pd.read_csv(path2dataset,
+                         sep=',',
+                         index_col=0,
+                         header=None,
+                         skiprows=1,
+                         parse_dates=[0],
+                         infer_datetime_format=True,
+                         names=['Bar', 'Open', 'High', 'Low', 'Close', 'Volume'],
+                         na_values=['nan', 'null', 'NULL']
+                          )
+        return ds
+    else:
+        print_log(f'No dataset file at {path2dataset.absolute()} !!!!!!!!!!!')
+        return False
 
 # --------------------------------------------------------------------------------------------------------------------
 # ---- Price download handling functions
@@ -920,40 +905,40 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
     print_log(f'Starting alphavantage price update', verbose=verbose)
     if pairs is None:
         pairs = [
-                'AUDCAD',
-                'AUDCHF',
-                'AUDJPY',
-                'AUDUSD',
-                'CADCHF',
-                'CADJPY',
-                'CHFJPY',
-                'EURAUD',
-                'EURCHF',
-                'EURGBP',
-                'EURJPY',
-                'EURSGD',
-                'EURUSD',
-                'GBPAUD',
-                'GBPCAD',
-                'GBPCHF',
-                'GBPJPY',
-                'GBPUSD',
-                'SGDJPY',
-                'USDCAD',
-                'USDCHF',
-                'USDHKD',
-                'USDILS',
-                'USDJPY',
-                'USDKRW',
-                'USDPLN',
-                'USDSGD',
-                'USDTHB',
-                ]
+            'AUDCAD',
+            'AUDCHF',
+            'AUDJPY',
+            'AUDUSD',
+            'CADCHF',
+            'CADJPY',
+            'CHFJPY',
+            'EURAUD',
+            'EURCHF',
+            'EURGBP',
+            'EURJPY',
+            'EURSGD',
+            'EURUSD',
+            'GBPAUD',
+            'GBPCAD',
+            'GBPCHF',
+            'GBPJPY',
+            'GBPUSD',
+            'SGDJPY',
+            'USDCAD',
+            'USDCHF',
+            'USDHKD',
+            'USDILS',
+            'USDJPY',
+            'USDKRW',
+            'USDPLN',
+            'USDSGD',
+            'USDTHB',
+        ]
     if timeframes is None:
         timeframes = ['1d', '60min', '30min']
         # timeframes = ['1m', '1w', '1d', '60min', '30min', '15min', '5min', '1min']
 
-    SECONDS_TO_SLEEP = 20   # Std API call frequency is 5 calls per minute and 500 calls per day
+    SECONDS_TO_SLEEP = 20  # Std API call frequency is 5 calls per minute and 500 calls per day
     number_pairs = len(pairs)
     number_timeframes = len(timeframes)
     timeframe_dict = {'1min': {'name': 'FX_INTRADAY_1min', 'param': 'FX_INTRADAY&interval=1min', 'mode': 'full'},
@@ -966,9 +951,10 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
                       '1m': {'name': 'FX_MONTHLY', 'param': 'FX_MONTHLY', 'mode': 'compact'},
                       }
 
-    print_log(f'Get new data for selected pairs ({number_pairs}) and timeframes ({number_timeframes}):', verbose=verbose)
+    print_log(f'Get new data for selected pairs ({number_pairs}) and timeframes ({number_timeframes}):',
+              verbose=verbose)
     print_log(f'  - {timeframes}', verbose=verbose)
-    print_log(f'  - {pairs}',verbose=verbose)
+    print_log(f'  - {pairs}', verbose=verbose)
 
     downloads_to_retry_dict = {}
     failed_download_dict = {}
@@ -1084,6 +1070,8 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
 
 #  CONSTANTS
 PCT_SPREAD = 0.00015
+
+
 # PCT_SPREAD = 0.00015   # for FOREX Axitrader
 # PCT_SPREAD = 0.00025  # for S&P
 # PCT_SPREAD = 0.00050   # for EU50, SPI200, ...
@@ -1244,7 +1232,7 @@ def estimate_probabilities(gap_df):
     print(f'{STARS}Total Gap Count: {count_gaps}')
     print(f'{STARS}Probabilities:')
     print(f'{STARS}Probability a gap fades within 1 bar = P[Gap Fades] = p_fade[True]')
-    display(p_fade)     # only used with jupyter where display() is defined
+    display(p_fade)  # only used with jupyter where display() is defined
 
     p_momzone = gap_df.groupby('MomZone Label').count().loc[:, 'Open'] / count_gaps
     p_momzone.name = 'Probability'
@@ -1289,7 +1277,7 @@ def estimate_probabilities(gap_df):
     cross_check = pd.DataFrame([p_fades_if_momzone, p_does_not_fade_if_momzone], index=['Fading Gap', 'Not Fading Gap'])
     cross_check.loc['Total', :] = cross_check.loc[['Fading Gap', 'Not Fading Gap'], :].apply(lambda x: x[0] + x[1],
                                                                                              axis='index')
-    display(cross_check)    # only used with jupyter where display() is defined
+    display(cross_check)  # only used with jupyter where display() is defined
     assert_msg = 'p_fades_if_momzone + p_does_not_fade_if_momzone not equal to 1'
     assert all(np.isclose(cross_check.loc['Total', :], 1)), assert_msg
 
@@ -1482,9 +1470,9 @@ def multi_plot(time_series_dict, fctn, *args, **kwargs):
         axes.set_ylabel(y_label, fontsize=ft_axis)
 
         max_value = data_to_plot.abs().max()
-        y_limit = max(0.25,max_value)
+        y_limit = max(0.25, max_value)
         # axes.set_ylim((-y_limit,+y_limit)) modified into following line on Nov 15, 2019
-        axes.set_ylim(-y_limit,+y_limit)
+        axes.set_ylim(-y_limit, +y_limit)
 
         for label in axes.xaxis.get_ticklabels():
             label.set_fontsize(ft_axis)
@@ -1533,9 +1521,10 @@ def multi_plot(time_series_dict, fctn, *args, **kwargs):
 
 
 if __name__ == '__main__':
-
-    price_dict = get_price_dict_from_wsj(ticker='NYA', timeframe='1440', verbose=True)
-    print(list(price_dict))
+    # price_dict = get_price_dict_from_wsj(ticker='NYA', timeframe='1440', verbose=True)
+    # print(list(price_dict))
+    #
+    print(ticker_dict.keys())
     # update_price_datasets_yahoo(['AAAA'])
 
     # raw_data = get_module_root_path() / 'data/raw-data/'
