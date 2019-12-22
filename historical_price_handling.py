@@ -7,14 +7,16 @@ Link to this scrip by using a Symlink:
  More info here: https://www.maketecheasier.com/create-symbolic-links-windows10/
 """
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import urllib.request
-import time
 import configparser
+import json
 import logging
+import matplotlib.pyplot as plt
+import numpy as np
 import os
+import pandas as pd
+import pkg_resources
+import time
+import urllib.request
 
 from datetime import datetime
 from pathlib import Path
@@ -22,13 +24,68 @@ from matplotlib import style
 from bokeh.plotting import figure, show, output_file
 from IPython.display import display
 
-from fx_utilities.historical_price_configs import NAS_raw_data, NAS_datasets, sources_dict, ticker_dict
-
 # --------------------------------------------------------------------------------------------------------------------
 # --- Set general parameter for current file
 verbose = True
 test_mode = True
 forced_file_error = False
+
+# --------------------------------------------------------------------------------------------------------------------
+# --- Set and load configuration and default values dictionaries
+#
+# Location of raw and dataset files
+NAS_raw_data = Path('R:\\Financial Data\\Historical Prices Raw Data\\alphavantage')
+NAS_datasets = Path('R:\\Financial Data\\Historical Prices Datasets\\alphavantage')
+sources_dict = {'alphavantage': {'name': 'alphavantage',
+                                 'directory': 'alphavantage',
+                                 'format': 'alphavantage'},
+                'axitrader': {'name': 'axitrader',
+                              'directory': 'axitrader-mt4',
+                              'format': 'mt4'},
+                'yahoo': {'name': 'yahoo',
+                          'directory': 'yahoo',
+                          'format': 'yahoo'},
+                'xm-com': {'name': 'xm-com',
+                           'directory': 'xm-com-mt4',
+                           'format': 'mt4'},
+                'metatrader': {'name': 'metatrader',
+                               'directory': 'metatrader-mt4',
+                               'format': 'mt4'},
+                'mixed-mt4': {'name': 'mixed-mt4',
+                              'directory': 'mixed-mt4',
+                              'format': 'mt4'},
+                'wsj': {'name': 'wsj',
+                        'directory': 'wsj',
+                        'format': 'wsj'},
+                }
+
+# Load ticker dictionary from json file (use pkg_resources to point to package directory)
+json_file = Path(pkg_resources.resource_filename(__name__, 'historical_prices_tickers.json'))
+if json_file.is_file():
+    with open(json_file, 'r') as f:
+        ticker_dict = json.load(f)
+else:
+    raise ValueError(f"No json file with name <{json_file.name}> at {json_file.absolute()}")
+
+# Set default lists for alphavantage
+source = 'alphavantage'
+forex_alphavantage = [subdict[source] for _, subdict in ticker_dict.items()
+                      if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'forex']
+
+# Set default lists for MT4
+source = 'axitrader'
+forex_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
+                   if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'forex']
+indices_cash_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
+                          if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'index']
+indices_future_axitrader =  [subdict[source] for _, subdict in ticker_dict.items()
+                             if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'index future']
+commodities_cash_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
+                              if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'commodity']
+commodities_future_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
+                                if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'commodity future']
+others_axitrader = ['BTCUSD']
+
 
 # --------------------------------------------------------------------------------------------------------------------
 # --- Load config files and save in config dictionary (https://docs.python.org/3.4/library/configparser.html)
@@ -40,7 +97,9 @@ def load_config(cwdir):
     :param: Path() object to the the directory where to check for cfg files
     return: config_dict: configuration dictionary key:value dictionary
     """
-    # configuration = configparser.ConfigParser()
+    # When method is called from 'ec-utils' directly, instead of another package, use config from fx-bt.
+    if cwdir.name == 'ec-utils': cwdir = Path('D:\\PyProjects\\fx-bt')
+
     cwd_is_config_file_dir = 'config.cfg' in list(f.name for f in cwdir.iterdir() if f.is_file())
     if cwd_is_config_file_dir:
         # Read all *.cfg files in the current working directory
@@ -63,7 +122,6 @@ def load_config(cwdir):
 
 
 config = load_config(Path().cwd())
-
 
 # --------------------------------------------------------------------------------------------------------------------
 # --- General Utility Functions
@@ -1524,7 +1582,8 @@ if __name__ == '__main__':
     # price_dict = get_price_dict_from_wsj(ticker='NYA', timeframe='1440', verbose=True)
     # print(list(price_dict))
     #
-    print(ticker_dict.keys())
+    print('Running')
+    print(len(ticker_dict), ticker_dict.keys())
     # update_price_datasets_yahoo(['AAAA'])
 
     # raw_data = get_module_root_path() / 'data/raw-data/'
