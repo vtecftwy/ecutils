@@ -69,23 +69,23 @@ else:
 
 # Set default lists for alphavantage
 source = 'alphavantage'
-forex_alphavantage = [subdict[source] for _, subdict in ticker_dict.items()
-                      if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'forex']
+forex_alphavantage = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
+                      if source in subdict['tickers'].keys() and subdict['type'] == 'forex']
 
 # Set default lists for MT4
 source = 'axitrader'
-forex_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
-                   if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'forex']
-indices_cash_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
-                          if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'index']
-indices_future_axitrader =  [subdict[source] for _, subdict in ticker_dict.items()
-                             if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'index future']
-commodities_cash_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
-                              if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'commodity']
-commodities_future_axitrader = [subdict[source] for _, subdict in ticker_dict.items()
-                                if source in subdict.keys() and subdict[source] != '-' and subdict['type'] == 'commodity future']
-others_axitrader = ['BTCUSD']
-
+forex_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
+                   if source in subdict['tickers'].keys() and subdict['type'] == 'forex']
+indices_cash_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
+                          if source in subdict['tickers'].keys() and subdict['type'] == 'index']
+indices_future_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
+                            if source in subdict['tickers'].keys() and subdict['type'] == 'index future']
+commodities_cash_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
+                              if source in subdict['tickers'].keys() and subdict['type'] == 'commodity']
+commodities_future_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
+                                if source in subdict['tickers'].keys() and subdict['type'] == 'commodity future']
+crypto_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
+                    if source in subdict['tickers'].keys() and subdict['type'] == 'crypto']
 
 # --------------------------------------------------------------------------------------------------------------------
 # --- Load config files and save in config dictionary (https://docs.python.org/3.4/library/configparser.html)
