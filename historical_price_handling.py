@@ -1334,11 +1334,7 @@ def estimate_probabilities(gap_df):
     p_fades_if_momzone = pd.Series(index=p_momzone.index, name='p_fades_if_momzone')
     p_does_not_fade_if_momzone = pd.Series(index=p_momzone.index, name='p_does_not_fade_if_momzone')
 
-    print(p_momzone_if_fade)
-    print(p_momzone)
-
     for label in p_momzone.index:
-        print(label)
         p_fades_if_momzone[label] = p_momzone_if_fade[True][label] * p_fade[True] / p_momzone[label]
         p_does_not_fade_if_momzone[label] = p_momzone_if_fade[False][label] * p_fade[False] / p_momzone[label]
 
