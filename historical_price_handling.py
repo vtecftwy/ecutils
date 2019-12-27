@@ -38,9 +38,16 @@ NAS_raw_data = Path('R:\\Financial Data\\Historical Prices Raw Data\\alphavantag
 NAS_datasets = Path('R:\\Financial Data\\Historical Prices Datasets\\alphavantage')
 sources_dict = {'alphavantage': {'name': 'alphavantage',
                                  'directory': 'alphavantage',
+                                 'timeframe': {'M': 'FX_MONTHLY',
+                                               'W': 'FX_WEEKLY',
+                                               'D': 'FX_DAILY',
+                                               'H1': 'INTRADAY_60min'},
                                  'format': 'alphavantage'},
                 'axitrader': {'name': 'axitrader',
                               'directory': 'axitrader-mt4',
+                              'timeframe': {'D': '1440',
+                                            'H4': '240',
+                                            'H1': '60'},
                               'format': 'mt4'},
                 'yahoo': {'name': 'yahoo',
                           'directory': 'yahoo',
@@ -1279,18 +1286,25 @@ def extract_gap_dataset(dataframe, pct_spread=None, atr_window=5):
     return gap_df
 
 
-def estimate_probabilities(gap_df):
-    count_gaps = gap_df.shape[0]
+def estimate_probabilities(gap_df, show_report=None):
+    if show_report is None: show_report = True
 
+    def printif(txt, flag=show_report):
+        if show_report: print(txt)
+
+    def displayif(obj, flag=show_report):
+        if show_report: display(obj)
+
+    count_gaps = gap_df.shape[0]
     p_fade = gap_df.groupby('1-Bar Fade?').count().loc[:, 'Open'] / count_gaps
     p_fade.name = 'Probability'
     p_fade.index.name = 'Fading Gap?'
 
     STARS = '************************************************************\n'
-    print(f'{STARS}Total Gap Count: {count_gaps}')
-    print(f'{STARS}Probabilities:')
-    print(f'{STARS}Probability a gap fades within 1 bar = P[Gap Fades] = p_fade[True]')
-    display(p_fade)  # only used with jupyter where display() is defined
+    printif(f'{STARS}Total Gap Count: {count_gaps}')
+    printif(f'{STARS}Probabilities:')
+    printif(f'{STARS}Probability a gap fades within 1 bar = P[Gap Fades] = p_fade[True]')
+    displayif(p_fade)  # only used with jupyter where display() is defined
 
     p_momzone = gap_df.groupby('MomZone Label').count().loc[:, 'Open'] / count_gaps
     p_momzone.name = 'Probability'
@@ -1298,9 +1312,9 @@ def estimate_probabilities(gap_df):
     assert_msg = 'Sum of probabilities for all MomZone (p_momzone) is not equal to 1'
     assert abs(p_momzone.sum() - 1) < 1e-5, assert_msg
 
-    print(f'{STARS}Probability a gap falls into a momzone = P[Gap in MomZone] = p_momzone["label"]')
-    display(p_momzone)  # only used with jupyter where display() is defined
-    print(f'Sum for all MomZone: ... {p_momzone.sum():6.5f}')
+    printif(f'{STARS}Probability a gap falls into a momzone = P[Gap in MomZone] = p_momzone["label"]')
+    displayif(p_momzone)  # only used with jupyter where display() is defined
+    printif(f'Sum for all MomZone: ... {p_momzone.sum():6.5f}')
 
     counts_momzone_if_fade = gap_df.groupby(['1-Bar Fade?', 'MomZone Label']).count().loc[:, 'Open']
     count_fading_gaps, count_not_fading_gaps = counts_momzone_if_fade[True].sum(), counts_momzone_if_fade[False].sum()
@@ -1325,11 +1339,11 @@ def estimate_probabilities(gap_df):
     assert_msg = 'Sum of probabilities for all MomZone if Not Fading (p_momzone_if_fade[False]) is not equal to 1'
     assert abs(p_momzone_if_fade[False].sum() - 1) < 1e-5, assert_msg
 
-    print(f'{STARS}Probability gap falls into a momzone if gap fades within same bar')
-    print(f'P[Gap in MomZone "label"|Gap Fades] = p_momzone_if_fade[True]["label"]')
-    display(p_momzone_if_fade)  # only used with jupyter where display() is defined
-    print(f'Sum for all MomZone if Fading: ....... {p_momzone_if_fade[True].sum():6.5f}')
-    print(f'Sum for all MomZone if Not Fading: ... {p_momzone_if_fade[False].sum():6.5f}')
+    printif(f'{STARS}Probability gap falls into a momzone if gap fades within same bar')
+    printif(f'P[Gap in MomZone "label"|Gap Fades] = p_momzone_if_fade[True]["label"]')
+    displayif(p_momzone_if_fade)  # only used with jupyter where display() is defined
+    printif(f'Sum for all MomZone if Fading: ....... {p_momzone_if_fade[True].sum():6.5f}')
+    printif(f'Sum for all MomZone if Not Fading: ... {p_momzone_if_fade[False].sum():6.5f}')
 
     p_fades_if_momzone = pd.Series(index=p_momzone.index, name='p_fades_if_momzone')
     p_does_not_fade_if_momzone = pd.Series(index=p_momzone.index, name='p_does_not_fade_if_momzone')
@@ -1338,18 +1352,48 @@ def estimate_probabilities(gap_df):
         p_fades_if_momzone[label] = p_momzone_if_fade[True][label] * p_fade[True] / p_momzone[label]
         p_does_not_fade_if_momzone[label] = p_momzone_if_fade[False][label] * p_fade[False] / p_momzone[label]
 
-    print(f'{STARS}Probability gap fades if it is in a gap momzone')
-    print(f'P[Gap fades|Gap in MomZone "label"] = p_fades_if_momzone["label"]')
-    display(p_fades_if_momzone)  # only used with jupyter where display() is defined
+    printif(f'{STARS}Probability gap fades if it is in a gap momzone')
+    printif(f'P[Gap fades|Gap in MomZone "label"] = p_fades_if_momzone["label"]')
+    displayif(p_fades_if_momzone)  # only used with jupyter where display() is defined
 
     cross_check = pd.DataFrame([p_fades_if_momzone, p_does_not_fade_if_momzone], index=['Fading Gap', 'Not Fading Gap'])
     cross_check.loc['Total', :] = cross_check.loc[['Fading Gap', 'Not Fading Gap'], :].apply(lambda x: x[0] + x[1],
                                                                                              axis='index')
-    display(cross_check)  # only used with jupyter where display() is defined
+    displayif(cross_check)  # only used with jupyter where display() is defined
     assert_msg = 'p_fades_if_momzone + p_does_not_fade_if_momzone not equal to 1'
     assert all(np.isclose(cross_check.loc['Total', :], 1)), assert_msg
 
     return p_fade, p_fades_if_momzone, p_does_not_fade_if_momzone
+
+
+def graph_zone_probabilities(prob_per_momzone):
+    DBB, DBH, DBL, DHH, DLL, UBB, UBH, UBL, UHH, ULL = prob_per_momzone
+
+    print(f"--------------------------------------------------")
+    # print(f"                                                  ")
+    print(f" DHH {DHH:3.1%}                              {UHH:3.1%} UHH ")
+    print(f"                                                  ")
+    print(f"--------------------------------------------------")
+    print(f"                   |           |                  ")
+    print(f" DBH {DHH:3.1%}         |           |        {UBH:3.1%} UBH ")
+    print(f"                   |           |                  ")
+    print(f"---------------- ===== ----- ===== ---------------")
+    # print(f"                 |   |       |   |                ")
+    print(f"                 |   |       |   |                ")
+    print(f" DBB {DBB:3.1%}       | D |       | U |      {UBB:3.1%} UBB ")
+    print(f"                 |   |       |   |                ")
+    # print(f"                 |   |       |   |                ")
+    print(f"---------------- ===== ----- ===== ---------------")
+    print(f"                   |           |                  ")
+    print(f" DBL {DBL:3.1%}         |           |        {UBL:3.1%} UBL ")
+    print(f"                   |           |                  ")
+    print(f"--------------------------------------------------")
+    print(f"                                                  ")
+    print(f" DLL {DLL:3.1%}                              {ULL:3.1%} ULL ")
+    # print(f"                                                  ")
+    print(f"--------------------------------------------------")
+
+
 
 
 # --------------------------------------------------------------------------------------------------------------------
