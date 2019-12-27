@@ -1305,6 +1305,17 @@ def estimate_probabilities(gap_df):
     counts_momzone_if_fade = gap_df.groupby(['1-Bar Fade?', 'MomZone Label']).count().loc[:, 'Open']
     count_fading_gaps, count_not_fading_gaps = counts_momzone_if_fade[True].sum(), counts_momzone_if_fade[False].sum()
 
+    # check that all possible momzones are in the df, else, add with a count of zero
+    MOMZONE_SET = {'UHH', 'UBH', 'UBB', 'UBL', 'ULL', 'DHH', 'DBH', 'DBB', 'DBL', 'DLL'}
+    missing_momzones = MOMZONE_SET.difference(set(counts_momzone_if_fade[True].index))
+    if len(missing_momzones) != 0:
+        for momzone in missing_momzones:
+            counts_momzone_if_fade[True, momzone] = 0
+    missing_momzones = MOMZONE_SET.difference(set(counts_momzone_if_fade[False].index))
+    if len(missing_momzones) != 0:
+        for momzone in missing_momzones:
+            counts_momzone_if_fade[False, momzone] = 0
+
     p_momzone_if_fade = counts_momzone_if_fade
     p_momzone_if_fade[True] = counts_momzone_if_fade / count_fading_gaps
     p_momzone_if_fade[False] = counts_momzone_if_fade / count_not_fading_gaps
@@ -1312,7 +1323,6 @@ def estimate_probabilities(gap_df):
     assert_msg = 'Sum of probabilities for all MomZone if Fading (p_momzone_if_fade[True]) is not equal to 1'
     assert abs(p_momzone_if_fade[True].sum() - 1) < 1e-5, assert_msg
     assert_msg = 'Sum of probabilities for all MomZone if Not Fading (p_momzone_if_fade[False]) is not equal to 1'
-
     assert abs(p_momzone_if_fade[False].sum() - 1) < 1e-5, assert_msg
 
     print(f'{STARS}Probability gap falls into a momzone if gap fades within same bar')
@@ -1324,7 +1334,11 @@ def estimate_probabilities(gap_df):
     p_fades_if_momzone = pd.Series(index=p_momzone.index, name='p_fades_if_momzone')
     p_does_not_fade_if_momzone = pd.Series(index=p_momzone.index, name='p_does_not_fade_if_momzone')
 
+    print(p_momzone_if_fade)
+    print(p_momzone)
+
     for label in p_momzone.index:
+        print(label)
         p_fades_if_momzone[label] = p_momzone_if_fade[True][label] * p_fade[True] / p_momzone[label]
         p_does_not_fade_if_momzone[label] = p_momzone_if_fade[False][label] * p_fade[False] / p_momzone[label]
 
