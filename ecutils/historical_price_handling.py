@@ -110,8 +110,8 @@ def load_config(cwdir):
     :param: Path() object to the the directory where to check for cfg files
     return: config_dict: configuration dictionary key:value dictionary
     """
-    # When method is called from 'ec-utils' directly, instead of another package, use config from fx-bt.
-    if cwdir.name == 'ec-utils': cwdir = Path('D:\\PyProjects\\fx-bt')
+    # When method is called from 'ecutils' directly, instead of another package, use config from fx-bt.
+    if cwdir.name == 'ecutils': cwdir = Path('D:\\PyProjects\\fx-bt')
 
     cwd_is_config_file_dir = 'config.cfg' in list(f.name for f in cwdir.iterdir() if f.is_file())
     if cwd_is_config_file_dir:

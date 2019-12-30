@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+
 def pprint_dict(obj=None, topic=None, depth=None):
     """
     Prints a pretty clean tree representation of a dictionary
