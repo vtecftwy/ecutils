@@ -571,12 +571,9 @@ def consolidate_price_files_mt4(ticker='EURUSD', timeframe='1440',
 def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, timefilter=None,
                                        data_source=None, drive=None, type='alphavantage', verbose=False):
     if timeframe_list is None:
-        timeframe_list = ['FX_DAILY', 'FX_WEEKLY', 'FX_MONTHLY', 'FX_INTRADAY_60min', 'FX_INTRADAY_30min']
+        timeframe_list = ['FX_DAILY', 'FX_INTRADAY_60min', 'FX_INTRADAY_30min']
     if ticker_list is None:
-        ticker_list = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCHF',
-                       'EURGBP', 'EURJPY', 'EURSGD', 'EURUSD',
-                       'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPUSD', 'SGDJPY',
-                       'USDCAD', 'USDCHF', 'USDHKD', 'USDILS', 'USDJPY', 'USDKRW', 'USDPLN', 'USDSGD', 'USDTHB']
+        ticker_list = forex_alphavantage
     if timefilter is None:
         timefilter = ''
     if data_source is None:
@@ -986,36 +983,6 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
 
     print_log(f'Starting alphavantage price update', verbose=verbose)
     if pairs is None:
-        # pairs = [
-        #     'AUDCAD',
-        #     'AUDCHF',
-        #     'AUDJPY',
-        #     'AUDUSD',
-        #     'CADCHF',
-        #     'CADJPY',
-        #     'CHFJPY',
-        #     'EURAUD',
-        #     'EURCHF',
-        #     'EURGBP',
-        #     'EURJPY',
-        #     'EURSGD',
-        #     'EURUSD',
-        #     'GBPAUD',
-        #     'GBPCAD',
-        #     'GBPCHF',
-        #     'GBPJPY',
-        #     'GBPUSD',
-        #     'SGDJPY',
-        #     'USDCAD',
-        #     'USDCHF',
-        #     'USDHKD',
-        #     'USDILS',
-        #     'USDJPY',
-        #     'USDKRW',
-        #     'USDPLN',
-        #     'USDSGD',
-        #     'USDTHB',
-        # ]
         pairs = forex_alphavantage
         pairs.sort()
     if timeframes is None:
