@@ -3,7 +3,7 @@ Master Historical Prices Utility Functions
 
 Includes all stable utility functions for handling historical prices.
 Link to this scrip by using a Symlink:
- - mklink /D "D:\PyProjects\project_folder\src\symlink_name" "D:\PyProjects\ec-utils"
+ - mklink /D "D:\PyProjects\fx-bt\src\symlink_name" "D:\PyProjects\ec-utils"
  More info here: https://www.maketecheasier.com/create-symbolic-links-windows10/
 """
 
@@ -36,12 +36,17 @@ forced_file_error = False
 # Location of raw and dataset files
 NAS_raw_data = Path('R:\\Financial Data\\Historical Prices Raw Data\\alphavantage')
 NAS_datasets = Path('R:\\Financial Data\\Historical Prices Datasets\\alphavantage')
+
 sources_dict = {'alphavantage': {'name': 'alphavantage',
                                  'directory': 'alphavantage',
                                  'timeframe': {'M': 'FX_MONTHLY',
                                                'W': 'FX_WEEKLY',
                                                'D': 'FX_DAILY',
-                                               'H1': 'INTRADAY_60min'},
+                                               'H1': 'FX_INTRADAY_60min',
+                                               'M30': 'FX_INTRADAY_30min',
+                                               'M15': 'FX_INTRADAY_15min',
+                                               'M5': 'FX_INTRADAY_5min',
+                                               'M1': 'FX_INTRADAY_1min'},
                                  'format': 'alphavantage'},
                 'axitrader': {'name': 'axitrader',
                               'directory': 'axitrader-mt4',
@@ -74,12 +79,12 @@ if json_file.is_file():
 else:
     raise ValueError(f"No json file with name <{json_file.name}> at {json_file.absolute()}")
 
-# Set default lists for alphavantage
+# Create default lists for alphavantage
 source = 'alphavantage'
 forex_alphavantage = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
                       if source in subdict['tickers'].keys() and subdict['type'] == 'forex']
 
-# Set default lists for MT4
+# Create default lists for axitrader-mt4
 source = 'axitrader'
 forex_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
                    if source in subdict['tickers'].keys() and subdict['type'] == 'forex']
@@ -95,8 +100,9 @@ crypto_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.i
                     if source in subdict['tickers'].keys() and subdict['type'] == 'crypto']
 
 # --------------------------------------------------------------------------------------------------------------------
-# --- Load config files and save in config dictionary (https://docs.python.org/3.4/library/configparser.html)
-# --- min expected keys: 'module_root_directory', 'alphavantage'
+# --- Load project config files and save in config dictionary (https://docs.python.org/3.4/library/configparser.html)
+# --- required keys: 'module_root_directory', 'alphavantage'
+
 
 def load_config(cwdir):
     """Walk up folder tree till config.cfg file is found, load any *.cfg file and return config dictionary
@@ -130,8 +136,9 @@ def load_config(cwdir):
 
 config = load_config(Path().cwd())
 
+
 # --------------------------------------------------------------------------------------------------------------------
-# --- General Utility Functions
+# --- Module utility functions
 # ------------------------------
 
 
@@ -238,9 +245,18 @@ def safe_sampling(df, first=None, last=None):
 
 
 # --------------------------------------------------------------------------------------------------------------------
-# ---- Price file handling functions
-# ----------------------------------
+# ---- Functions to handle historical price files.
+# ------------------------------------------------
 # ToDo: refactor these functions to only have one function or class and use parameters for different sources
+
+def date_latest_alphavantage_download():
+    target_directory = Path('D:\\PyProjects\\fx-bt') / 'data/raw-data/alphavantage'
+    list_of_files_names = list(p.name for p in target_directory.glob('EURUSD_FX_DAILY_*'))
+    # EURUSD_FX_DAILY_YYYY-MM-DD.csv 0123456789012345 YYYY 0 MM 3 DD 4
+    list_of_dates = [datetime(year=int(s[16:20]),
+                              month=int(s[21:23]),
+                              day=int(s[24:26])) for s in list_of_files_names]
+    return max(list_of_dates)
 
 
 def get_price_dict_from_alphavantage(ticker='*', timeframe='*', timefilter='', target_directory=None, verbose=False):
@@ -723,7 +739,7 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
             mt4_full_ds.to_csv(path_or_buf=datasets_dir / dataset_file_name, index_label='timestamp')
 
 
-# ToDo: make function to update datasets wsj
+# ToDo: make function update_price_datasets_wsj()
 
 
 def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
@@ -822,6 +838,7 @@ def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=
 
     """
     # Define standard lists for MT4
+    # ToDo: update this function by using above defined default lists and make it multi source
     tickers_forex = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCHF',
                      'EURGBP', 'EURJPY', 'EURSGD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPUSD',
                      'NZDUSD', 'SGDJPY', 'USDCAD', 'USDCHF', 'USDCNH', 'USDHKD', 'USDILS', 'USDJPY', 'USDPLN',
@@ -878,8 +895,8 @@ def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=
         return False
 
 # --------------------------------------------------------------------------------------------------------------------
-# ---- Price download handling functions
-# --------------------------------------
+# ---- Functions to download historical prices
+# --------------------------------------------
 
 
 def load_file_from_url(target_url, filename, verbose=False):
@@ -969,43 +986,55 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
 
     print_log(f'Starting alphavantage price update', verbose=verbose)
     if pairs is None:
-        pairs = [
-            'AUDCAD',
-            'AUDCHF',
-            'AUDJPY',
-            'AUDUSD',
-            'CADCHF',
-            'CADJPY',
-            'CHFJPY',
-            'EURAUD',
-            'EURCHF',
-            'EURGBP',
-            'EURJPY',
-            'EURSGD',
-            'EURUSD',
-            'GBPAUD',
-            'GBPCAD',
-            'GBPCHF',
-            'GBPJPY',
-            'GBPUSD',
-            'SGDJPY',
-            'USDCAD',
-            'USDCHF',
-            'USDHKD',
-            'USDILS',
-            'USDJPY',
-            'USDKRW',
-            'USDPLN',
-            'USDSGD',
-            'USDTHB',
-        ]
+        # pairs = [
+        #     'AUDCAD',
+        #     'AUDCHF',
+        #     'AUDJPY',
+        #     'AUDUSD',
+        #     'CADCHF',
+        #     'CADJPY',
+        #     'CHFJPY',
+        #     'EURAUD',
+        #     'EURCHF',
+        #     'EURGBP',
+        #     'EURJPY',
+        #     'EURSGD',
+        #     'EURUSD',
+        #     'GBPAUD',
+        #     'GBPCAD',
+        #     'GBPCHF',
+        #     'GBPJPY',
+        #     'GBPUSD',
+        #     'SGDJPY',
+        #     'USDCAD',
+        #     'USDCHF',
+        #     'USDHKD',
+        #     'USDILS',
+        #     'USDJPY',
+        #     'USDKRW',
+        #     'USDPLN',
+        #     'USDSGD',
+        #     'USDTHB',
+        # ]
+        pairs = forex_alphavantage
+        pairs.sort()
     if timeframes is None:
         timeframes = ['1d', '60min', '30min']
-        # timeframes = ['1m', '1w', '1d', '60min', '30min', '15min', '5min', '1min']
 
     SECONDS_TO_SLEEP = 20  # Std API call frequency is 5 calls per minute and 500 calls per day
     number_pairs = len(pairs)
     number_timeframes = len(timeframes)
+    # ToDo: align this timeframe_dict with the info on source_dict above !
+    # timeframe_dict = {'M1': {'name': 'FX_INTRADAY_1min', 'param': 'FX_INTRADAY&interval=1min', 'mode': 'full'},
+    #                   'M2': {'name': 'FX_INTRADAY_5min', 'param': 'FX_INTRADAY&interval=5min', 'mode': 'full'},
+    #                   'M15': {'name': 'FX_INTRADAY_15min', 'param': 'FX_INTRADAY&interval=15min', 'mode': 'full'},
+    #                   'M30': {'name': 'FX_INTRADAY_30min', 'param': 'FX_INTRADAY&interval=30min', 'mode': 'full'},
+    #                   'H1': {'name': 'FX_INTRADAY_60min', 'param': 'FX_INTRADAY&interval=60min', 'mode': 'full'},
+    #                   'D': {'name': 'FX_DAILY', 'param': 'FX_DAILY', 'mode': 'compact'},
+    #                   'W': {'name': 'FX_WEEKLY', 'param': 'FX_WEEKLY', 'mode': 'compact'},
+    #                   'M': {'name': 'FX_MONTHLY', 'param': 'FX_MONTHLY', 'mode': 'compact'},
+    #                   }
+
     timeframe_dict = {'1min': {'name': 'FX_INTRADAY_1min', 'param': 'FX_INTRADAY&interval=1min', 'mode': 'full'},
                       '5min': {'name': 'FX_INTRADAY_5min', 'param': 'FX_INTRADAY&interval=5min', 'mode': 'full'},
                       '15min': {'name': 'FX_INTRADAY_15min', 'param': 'FX_INTRADAY&interval=15min', 'mode': 'full'},
@@ -1038,11 +1067,11 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
             mode = timeframe_dict[tf]['mode']
             # Overwrites the mode from compact to full for shortest time frame (see timeframe_dict above)
 
-        string_to_print = f'\nDownload all pairs for time frame {tf} ( tf {i} of {number_timeframes}) (mode={mode})'
+        string_to_print = f"\nDownload all pairs for time frame {tf} ( tf {i} of {number_timeframes}) (mode={mode})"
         print_log(string_to_print, verbose=verbose)
 
         for counter, pair in enumerate(pairs, 1):
-            string_to_print = f'\n  Starting process for {pair} - {tf} (pair {counter} of {number_pairs})'
+            string_to_print = f"\n  Starting process for {pair}-{tf} (pair {counter} of {number_pairs} for tf{i}/{number_timeframes}"
             print_log(string_to_print, verbose=verbose)
 
             target_currency = pair[0:3]
@@ -1130,20 +1159,256 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
 
 
 # --------------------------------------------------------------------------------------------------------------------
-# --- Gap Analysis
-# -----------------------------------
+# --- OHLC handling functions
+# ---------------------------
+
+
+def resample_ohlcv(df, rule_str='W-FRI'):
+    """
+    Resample an DataFrame with OHLCV format according to given rule string.
+
+    The resampling is applied to each of the OHLC and optional V column,
+    Resampling aggregate applies first(), max(), min(), last() and sum() to OHLCV respectively.
+    Common 'rules' are: 'D', 'B', 'W', 'W-FRI', 'M'
+
+    Parameters:
+    ----------
+    df :        dataframe with datetime index and columns 'Open', 'High', 'Low', 'Close'. Optional 'Volume'
+    rule_str:   str. Time offset alias for resampling. Default value: 'W-FRI'.
+
+    Return:
+    -------
+    ohlcv_df : dataframe with datetime index and columns 'Open', 'High', 'Low', 'Close'. Optional 'Volume'
+    """
+
+    resampled_df = df.resample(rule_str)
+    resampled_index = resampled_df.groups
+    # resample() returns a Resampler object, on which a function must be applied, e.g. first(), max(), aggregate()
+
+    ohlcv_df = pd.DataFrame({'Open': resampled_df['Open'].first(),
+                             'High': resampled_df['High'].max(),
+                             'Low': resampled_df['Low'].min(),
+                             'Close': resampled_df['Close'].last(),
+                             },
+                            index=resampled_index
+                            )
+    if 'Volume' in resampled_df.count().columns:
+        ohlcv_df['Volumes'] = resampled_df['Volume'].sum()
+
+    return ohlcv_df
+
+
+def autocorrelation_ohlv(series, max_lag, ohlc='Close', **kwarg):
+    """
+    Return autocorrelation for the passed series, applied on O, H, L or O.
+
+    :param:     series (pd.Series): Series on which autocorrelation has to be applied
+    :param:     ohlc (str): Which price to use. Options: 'Open', 'High', 'Low', 'Close' (default)
+    :param:     max_lag (int): Maximum lag to consider for the autocorrelation
+    :return:    series_autocorrelatioon
+    """
+
+    lag_range = range(1, max_lag)
+    series_autocorrelation = pd.Series(0, index=lag_range, name='Autocorrelation')
+    for lag in lag_range:
+        series_autocorrelation.loc[lag] = series[ohlc].autocorr(lag)
+
+    return series_autocorrelation
+
+
+# --------------------------------------------------------------------------------------------------------------------
+# --- Functions to visualize candle stick plots for OHLC.
+# -------------------------------------------------------
+
+
+def candlestick_plot(df, width=950, height=600, chart_title='', fig=None):
+    """Create a Bokeh candlestick chart based on the DataFrame provided as parameter.
+
+       Parameters
+       ----------
+       df: DataFrame with datetime index, and at least the following columns ['Open', 'High', 'Low', 'Close', 'Volume']
+       width, height: sizes of the plot figure
+       chart_title: optional. String to be used as title of the chart
+       fig: optional. Figure to allow superposition of other lines on candlestick plot
+
+       Returns
+       ----------
+       Nothing
+
+    """
+    if fig is None:
+        p = figure(plot_width=width, plot_height=height, title=chart_title, x_axis_type="datetime")
+    else:
+        p = fig
+    p.xaxis.major_label_orientation = 3.1415 / 4
+    p.grid.grid_line_alpha = 0.5
+
+    # x_axis_type as 'datetime' means that the width dimensions are measured in milliseconds
+    # note: sometimes, the two first bars are not contiguous (e.g. bar[0]=Fri and bar[1]=Mon)
+    # in such case, if interval(bar[1],bar[0]) > interval(contiguous bars). .
+    # instead of taking the first interval, we take the min interval across the full index
+    intervals = df.index.unique().to_series() - df.index.unique().to_series().shift(1)
+    interval_in_ms = intervals[1:-1].min().total_seconds() * 1000
+    ratio = 0.60
+
+    inc = df['Close'] > df['Open']
+    dec = df['Close'] < df['Open']
+    flat = df['Close'] == df['Open']
+
+    p.segment(df[inc].index, df.loc[inc, 'High'], df[inc].index, df.loc[inc, 'Low'], color='darkgreen')
+    p.segment(df[dec].index, df.loc[dec, 'High'], df[dec].index, df.loc[dec, 'Low'], color='darkred')
+    p.segment(df[flat].index, df.loc[flat, 'High'], df[flat].index, df.loc[flat, 'Low'], color='black')
+
+    p.vbar(x=df[inc].index,
+           bottom=df.loc[inc, 'Open'],
+           top=df.loc[inc, 'Close'],
+           width=ratio * interval_in_ms,
+           fill_color="darkgreen",
+           line_color="darkgreen")
+    p.vbar(x=df[dec].index,
+           bottom=df.loc[dec, 'Close'],
+           top=df.loc[dec, 'Open'],
+           width=ratio * interval_in_ms,
+           fill_color="darkred",
+           line_color="darkred")
+    p.vbar(x=df[flat].index,
+           bottom=df.loc[flat, 'Close'],
+           top=df.loc[flat, 'Open'],
+           width=ratio * interval_in_ms,
+           fill_color="black",
+           line_color="black")
+
+    if fig is None:
+        show(p)
+
+
+def multi_plot(time_series_dict, fctn, *args, **kwargs):
+    """
+    Prepare several subplots based on ..............
+
+    :param time_series_dict: Dict containing all time series to which to apply the fctn
+    :param fctn: Function that is applied to time_series_dict to create plot
+    :param args: to pass position arguments to the fctn
+    :param kwargs: to pass kw argument to both multiplot and plot
+                     include: verbose, grid_rows, grid_columns, font_titles, fonmt_axis
+    :return None
+    """
+
+    # TODO: Review this function and clean up or improve
+
+    # Extract/Set function parameters
+    # style.use(str('ggplot'))
+    # figsize = par.get('figsize', (6, 3))
+    # grid_rows = par.get('grid_rows', 8)
+    # grid_columns = par.get('grid_columns', 2)
+    # is_hist_cumulative = par.get('is_hist_cumulative', True)
+    # hist_style = par.get('hist_style', 'step')  # 'step' 'bar'
+    # font_titles = par.get('font_titles', 8)
+    # font_axes = par.get('font_axes', 8)
+    # adjust_wspace = par.get('adjust_wspace', 0.3)
+    # adjust_hspace = par.get('adjust_hspace', 0.5)
+
+    # Set all parameters
+    verbose = kwargs.get('verbose', False)
+    style.use(str('ggplot'))
+    figsize = kwargs.get('figsize', (10, 10))
+    grid_rows = kwargs.get('grid_rows', 4)
+    grid_columns = kwargs.get('grid_columns', 3)
+    max_grid_position = grid_rows * grid_columns
+    font_titles = kwargs.get('font_titles', 8)
+    font_axis = kwargs.get('font_axis', 8)
+    adjust_wspace = kwargs.get('adjust_wspace', 0.5)
+    adjust_hspace = kwargs.get('adjust_hspace', 0.2)
+
+    # Initialize figure and plot count
+    fig = plt.figure(num=88, figsize=figsize)
+
+    # Utility function to set subplots
+    def set_plot_ax(data_to_plot,
+                    count,
+                    plot_title='Title',
+                    x_label='x',
+                    y_label='y',
+                    figure=fig,
+                    row=grid_rows,
+                    col=grid_columns,
+                    ft_titles=font_titles,
+                    ft_axis=font_axis):
+        print_log('Entered set_plot_ax for {plot_title}-{row}-{col}-{count}', verbose=verbose)
+
+        axes = figure.add_subplot(row, col, count)
+        axes.plot(data_to_plot, alpha=0.75)
+
+        axes.set_title(plot_title, fontsize=ft_titles)
+        axes.set_xlabel(x_label, fontsize=ft_axis)
+        axes.set_ylabel(y_label, fontsize=ft_axis)
+
+        max_value = data_to_plot.abs().max()
+        y_limit = max(0.25, max_value)
+        # axes.set_ylim((-y_limit,+y_limit)) modified into following line on Nov 15, 2019
+        axes.set_ylim(-y_limit, +y_limit)
+
+        for label in axes.xaxis.get_ticklabels():
+            label.set_fontsize(ft_axis)
+        for label in axes.yaxis.get_ticklabels():
+            label.set_fontsize(ft_axis)
+
+    def adjust_subplot_and_plot():
+        adjust_left = 0.1
+        adjust_right = 0.9
+        adjust_bottom = 0.1
+        adjust_top = 0.9
+        adjust_wspace = grid_columns / 10
+        adjust_hspace = 0.2 + 0.2 * (grid_rows - 2)
+        # plt.subplots_adjust(left=adjust_left,
+        #                     right=adjust_right,
+        #                     bottom=adjust_bottom,
+        #                     top=adjust_top,
+        #                     wspace=adjust_wspace,
+        #                     hspace=adjust_hspace)
+        plt.tight_layout()
+        plt.show()
+
+    # Main loop to plot each item in dictionary
+
+    plot_set_count = 0
+    for key, time_series in time_series_dict.items():
+        data_to_plot = fctn(time_series, *args, **kwargs)
+
+        plot_set_count += 1
+        if plot_set_count > max_grid_position:
+            if verbose is True:
+                print('---------------------------------------------')
+                print('| Figure is full, cannot print more subplot |')
+                print('---------------------------------------------')
+            adjust_subplot_and_plot()
+            return
+
+        set_plot_ax(data_to_plot=data_to_plot,
+                    figure=fig,
+                    count=plot_set_count,
+                    plot_title=key,
+                    x_label='Time',
+                    y_label='Autocorr.')
+
+    adjust_subplot_and_plot()
+
+
+# --------------------------------------------------------------------------------------------------------------------
+# --- Function used for gap fading analysis.
+# ------------------------------------------
 
 #  CONSTANTS
 PCT_SPREAD = 0.00015
-
-
 # PCT_SPREAD = 0.00015   # for FOREX Axitrader
 # PCT_SPREAD = 0.00025  # for S&P
 # PCT_SPREAD = 0.00050   # for EU50, SPI200, ...
 
+# --------------------------------------------------------------------------------------------------------------------
+# --- Functions used for apply() method
+# ---------------------------------------------------------
 
-# functions used for apply() method
-#
+
 def estimate_pnl(series, pct_spread=PCT_SPREAD):
     o, h, l, c, g, previous_bar, faded, label = (series['Open'], series['High'], series['Low'], series['Close'],
                                                  series['Gap'], series['Previous Bar'], series['1-Bar Fade?'],
@@ -1394,250 +1659,14 @@ def graph_zone_probabilities(prob_per_momzone):
     print(f"--------------------------------------------------")
 
 
-
-
-# --------------------------------------------------------------------------------------------------------------------
-# --- OHLC handling functions
-# ---------------------------
-
-
-def resample_ohlcv(df, rule_str='W-FRI'):
-    """
-    Resample an DataFrame with OHLCV format according to given rule string.
-
-    The resampling is applied to each of the OHLC and optional V column,
-    Resampling aggregate applies first(), max(), min(), last() and sum() to OHLCV respectively.
-    Common 'rules' are: 'D', 'B', 'W', 'W-FRI', 'M'
-
-    Parameters:
-    ----------
-    df :        dataframe with datetime index and columns 'Open', 'High', 'Low', 'Close'. Optional 'Volume'
-    rule_str:   str. Time offset alias for resampling. Default value: 'W-FRI'.
-
-    Return:
-    -------
-    ohlcv_df : dataframe with datetime index and columns 'Open', 'High', 'Low', 'Close'. Optional 'Volume'
-    """
-
-    resampled_df = df.resample(rule_str)
-    resampled_index = resampled_df.groups
-    # resample() returns a Resampler object, on which a function must be applied, e.g. first(), max(), aggregate()
-
-    ohlcv_df = pd.DataFrame({'Open': resampled_df['Open'].first(),
-                             'High': resampled_df['High'].max(),
-                             'Low': resampled_df['Low'].min(),
-                             'Close': resampled_df['Close'].last(),
-                             },
-                            index=resampled_index
-                            )
-    if 'Volume' in resampled_df.count().columns:
-        ohlcv_df['Volumes'] = resampled_df['Volume'].sum()
-
-    return ohlcv_df
-
-
-def autocorrelation_ohlv(series, max_lag, ohlc='Close', **kwarg):
-    """
-    Return autocorrelation for the passed series, applied on O, H, L or O.
-
-    :param:     series (pd.Series): Series on which autocorrelation has to be applied
-    :param:     ohlc (str): Which price to use. Options: 'Open', 'High', 'Low', 'Close' (default)
-    :param:     max_lag (int): Maximum lag to consider for the autocorrelation
-    :return:    series_autocorrelatioon
-    """
-
-    lag_range = range(1, max_lag)
-    series_autocorrelation = pd.Series(0, index=lag_range, name='Autocorrelation')
-    for lag in lag_range:
-        series_autocorrelation.loc[lag] = series[ohlc].autocorr(lag)
-
-    return series_autocorrelation
-
-
-# --------------------------------------------------------------------------------------------------------------------
-# --- Visualization Utility Functions
-# -----------------------------------
-
-
-def candlestick_plot(df, width=950, height=600, chart_title='', fig=None):
-    """Create a Bokeh candlestick chart based on the DataFrame provided as parameter.
-
-       Parameters
-       ----------
-       df: DataFrame with datetime index, and at least the following columns ['Open', 'High', 'Low', 'Close', 'Volume']
-       width, height: sizes of the plot figure
-       chart_title: optional. String to be used as title of the chart
-       fig: optional. Figure to allow superposition of other lines on candlestick plot
-
-       Returns
-       ----------
-       Nothing
-
-    """
-    if fig is None:
-        p = figure(plot_width=width, plot_height=height, title=chart_title, x_axis_type="datetime")
-    else:
-        p = fig
-    p.xaxis.major_label_orientation = 3.1415 / 4
-    p.grid.grid_line_alpha = 0.5
-
-    # x_axis_type as 'datetime' means that the width dimensions are measured in milliseconds
-    # note: sometimes, the two first bars are not contiguous (e.g. bar[0]=Fri and bar[1]=Mon)
-    # in such case, if interval(bar[1],bar[0]) > interval(contiguous bars). .
-    # instead of taking the first interval, we take the min interval across the full index
-    intervals = df.index.unique().to_series() - df.index.unique().to_series().shift(1)
-    interval_in_ms = intervals[1:-1].min().total_seconds() * 1000
-    ratio = 0.60
-
-    inc = df['Close'] > df['Open']
-    dec = df['Close'] < df['Open']
-    flat = df['Close'] == df['Open']
-
-    p.segment(df[inc].index, df.loc[inc, 'High'], df[inc].index, df.loc[inc, 'Low'], color='darkgreen')
-    p.segment(df[dec].index, df.loc[dec, 'High'], df[dec].index, df.loc[dec, 'Low'], color='darkred')
-    p.segment(df[flat].index, df.loc[flat, 'High'], df[flat].index, df.loc[flat, 'Low'], color='black')
-
-    p.vbar(x=df[inc].index,
-           bottom=df.loc[inc, 'Open'],
-           top=df.loc[inc, 'Close'],
-           width=ratio * interval_in_ms,
-           fill_color="darkgreen",
-           line_color="darkgreen")
-    p.vbar(x=df[dec].index,
-           bottom=df.loc[dec, 'Close'],
-           top=df.loc[dec, 'Open'],
-           width=ratio * interval_in_ms,
-           fill_color="darkred",
-           line_color="darkred")
-    p.vbar(x=df[flat].index,
-           bottom=df.loc[flat, 'Close'],
-           top=df.loc[flat, 'Open'],
-           width=ratio * interval_in_ms,
-           fill_color="black",
-           line_color="black")
-
-    if fig is None:
-        show(p)
-
-
-def multi_plot(time_series_dict, fctn, *args, **kwargs):
-    """
-    Prepare several subplots based on ..............
-
-    :param time_series_dict: Dict containing all time series to which to apply the fctn
-    :param fctn: Function that is applied to time_series_dict to create plot
-    :param args: to pass position arguments to the fctn
-    :param kwargs: to pass kw argument to both multiplot and plot
-                     include: verbose, grid_rows, grid_columns, font_titles, fonmt_axis
-    :return None
-    """
-
-    # TODO: Review this function and clean up or improve
-
-    # Extract/Set function parameters
-    # style.use(str('ggplot'))
-    # figsize = par.get('figsize', (6, 3))
-    # grid_rows = par.get('grid_rows', 8)
-    # grid_columns = par.get('grid_columns', 2)
-    # is_hist_cumulative = par.get('is_hist_cumulative', True)
-    # hist_style = par.get('hist_style', 'step')  # 'step' 'bar'
-    # font_titles = par.get('font_titles', 8)
-    # font_axes = par.get('font_axes', 8)
-    # adjust_wspace = par.get('adjust_wspace', 0.3)
-    # adjust_hspace = par.get('adjust_hspace', 0.5)
-
-    # Set all parameters
-    verbose = kwargs.get('verbose', False)
-    style.use(str('ggplot'))
-    figsize = kwargs.get('figsize', (10, 10))
-    grid_rows = kwargs.get('grid_rows', 4)
-    grid_columns = kwargs.get('grid_columns', 3)
-    max_grid_position = grid_rows * grid_columns
-    font_titles = kwargs.get('font_titles', 8)
-    font_axis = kwargs.get('font_axis', 8)
-    adjust_wspace = kwargs.get('adjust_wspace', 0.5)
-    adjust_hspace = kwargs.get('adjust_hspace', 0.2)
-
-    # Initialize figure and plot count
-    fig = plt.figure(num=88, figsize=figsize)
-
-    # Utility function to set subplots
-    def set_plot_ax(data_to_plot,
-                    count,
-                    plot_title='Title',
-                    x_label='x',
-                    y_label='y',
-                    figure=fig,
-                    row=grid_rows,
-                    col=grid_columns,
-                    ft_titles=font_titles,
-                    ft_axis=font_axis):
-        print_log('Entered set_plot_ax for {plot_title}-{row}-{col}-{count}', verbose=verbose)
-
-        axes = figure.add_subplot(row, col, count)
-        axes.plot(data_to_plot, alpha=0.75)
-
-        axes.set_title(plot_title, fontsize=ft_titles)
-        axes.set_xlabel(x_label, fontsize=ft_axis)
-        axes.set_ylabel(y_label, fontsize=ft_axis)
-
-        max_value = data_to_plot.abs().max()
-        y_limit = max(0.25, max_value)
-        # axes.set_ylim((-y_limit,+y_limit)) modified into following line on Nov 15, 2019
-        axes.set_ylim(-y_limit, +y_limit)
-
-        for label in axes.xaxis.get_ticklabels():
-            label.set_fontsize(ft_axis)
-        for label in axes.yaxis.get_ticklabels():
-            label.set_fontsize(ft_axis)
-
-    def adjust_subplot_and_plot():
-        adjust_left = 0.1
-        adjust_right = 0.9
-        adjust_bottom = 0.1
-        adjust_top = 0.9
-        adjust_wspace = grid_columns / 10
-        adjust_hspace = 0.2 + 0.2 * (grid_rows - 2)
-        # plt.subplots_adjust(left=adjust_left,
-        #                     right=adjust_right,
-        #                     bottom=adjust_bottom,
-        #                     top=adjust_top,
-        #                     wspace=adjust_wspace,
-        #                     hspace=adjust_hspace)
-        plt.tight_layout()
-        plt.show()
-
-    # Main loop to plot each item in dictionary
-
-    plot_set_count = 0
-    for key, time_series in time_series_dict.items():
-        data_to_plot = fctn(time_series, *args, **kwargs)
-
-        plot_set_count += 1
-        if plot_set_count > max_grid_position:
-            if verbose is True:
-                print('---------------------------------------------')
-                print('| Figure is full, cannot print more subplot |')
-                print('---------------------------------------------')
-            adjust_subplot_and_plot()
-            return
-
-        set_plot_ax(data_to_plot=data_to_plot,
-                    figure=fig,
-                    count=plot_set_count,
-                    plot_title=key,
-                    x_label='Time',
-                    y_label='Autocorr.')
-
-    adjust_subplot_and_plot()
-
-
 if __name__ == '__main__':
     # price_dict = get_price_dict_from_wsj(ticker='NYA', timeframe='1440', verbose=True)
     # print(list(price_dict))
     #
     print('Running')
-    print(len(ticker_dict), ticker_dict.keys())
+    ld = date_latest_alphavantage_update()
+    print(f"last date is: {ld:%Y-%m-%d}")
+    # print(len(ticker_dict), ticker_dict.keys())
     # update_price_datasets_yahoo(['AAAA'])
 
     # raw_data = get_module_root_path() / 'data/raw-data/'
