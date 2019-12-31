@@ -1,30 +1,19 @@
-# ec-utils
-Collection of my utility functions for several applications.
+# ecutils package
+Collection of my utility functions usable across several projects and applications.
 
-General Use:
+## Installation:
+Currently to be installed in `develop` mode:
+- `pip install -e .` from the project folder, or
+- `pip install -e "D:\PyProjects\ec-utils\"`
+
+## Modules:
+### General use:
 - ipython_utils
 
-ML:
-- fastai_utils
-
-Algotrading and other financial:
-- historical_price_configs
+### Algotrading and financial analysis:
 - historical_price_handling
 - mintos_utils
 
+### Machine learning:
+- fastai_utils (WIP)
 
-Currently these utility functions are linked to other project through symlinks. 
-Namely, a symlink is created in the src folder of each project using the utils.
-
-E.g.:
-- fx-bt\src\fx-utilities is a symlink
-
-
-
-Create a symlink in Windows:
-- open cmd in admin
-- mklink Link Target (for a file)
-- mklink /D Link Target (for a directory)
-
-In our case, 
-- mklink /D path_to_current_directory\symlink_name D:\PyProjects\ec-utils
