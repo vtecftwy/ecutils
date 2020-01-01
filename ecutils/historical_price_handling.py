@@ -238,8 +238,13 @@ def safe_sampling(df, first=None, last=None):
     earliest, latest = f'{dmin.year}-{dmin.month}-{dmin.day}', f'{dmax.year}-{dmax.month}-{dmax.day}'
     if first is None:
         first = earliest
+    elif isinstance(first, datetime):
+        first = f'{first.year}-{first.month}-{first.day}'
     if last is None:
         last = latest
+    elif isinstance(last, datetime):
+        last = f'{last.year}-{last.month}-{last.day}'
+
     sample = df.loc[max(first, earliest):min(last, latest), :].copy()
     return sample
 
