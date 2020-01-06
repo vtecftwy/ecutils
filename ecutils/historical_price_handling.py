@@ -235,19 +235,21 @@ def str_date(d):
 def safe_sampling(df, first=None, last=None):
     """Returns tuple(first date, last date) in str format, for passed df"""
     dmin, dmax = df.index[0], df.index[-1]
-    earliest, latest = f'{dmin.year}-{dmin.month}-{dmin.day}', f'{dmax.year}-{dmax.month}-{dmax.day}'
+    earliest, latest = df.index[0], df.index[-1]
     if first is None:
         first = earliest
-    elif isinstance(first, datetime):
-        first = f'{first.year}-{first.month}-{first.day}'
+    elif isinstance(first, str):
+        # string format: YYYY-MM-DD  0123 56 89
+        first = datetime(year=int(first[0:4]), month=int(first[5:7]), day=int(first[8:10]))
     if last is None:
         last = latest
-    elif isinstance(last, datetime):
-        last = f'{last.year}-{last.month}-{last.day}'
+    elif isinstance(last, str):
+        last = datetime(year=int(last[0:4]), month=int(last[5:7]), day=int(last[8:10]))
+
+    assert first <= last, f"first ({first:%Y-%m-%d}) not before last ({last:%Y-%m-%d})"
 
     sample = df.loc[max(first, earliest):min(last, latest), :].copy()
     return sample
-
 
 # --------------------------------------------------------------------------------------------------------------------
 # ---- Functions to handle historical price files.
@@ -1632,34 +1634,21 @@ def graph_zone_probabilities(prob_per_momzone):
 
 
 if __name__ == '__main__':
-    # price_dict = get_price_dict_from_wsj(ticker='NYA', timeframe='1440', verbose=True)
-    # print(list(price_dict))
-    #
-    print('Running')
-    ld = date_latest_alphavantage_update()
-    print(f"last date is: {ld:%Y-%m-%d}")
-    # print(len(ticker_dict), ticker_dict.keys())
-    # update_price_datasets_yahoo(['AAAA'])
 
-    # raw_data = get_module_root_path() / 'data/raw-data/'
-    # axitrader = raw_data / 'axitrader-mt4'
-    # xmcom = raw_data / 'xm-com-mt4'
-    #
-    # axidf = get_price_dict_from_MT4(ticker='EURUSD', timeframe='1440', target_directory=xmcom)
-    #
-    # print('done')
 
-    # price_dict = get_price_dict_from_alphavantage(ticker='EURUSD', timeframe='FX_DAILY',
-    #                                               target_directory=None, verbose=False)
-    # print(price_dict)
+    data = np.random.random(size=60)
+    start = datetime(year=2010, month=1, day=1)
+    from datetime import timedelta
+    interval = timedelta(days=1)
+    idx = [start + i * 2 * interval for i in range(60)]
+    df = pd.DataFrame(data=data, index=idx, columns=['a'])
+    print(df.shape)
 
-    # update_alphavantage_fx(pairs=['KRWUSD'], timeframes=['1w'], alphavantage_mode='compact', verbose=True)
-    # update_alphavantage_fx(alphavantage_mode='compact', verbose=True)
-
-    # print(config)
-    # print(config['module_root_directory'])
-    # print(config['alphavantage'])
-    # print(f'current working directory {Path().cwd()}')
-    # print(f"data directory {get_module_root_path() / 'data' / 'metatrader-mt4'}")
+    delta = 3
+    print(start + delta * interval)
+    df2 = safe_sampling(df, start + delta * interval, start + 10 * interval)
+    df3 = safe_sampling(df, '2010-01-04', '2010-01-25')
+    print(df3.shape)
+    print(df3)
 
     pass
