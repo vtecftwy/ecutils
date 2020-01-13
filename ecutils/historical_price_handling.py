@@ -47,16 +47,19 @@ sources_dict = {'alphavantage': {'name': 'alphavantage',
                                                'M15': 'FX_INTRADAY_15min',
                                                'M5': 'FX_INTRADAY_5min',
                                                'M1': 'FX_INTRADAY_1min'},
-                                 'format': 'alphavantage'},
+                                 'format': 'alphavantage',
+                                 'columns': ['Bar', 'Open', 'High', 'Low', 'Close']},
                 'axitrader': {'name': 'axitrader',
                               'directory': 'axitrader-mt4',
                               'timeframe': {'D': '1440',
                                             'H4': '240',
                                             'H1': '60'},
-                              'format': 'mt4'},
+                              'format': 'mt4',
+                              'columns': ['Bar', 'Open', 'High', 'Low', 'Close', 'Volume']},
                 'yahoo': {'name': 'yahoo',
                           'directory': 'yahoo',
-                          'format': 'yahoo'},
+                          'format': 'yahoo',
+                          'columns': ['timestamp', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']},
                 'xm-com': {'name': 'xm-com',
                            'directory': 'xm-com-mt4',
                            'format': 'mt4'},
@@ -255,6 +258,7 @@ def safe_sampling(df, first=None, last=None):
 # ---- Functions to handle historical price files.
 # ------------------------------------------------
 # ToDo: refactor these functions to only have one function or class and use parameters for different sources
+
 
 def date_latest_alphavantage_download():
     target_directory = Path('D:\\PyProjects\\fx-bt') / 'data/raw-data/alphavantage'
@@ -841,28 +845,7 @@ def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=
     """
 
     """
-    # Define standard lists for MT4
-    # ToDo: update this function by using above defined default lists and make it multi source
-    tickers_forex = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCHF',
-                     'EURGBP', 'EURJPY', 'EURSGD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPUSD',
-                     'NZDUSD', 'SGDJPY', 'USDCAD', 'USDCHF', 'USDCNH', 'USDHKD', 'USDILS', 'USDJPY', 'USDPLN',
-                     'USDSGD', 'USDTHB']
-
-    tickers_indices_cash = ['CN50', 'EU50', 'FRA40', 'GER30', 'UK100', 'US30', 'US500', 'USTECH']
-    tickers_indices_future = ['CAC40.fs', 'CHINA50.fs', 'DAX30.fs', 'DJ30.fs', 'EUSTX50.fs', 'FT100.fs',
-                              'NAS100.fs', 'S&P.fs']
-    tickers_commodities_cash = ['UKOIL', 'USOIL', 'XAGUSD', 'XAUUSD']
-    tickers_commodities_future = ['BRENT.fs', 'COCOA.fs', 'COFFEE.fs', 'COPPER.fs', 'GOLD.fs', 'NATGAS.fs',
-                                  'SILVER.fs', 'SOYBEAN.fs', 'WTI.fs']
-    tickers_others = ['BTCUSD']
-    tickers_active = tickers_indices_cash + tickers_indices_future + \
-                     tickers_commodities_cash + tickers_commodities_future + \
-                     tickers_others
-
-    if timeframe is None:
-        timeframe = '1440'
-    if ticker is None:
-        ticker = 'US500'
+    # Define data_source independent default parameters
     if data_source is None:
         data_source = 'axitrader'
     if drive is None:
@@ -878,11 +861,41 @@ def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=
         msg = f'value for drive: {drive} is not recognized'
         raise ValueError(msg)
 
+    list_of_timeframes = [tfr for tfr in sources_dict[data_source]['timeframe'].values()]
+    dataset_columns = sources_dict[data_source]['columns']
+
+    # Define data_source dependant default parameters
+    if data_source == 'axitrader':
+        timeframe = '1440' if timeframe is None else timeframe
+        ticker = 'US500' if ticker is None else ticker
+        tickers_forex = forex_axitrader
+        tickers_indices_cash = indices_cash_axitrader
+        tickers_indices_future = indices_future_axitrader
+        tickers_commodities_cash = commodities_cash_axitrader
+        tickers_commodities_future = commodities_future_axitrader
+        tickers_crypto = crypto_axitrader
+        tickers_active = tickers_indices_cash + tickers_indices_future + \
+            tickers_commodities_cash + tickers_commodities_future + \
+            tickers_crypto
+
+    elif data_source == 'alphavantage':
+        timeframe = 'FX_DAILY' if timeframe is None else timeframe
+        ticker = 'EURUSD' if ticker is None else ticker
+        tickers_forex = forex_alphavantage
+        tickers_active = tickers_forex
+
+    else:
+        msg = f'value for data_source: {data_source} is not recognized'
+        raise ValueError(msg)
+
+    assert ticker in tickers_active, f"Ticker <{ticker} is not in active list for {data_source}>"
+    assert timeframe in list_of_timeframes, f"Timeframe <{timeframe} is not a valid timeframe for {data_source}>"
+
     dataset_file_name = f'{data_source}-{ticker}-{timeframe}.csv'
     path2dataset = datasets_dir / dataset_file_name
 
     if path2dataset.exists():
-        print_log(f'Loading Dataset for {ticker} for {timeframe}',verbose=verbose)
+        print_log(f'Loading Dataset for {ticker} for {timeframe}', verbose=verbose)
         ds = pd.read_csv(path2dataset,
                          sep=',',
                          index_col=0,
@@ -890,9 +903,9 @@ def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=
                          skiprows=1,
                          parse_dates=[0],
                          infer_datetime_format=True,
-                         names=['Bar', 'Open', 'High', 'Low', 'Close', 'Volume'],
+                         names=dataset_columns,
                          na_values=['nan', 'null', 'NULL']
-                          )
+                         )
         return ds
     else:
         print_log(f'No dataset file at {path2dataset.absolute()} !!!!!!!!!!!')
@@ -1045,7 +1058,7 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
         print_log(string_to_print, verbose=verbose)
 
         for counter, pair in enumerate(pairs, 1):
-            string_to_print = f"\n  Starting process for {pair}-{tf} (pair {counter} of {number_pairs} for tf{i}/{number_timeframes}"
+            string_to_print = f"\n  Starting process for {pair}-{tf} (pair {counter} of {number_pairs} for tf {i} of {number_timeframes}"
             print_log(string_to_print, verbose=verbose)
 
             target_currency = pair[0:3]
