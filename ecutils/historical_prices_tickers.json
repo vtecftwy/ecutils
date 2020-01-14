@@ -1,1 +1,536 @@
-{"S&P500": {"name": "S&P500", "type": "index", "description": "Standard and Poor 500", "tickers": {"axitrader": "US500", "wsj": "SPX", "yahoo": "^GSPC"}}, "S&P500 option": {"name": "S&P500 option", "type": "index future", "description": "Standard and Poor 500 option", "tickers": {"axitrader": "S&P.fs"}}, "DJ30": {"name": "Dow Jones 30", "type": "index", "description": "Nyse Composite", "tickers": {"axitrader": "US30", "wsj": "NYA", "yahoo": "^NYA"}}, "DJ30 option": {"name": "Dow Jones 30 option", "type": "index future", "description": "Nyse Composite option", "tickers": {"axitrader": "DJ30.fs"}}, "NASDAQ100": {"name": "NASDAQ 100", "type": "index", "description": "NASDAQ 100", "tickers": {"axitrader": "USTECH", "wsj": "NDX", "yahoo": "^NDX"}}, "NASDAQ100 option": {"name": "NASDAQ 100 option", "type": "index future", "description": "NASDAQ 100", "tickers": {"axitrader": "NAS100.fs"}}, "EUSTOXX50": {"name": "Euro Stoxx 50", "type": "index", "description": "Euro Stoxx 50 components", "tickers": {"axitrader": "EU50", "wsj": "SX5E", "yahoo": "^STOXX50E"}}, "EUSTOXX50 option": {"name": "Euro Stoxx 50 option", "type": "index future", "description": "Euro Stoxx 50 components option", "tickers": {"axitrader": "EUSTX50.fs"}}, "FTSE100": {"name": "FTSE 100", "type": "index", "description": "FTSE Index 100", "tickers": {"axitrader": "UK100", "wsj": "UKX", "yahoo": "^FTSE"}}, "FTSE100 option": {"name": "FTSE 100 option", "type": "index future", "description": "FTSE Index 100 option", "tickers": {"axitrader": "FT100.fs"}}, "Russel2000": {"name": "Russel 2000", "type": "index", "description": "Russel 2000 index", "tickers": {"axitrader": "US2000", "wsj": "RUT", "yahoo": "^RUT"}}, "DAX30": {"name": "DAX 30", "type": "index", "description": "Germany DAX 30 index", "tickers": {"axitrader": "GER30", "wsj": "DAX", "yahoo": "^GDAXI"}}, "DAX30 option": {"name": "DAX 30 option", "type": "index future", "description": "Germany DAX 30 index option", "tickers": {"axitrader": "DAX30.fs"}}, "CAC40": {"name": "CAC 40", "type": "index", "description": "France CAC 40", "tickers": {"axitrader": "FRA40", "wsj": "PX1", "yahoo": "^FCHI"}}, "CAC40 option": {"name": "CAC 40", "type": "index future", "description": "France CAC 40 option", "tickers": {"axitrader": "CAC40.fs"}}, "CN50": {"name": "China 50", "type": "index", "description": "China 50", "tickers": {"axitrader": "CN50"}}, "CN50 option": {"name": "China 50 option", "type": "index future", "description": "China 50 option", "tickers": {"axitrader": "CHINA50.fs"}}, "Gold USD": {"name": "Gold (USD)", "type": "commodity", "description": "Gold in USD", "tickers": {"axitrader": "XAUUSD"}}, "Silver USD": {"name": "Silver (USD)", "type": "commodity", "description": "Silver in USD", "tickers": {"axitrader": "XAGUSD"}}, "UK Oil": {"name": "Brent (USD)", "type": "commodity", "description": "Brent Crude Oil", "tickers": {"axitrader": "UKOIL"}}, "US Oil": {"name": "WTI (USD)", "type": "commodity", "description": "West Texas Intermetiate Oil option", "tickers": {"axitrader": "USOIL"}}, "Gold Option": {"name": "Gold option (USD)", "type": "commodity future", "description": "Gold option in USD", "tickers": {"axitrader": "GOLD.fs"}}, "Silver Option": {"name": "Silver option (USD)", "type": "commodity future", "description": "Silver option in USD", "tickers": {"axitrader": "SILVER.fs"}}, "BRENT Option": {"name": "Brent Oil option", "type": "commodity future", "description": "Brent Oil Option", "tickers": {"axitrader": "BRENT.fs"}}, "WTI Option": {"name": "WTI Oil option", "type": "commodity future", "description": "West Texas Intermediate Oil option", "tickers": {"axitrader": "WTI.fs"}}, "Cocoa Option": {"name": "Cocoa option (USD)", "type": "commodity future", "description": "Cocoa option in USD", "tickers": {"axitrader": "COCOA.fs"}}, "Coffee Option": {"name": "Coffee option (USD)", "type": "commodity future", "description": "Coffee option in USD", "tickers": {"axitrader": "COFFEE.fs"}}, "Copper Option": {"name": "COPPER option", "type": "commodity future", "description": "Copper Option", "tickers": {"axitrader": "COPPER.fs"}}, "Natgas Option": {"name": "Natural Gas option", "type": "commodity future", "description": "Natural Gas option", "tickers": {"axitrader": "NATGAS.fs"}}, "Soybean Option": {"name": "Soybean option", "type": "commodity future", "description": "Soybean option", "tickers": {"axitrader": "SOYBEAN.fs"}}, "CADCHF": {"name": "CADCHF", "description": "Exchange rate CAD CHF", "type": "forex", "tickers": {"alphavantage": "CADCHF", "axitrader": "CADCHF"}}, "USDILS": {"name": "USDILS", "description": "Exchange rate USD ILS", "type": "forex", "tickers": {"alphavantage": "USDILS", "axitrader": "USDILS"}}, "USDCHF": {"name": "USDCHF", "description": "Exchange rate USD CHF", "type": "forex", "tickers": {"alphavantage": "USDCHF", "axitrader": "USDCHF"}}, "USDHKD": {"name": "USDHKD", "description": "Exchange rate USD HKD", "type": "forex", "tickers": {"alphavantage": "USDHKD", "axitrader": "USDHKD"}}, "GBPCAD": {"name": "GBPCAD", "description": "Exchange rate GBP CAD", "type": "forex", "tickers": {"alphavantage": "GBPCAD", "axitrader": "GBPCAD"}}, "USDJPY": {"name": "USDJPY", "description": "Exchange rate USD JPY", "type": "forex", "tickers": {"alphavantage": "USDJPY", "axitrader": "USDJPY"}}, "EURAUD": {"name": "EURAUD", "description": "Exchange rate EUR AUD", "type": "forex", "tickers": {"alphavantage": "EURAUD", "axitrader": "EURAUD"}}, "USDTHB": {"name": "USDTHB", "description": "Exchange rate USD THB", "type": "forex", "tickers": {"alphavantage": "USDTHB", "axitrader": "USDTHB"}}, "SGDJPY": {"name": "SGDJPY", "description": "Exchange rate SGD JPY", "type": "forex", "tickers": {"alphavantage": "SGDJPY", "axitrader": "SGDJPY"}}, "NZDUSD": {"name": "NZDUSD", "description": "Exchange rate NZD USD", "type": "forex", "tickers": {"alphavantage": "NZDUSD", "axitrader": "NZDUSD"}}, "EURJPY": {"name": "EURJPY", "description": "Exchange rate EUR JPY", "type": "forex", "tickers": {"alphavantage": "EURJPY", "axitrader": "EURJPY"}}, "EURGBP": {"name": "EURGBP", "description": "Exchange rate EUR GBP", "type": "forex", "tickers": {"alphavantage": "EURGBP", "axitrader": "EURGBP"}}, "GBPUSD": {"name": "GBPUSD", "description": "Exchange rate GBP USD", "type": "forex", "tickers": {"alphavantage": "GBPUSD", "axitrader": "GBPUSD"}}, "USDPLN": {"name": "USDPLN", "description": "Exchange rate USD PLN", "type": "forex", "tickers": {"alphavantage": "USDPLN", "axitrader": "USDPLN"}}, "USDKRW": {"name": "USDKRW", "description": "Exchange rate USD KRW", "type": "forex", "tickers": {"alphavantage": "USDKRW"}}, "USDSGD": {"name": "USDSGD", "description": "Exchange rate USD SGD", "type": "forex", "tickers": {"alphavantage": "USDSGD", "axitrader": "USDSGD"}}, "GBPJPY": {"name": "GBPJPY", "description": "Exchange rate GBP JPY", "type": "forex", "tickers": {"alphavantage": "GBPJPY", "axitrader": "GBPJPY"}}, "EURCHF": {"name": "EURCHF", "description": "Exchange rate EUR CHF", "type": "forex", "tickers": {"alphavantage": "EURCHF", "axitrader": "EURCHF"}}, "EURUSD": {"name": "EURUSD", "description": "Exchange rate EUR USD", "type": "forex", "tickers": {"alphavantage": "EURUSD", "axitrader": "EURUSD"}}, "USDCAD": {"name": "USDCAD", "description": "Exchange rate USD CAD", "type": "forex", "tickers": {"alphavantage": "USDCAD", "axitrader": "USDCAD"}}, "AUDCHF": {"name": "AUDCHF", "description": "Exchange rate AUD CHF", "type": "forex", "tickers": {"alphavantage": "AUDCHF", "axitrader": "AUDCHF"}}, "GBPCHF": {"name": "GBPCHF", "description": "Exchange rate GBP CHF", "type": "forex", "tickers": {"alphavantage": "GBPCHF", "axitrader": "GBPCHF"}}, "AUDJPY": {"name": "AUDJPY", "description": "Exchange rate AUD JPY", "type": "forex", "tickers": {"alphavantage": "AUDJPY", "axitrader": "AUDJPY"}}, "CADJPY": {"name": "CADJPY", "description": "Exchange rate CAD JPY", "type": "forex", "tickers": {"alphavantage": "CADJPY", "axitrader": "CADJPY"}}, "USDCNH": {"name": "USDCNH", "description": "Exchange rate USD CNH", "type": "forex", "tickers": {"alphavantage": "USDCNH", "axitrader": "USDCNH"}}, "CHFJPY": {"name": "CHFJPY", "description": "Exchange rate CHF JPY", "type": "forex", "tickers": {"alphavantage": "CHFJPY", "axitrader": "CHFJPY"}}, "AUDUSD": {"name": "AUDUSD", "description": "Exchange rate AUD USD", "type": "forex", "tickers": {"alphavantage": "AUDUSD", "axitrader": "AUDUSD"}}, "AUDCAD": {"name": "AUDCAD", "description": "Exchange rate AUD CAD", "type": "forex", "tickers": {"alphavantage": "AUDCAD", "axitrader": "AUDCAD"}}, "GBPAUD": {"name": "GBPAUD", "description": "Exchange rate GBP AUD", "type": "forex", "tickers": {"alphavantage": "GBPAUD", "axitrader": "GBPAUD"}}, "EURSGD": {"name": "EURSGD", "description": "Exchange rate EUR SGD", "type": "forex", "tickers": {"alphavantage": "EURSGD", "axitrader": "EURSGD"}}, "Bitcoin USD": {"name": "Bitcoin USD", "description": "Bitcoin in USD", "type": "crypto", "tickers": {"alphavantage": "BTCUSD", "axitrader": "BTCUSD"}}}
+{
+    "S&P500": {
+        "name": "S&P500 Cash CDF",
+        "type": "index",
+        "description": "Standard and Poor 500 Cash CDF",
+        "tickers": {
+            "axitrader": "US500",
+            "wsj": "SPX",
+            "yahoo": "^GSPC"
+        }
+    },
+    "S&P500 future": {
+        "name": "S&P500 Future CFD",
+        "type": "index future",
+        "description": "Standard and Poor 500 Future CFD",
+        "tickers": {
+            "axitrader": "S&P.fs"
+        }
+    },
+    "DJ30": {
+        "name": "Dow Jones 30 Cash CDF",
+        "type": "index",
+        "description": "Nyse Composite Cash CDF",
+        "tickers": {
+            "axitrader": "US30",
+            "wsj": "NYA",
+            "yahoo": "^NYA"
+        }
+    },
+    "DJ30 future": {
+        "name": "Dow Jones 30 Future CFD",
+        "type": "index future",
+        "description": "Nyse Composite Future CFD",
+        "tickers": {
+            "axitrader": "DJ30.fs"
+        }
+    },
+    "NASDAQ100": {
+        "name": "NASDAQ 100 Cash CDF",
+        "type": "index",
+        "description": "NASDAQ 100 Cash CDF",
+        "tickers": {
+            "axitrader": "USTECH",
+            "wsj": "NDX",
+            "yahoo": "^NDX"
+        }
+    },
+    "NASDAQ100 future": {
+        "name": "NASDAQ 100 Future CFD",
+        "type": "index future",
+        "description": "NASDAQ 100",
+        "tickers": {
+            "axitrader": "NAS100.fs"
+        }
+    },
+    "EUSTOXX50": {
+        "name": "Euro Stoxx 50 Cash CDF",
+        "type": "index",
+        "description": "Euro Stoxx 50 components Cash CDF",
+        "tickers": {
+            "axitrader": "EU50",
+            "wsj": "SX5E",
+            "yahoo": "^STOXX50E"
+        }
+    },
+    "EUSTOXX50 future": {
+        "name": "Euro Stoxx 50 Future CFD",
+        "type": "index future",
+        "description": "Euro Stoxx 50 components Future CFD",
+        "tickers": {
+            "axitrader": "EUSTX50.fs"
+        }
+    },
+    "FTSE100": {
+        "name": "FTSE 100 Cash CDF",
+        "type": "index",
+        "description": "FTSE Index 100 Cash CDF",
+        "tickers": {
+            "axitrader": "UK100",
+            "wsj": "UKX",
+            "yahoo": "^FTSE"
+        }
+    },
+    "FTSE100 future": {
+        "name": "FTSE 100 Future CFD",
+        "type": "index future",
+        "description": "FTSE Index 100 Future CFD",
+        "tickers": {
+            "axitrader": "FT100.fs"
+        }
+    },
+    "Russel2000": {
+        "name": "Russel 2000 Cash CDF",
+        "type": "index",
+        "description": "Russel 2000 index Cash CDF",
+        "tickers": {
+            "axitrader": "US2000",
+            "wsj": "RUT",
+            "yahoo": "^RUT"
+        }
+    },
+    "DAX30": {
+        "name": "DAX 30 Cash CDF",
+        "type": "index",
+        "description": "Germany DAX 30 index Cash CDF",
+        "tickers": {
+            "axitrader": "GER30",
+            "wsj": "DAX",
+            "yahoo": "^GDAXI"
+        }
+    },
+    "DAX30 future": {
+        "name": "DAX 30 Future CFD",
+        "type": "index future",
+        "description": "Germany DAX 30 index Future CFD",
+        "tickers": {
+            "axitrader": "DAX30.fs"
+        }
+    },
+    "CAC40": {
+        "name": "CAC 40 Cash CDF",
+        "type": "index",
+        "description": "France CAC 40 Cash CDF",
+        "tickers": {
+            "axitrader": "FRA40",
+            "wsj": "PX1",
+            "yahoo": "^FCHI"
+        }
+    },
+    "CAC40 future": {
+        "name": "CAC 40",
+        "type": "index future",
+        "description": "France CAC 40 Future CFD",
+        "tickers": {
+            "axitrader": "CAC40.fs"
+        }
+    },
+    "CN50": {
+        "name": "China 50 Cash CDF",
+        "type": "index",
+        "description": "China 50 Cash CDF",
+        "tickers": {
+            "axitrader": "CN50"
+        }
+    },
+    "CN50 future": {
+        "name": "China 50 Future CFD",
+        "type": "index future",
+        "description": "China 50 Future CFD",
+        "tickers": {
+            "axitrader": "CHINA50.fs"
+        }
+    },
+    "Gold USD": {
+        "name": "Gold (USD) Cash CDF",
+        "type": "commodity",
+        "description": "Gold in USD Cash CDF",
+        "tickers": {
+            "axitrader": "XAUUSD"
+        }
+    },
+    "Silver USD": {
+        "name": "Silver (USD) Cash CDF",
+        "type": "commodity",
+        "description": "Silver in USD Cash CDF",
+        "tickers": {
+            "axitrader": "XAGUSD"
+        }
+    },
+    "UK Oil": {
+        "name": "Brent (USD) Cash CDF",
+        "type": "commodity",
+        "description": "Brent Crude Oil Cash CDF",
+        "tickers": {
+            "axitrader": "UKOIL"
+        }
+    },
+    "US Oil": {
+        "name": "WTI (USD) Cash CDF",
+        "type": "commodity",
+        "description": "West Texas Intermetiate Oil Cash CDF",
+        "tickers": {
+            "axitrader": "USOIL"
+        }
+    },
+    "Gold future": {
+        "name": "Gold Future CFD (USD)",
+        "type": "commodity future",
+        "description": "Gold Future CFD in USD",
+        "tickers": {
+            "axitrader": "GOLD.fs"
+        }
+    },
+    "Silver future": {
+        "name": "Silver Future CFD (USD)",
+        "type": "commodity future",
+        "description": "Silver Future CFD in USD",
+        "tickers": {
+            "axitrader": "SILVER.fs"
+        }
+    },
+    "BRENT future": {
+        "name": "Brent Oil Future CFD",
+        "type": "commodity future",
+        "description": "Brent Oil Future CFD",
+        "tickers": {
+            "axitrader": "BRENT.fs"
+        }
+    },
+    "WTI future": {
+        "name": "WTI Oil Future CFD",
+        "type": "commodity future",
+        "description": "West Texas Intermediate Oil Future CFD",
+        "tickers": {
+            "axitrader": "WTI.fs"
+        }
+    },
+    "Cocoa future": {
+        "name": "Cocoa Future CFD (USD)",
+        "type": "commodity future",
+        "description": "Cocoa Future CFD in USD",
+        "tickers": {
+            "axitrader": "COCOA.fs"
+        }
+    },
+    "Coffee future": {
+        "name": "Coffee Future CFD (USD)",
+        "type": "commodity future",
+        "description": "Coffee Future CFD in USD",
+        "tickers": {
+            "axitrader": "COFFEE.fs"
+        }
+    },
+    "Copper future": {
+        "name": "COPPER Future CFD",
+        "type": "commodity future",
+        "description": "Copper Future CFD",
+        "tickers": {
+            "axitrader": "COPPER.fs"
+        }
+    },
+    "Natgas future": {
+        "name": "Natural Gas Future CFD",
+        "type": "commodity future",
+        "description": "Natural Gas Future CFD",
+        "tickers": {
+            "axitrader": "NATGAS.fs"
+        }
+    },
+    "Soybean future": {
+        "name": "Soybean Future CFD",
+        "type": "commodity future",
+        "description": "Soybean Future CFD",
+        "tickers": {
+            "axitrader": "SOYBEAN.fs"
+        }
+    },
+    "CADCHF": {
+        "name": "CADCHF",
+        "description": " Margin FX Contract CAD CHF",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "CADCHF",
+            "axitrader": "CADCHF"
+        }
+    },
+    "USDILS": {
+        "name": "USDILS",
+        "description": " Margin FX Contract USD ILS",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDILS",
+            "axitrader": "USDILS"
+        }
+    },
+    "USDCHF": {
+        "name": "USDCHF",
+        "description": "Margin FX Contract USD CHF",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDCHF",
+            "axitrader": "USDCHF"
+        }
+    },
+    "USDHKD": {
+        "name": "USDHKD",
+        "description": "Margin FX Contract USD HKD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDHKD",
+            "axitrader": "USDHKD"
+        }
+    },
+    "GBPCAD": {
+        "name": "GBPCAD",
+        "description": "Margin FX Contract GBP CAD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "GBPCAD",
+            "axitrader": "GBPCAD"
+        }
+    },
+    "USDJPY": {
+        "name": "USDJPY",
+        "description": "Margin FX Contract USD JPY",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDJPY",
+            "axitrader": "USDJPY"
+        }
+    },
+    "EURAUD": {
+        "name": "EURAUD",
+        "description": "Margin FX Contract EUR AUD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "EURAUD",
+            "axitrader": "EURAUD"
+        }
+    },
+    "USDTHB": {
+        "name": "USDTHB",
+        "description": "Margin FX Contract USD THB",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDTHB",
+            "axitrader": "USDTHB"
+        }
+    },
+    "SGDJPY": {
+        "name": "SGDJPY",
+        "description": "Margin FX Contract SGD JPY",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "SGDJPY",
+            "axitrader": "SGDJPY"
+        }
+    },
+    "NZDUSD": {
+        "name": "NZDUSD",
+        "description": "Margin FX Contract NZD USD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "NZDUSD",
+            "axitrader": "NZDUSD"
+        }
+    },
+    "EURJPY": {
+        "name": "EURJPY",
+        "description": "Margin FX Contract EUR JPY",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "EURJPY",
+            "axitrader": "EURJPY"
+        }
+    },
+    "EURGBP": {
+        "name": "EURGBP",
+        "description": "Margin FX Contract EUR GBP",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "EURGBP",
+            "axitrader": "EURGBP"
+        }
+    },
+    "GBPUSD": {
+        "name": "GBPUSD",
+        "description": "Margin FX Contract GBP USD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "GBPUSD",
+            "axitrader": "GBPUSD"
+        }
+    },
+    "USDPLN": {
+        "name": "USDPLN",
+        "description": "Margin FX Contract USD PLN",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDPLN",
+            "axitrader": "USDPLN"
+        }
+    },
+    "USDKRW": {
+        "name": "USDKRW",
+        "description": "Margin FX Contract USD KRW",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDKRW"
+        }
+    },
+    "USDSGD": {
+        "name": "USDSGD",
+        "description": "Margin FX Contract USD SGD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDSGD",
+            "axitrader": "USDSGD"
+        }
+    },
+    "GBPJPY": {
+        "name": "GBPJPY",
+        "description": "Margin FX Contract GBP JPY",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "GBPJPY",
+            "axitrader": "GBPJPY"
+        }
+    },
+    "EURCHF": {
+        "name": "EURCHF",
+        "description": "Margin FX Contract EUR CHF",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "EURCHF",
+            "axitrader": "EURCHF"
+        }
+    },
+    "EURUSD": {
+        "name": "EURUSD",
+        "description": "Margin FX Contract EUR USD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "EURUSD",
+            "axitrader": "EURUSD"
+        }
+    },
+    "USDCAD": {
+        "name": "USDCAD",
+        "description": "Margin FX Contract USD CAD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDCAD",
+            "axitrader": "USDCAD"
+        }
+    },
+    "AUDCHF": {
+        "name": "AUDCHF",
+        "description": "Margin FX Contract AUD CHF",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "AUDCHF",
+            "axitrader": "AUDCHF"
+        }
+    },
+    "GBPCHF": {
+        "name": "GBPCHF",
+        "description": "Margin FX Contract GBP CHF",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "GBPCHF",
+            "axitrader": "GBPCHF"
+        }
+    },
+    "AUDJPY": {
+        "name": "AUDJPY",
+        "description": "Margin FX Contract AUD JPY",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "AUDJPY",
+            "axitrader": "AUDJPY"
+        }
+    },
+    "CADJPY": {
+        "name": "CADJPY",
+        "description": "Margin FX Contract CAD JPY",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "CADJPY",
+            "axitrader": "CADJPY"
+        }
+    },
+    "USDCNH": {
+        "name": "USDCNH",
+        "description": "Margin FX Contract USD CNH",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "USDCNH",
+            "axitrader": "USDCNH"
+        }
+    },
+    "CHFJPY": {
+        "name": "CHFJPY",
+        "description": "Margin FX Contract CHF JPY",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "CHFJPY",
+            "axitrader": "CHFJPY"
+        }
+    },
+    "AUDUSD": {
+        "name": "AUDUSD",
+        "description": "Margin FX Contract AUD USD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "AUDUSD",
+            "axitrader": "AUDUSD"
+        }
+    },
+    "AUDCAD": {
+        "name": "AUDCAD",
+        "description": "Margin FX Contract AUD CAD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "AUDCAD",
+            "axitrader": "AUDCAD"
+        }
+    },
+    "GBPAUD": {
+        "name": "GBPAUD",
+        "description": "Margin FX Contract GBP AUD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "GBPAUD",
+            "axitrader": "GBPAUD"
+        }
+    },
+    "EURSGD": {
+        "name": "EURSGD",
+        "description": "Margin FX Contract EUR SGD",
+        "type": "forex",
+        "tickers": {
+            "alphavantage": "EURSGD",
+            "axitrader": "EURSGD"
+        }
+    },
+    "Bitcoin USD": {
+        "name": "Bitcoin USD",
+        "description": "Bitcoin in USD",
+        "type": "crypto",
+        "tickers": {
+            "alphavantage": "BTCUSD",
+            "axitrader": "BTCUSD"
+        }
+    }
+}
