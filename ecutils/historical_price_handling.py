@@ -85,20 +85,20 @@ else:
 # Create default lists for alphavantage
 source = 'alphavantage'
 forex_alphavantage = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
-                      if source in subdict['tickers'].keys() and subdict['type'] == 'forex']
+                      if source in subdict['tickers'].keys() and subdict['type'] == 'Margin FX Contract']
 
 # Create default lists for axitrader-mt4
 source = 'axitrader'
 forex_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
-                   if source in subdict['tickers'].keys() and subdict['type'] == 'forex']
+                   if source in subdict['tickers'].keys() and subdict['type'] == 'Margin FX Contract']
 indices_cash_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
-                          if source in subdict['tickers'].keys() and subdict['type'] == 'index']
+                          if source in subdict['tickers'].keys() and subdict['type'] == 'Index Cash CFDs']
 indices_future_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
-                            if source in subdict['tickers'].keys() and subdict['type'] == 'index future']
+                            if source in subdict['tickers'].keys() and subdict['type'] == 'Index Future CFDs']
 commodities_cash_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
-                              if source in subdict['tickers'].keys() and subdict['type'] == 'commodity']
+                              if source in subdict['tickers'].keys() and subdict['type'] == 'Commodity Cash CFDs']
 commodities_future_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
-                                if source in subdict['tickers'].keys() and subdict['type'] == 'commodity future']
+                                if source in subdict['tickers'].keys() and subdict['type'] == 'Commodity Future CFDs']
 crypto_axitrader = [subdict['tickers'][source] for sec, subdict in ticker_dict.items()
                     if source in subdict['tickers'].keys() and subdict['type'] == 'crypto']
 
