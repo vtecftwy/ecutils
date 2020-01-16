@@ -9,74 +9,68 @@ from ecutils import historical_price_handling as fxutils
 from numpy.testing import assert_almost_equal
 from pathlib import Path
 
-# --------------------------------------------------------------------------------------------------------------------
-# --- General Utility Functions
-# ------------------------------
+
+class TestGetModuleFunction:
+    # def test__get_module_root_path_no_param():
+    #     """ Test that get module returns the correct path when no parameters are passed"""
+    #     # ToDo: reconsider the need for this function. Use standard lib function instead. Then delete this test
+    #     # Setup
+    #     desired_path = Path('D:\\PyProjects\\ec-utils').absolute()
+    #
+    #     # Exercise
+    #     computed_root_path = fxutils.get_module_root_path().absolute()
+    #
+    #     # Verify
+    #     assert computed_root_path == desired_path
+    #
+    #     # Cleanup (none)
+
+    def test__get_module_root_path_param_correct(self):
+        """Test that get_module returns the correct path when the correct root dir param is passed"""
+        # Setup
+        desired_path = Path('D:\\PyProjects\\ec-utils').absolute()
+
+        # Exercise
+        computed_root_path =  fxutils.get_module_root_path(module_root='ec-utils').absolute()
+
+        # Verify
+        assert computed_root_path == desired_path
+
+        # Cleanup (none)
+
+    def test__get_module_root_path_param_erronous(self):
+        """Test that an error is raised in case the module_root parameter is not the same as the module root"""
+        # Setup
+        module_root = 'not_correct_name'
+
+        # Exercise and Verify
+        with pytest.raises(ValueError):
+            fxutils.get_module_root_path(module_root=module_root)
+
+        # Cleanup (None)
 
 
-# def test__get_module_root_path_no_param():
-#     """ Test that get module returns the correct path when no parameters are passed"""
-#     # ToDo: reconsider the need for this function. Use standard lib function instead. Then delete this test
-#     # Setup
-#     desired_path = Path('D:\\PyProjects\\ec-utils').absolute()
-#
-#     # Exercise
-#     computed_root_path = fxutils.get_module_root_path().absolute()
-#
-#     # Verify
-#     assert computed_root_path == desired_path
-#
-#     # Cleanup (none)
+class TestRemoveMultipleWidlcardsFunction:
+    def test__remove_multiple_wildcards_double(self):
+        """Test that the function removes double wildcards and not single wildcards"""
+        assert fxutils.remove_multiple_wildcards('123*321') == '123*321'
+        assert fxutils.remove_multiple_wildcards('123**321') == '123*321'
+        assert fxutils.remove_multiple_wildcards('**321') == '*321'
+        assert fxutils.remove_multiple_wildcards('321**') == '321*'
 
+    def test__remove_multiple_wildcards_triple(self):
+        """Test that the function removes triple wildcards and not single wildcards"""
+        assert fxutils.remove_multiple_wildcards('123*321') == '123*321'
+        assert fxutils.remove_multiple_wildcards('123***321') == '123*321'
+        assert fxutils.remove_multiple_wildcards('***321') == '*321'
+        assert fxutils.remove_multiple_wildcards('321***') == '321*'
 
-def test__get_module_root_path_param_correct():
-    """Test that get_module returns the correct path when the correct root dir param is passed"""
-    # Setup
-    desired_path = Path('D:\\PyProjects\\ec-utils').absolute()
-
-    # Exercise
-    computed_root_path =  fxutils.get_module_root_path(module_root='ec-utils').absolute()
-
-    # Verify
-    assert computed_root_path == desired_path
-
-    # Cleanup (none)
-
-
-def test__get_module_root_path_param_erronous():
-    """Test that an error is raised in case the module_root parameter is not the same as the module root"""
-    # Setup
-    module_root = 'not_correct_name'
-
-    # Exercise and Verify
-    with pytest.raises(ValueError):
-        fxutils.get_module_root_path(module_root=module_root)
-
-    # Cleanup (None)
-
-
-def test__remove_multiple_wildcards_double():
-    """Test that the function removes double wildcards and not single wildcards"""
-    assert fxutils.remove_multiple_wildcards('123*321') == '123*321'
-    assert fxutils.remove_multiple_wildcards('123**321') == '123*321'
-    assert fxutils.remove_multiple_wildcards('**321') == '*321'
-    assert fxutils.remove_multiple_wildcards('321**') == '321*'
-
-
-def test__remove_multiple_wildcards_triple():
-    """Test that the function removes triple wildcards and not single wildcards"""
-    assert fxutils.remove_multiple_wildcards('123*321') == '123*321'
-    assert fxutils.remove_multiple_wildcards('123***321') == '123*321'
-    assert fxutils.remove_multiple_wildcards('***321') == '*321'
-    assert fxutils.remove_multiple_wildcards('321***') == '321*'
-
-
-def test__remove_multiple_wildcards_quad():
-    """Test that the function removes quadruple wildcards and not single wildcards"""
-    assert fxutils.remove_multiple_wildcards('123*321') == '123*321'
-    assert fxutils.remove_multiple_wildcards('123****321') == '123*321'
-    assert fxutils.remove_multiple_wildcards('****321') == '*321'
-    assert fxutils.remove_multiple_wildcards('321****') == '321*'
+    def test__remove_multiple_wildcards_quad(self):
+        """Test that the function removes quadruple wildcards and not single wildcards"""
+        assert fxutils.remove_multiple_wildcards('123*321') == '123*321'
+        assert fxutils.remove_multiple_wildcards('123****321') == '123*321'
+        assert fxutils.remove_multiple_wildcards('****321') == '*321'
+        assert fxutils.remove_multiple_wildcards('321****') == '321*'
 
 
 def test__fill_nan():
@@ -129,125 +123,120 @@ def test__str_date():
     assert actual_string == desired_string
 
 
-def test__estimate_pnl__hh_fade():
-    """Test gap fading pnl with there is a HH fade"""
-    # Setup
-    pct_spread = 0.01
-    series = pd.Series(data={'Open': 11, 'High': 17, 'Low': 7, 'Close': 15,
-                             'Gap': 3, 'Previous Bar': '', '1-Bar Fade?': True,
-                             'Zone Label': 'HH'})
-    series.at['Previous Bar'] = (4, 10, 2, 8)
+class TestEstimatePnLFunction:
 
-    true_pnl = 3 - 11 * pct_spread
+    def test__estimate_pnl__hh_fade(self):
+        """Test gap fading pnl with there is a HH fade"""
+        # Setup
+        pct_spread = 0.01
+        series = pd.Series(data={'Open': 11, 'High': 17, 'Low': 7, 'Close': 15,
+                                 'Gap': 3, 'Previous Bar': '', '1-Bar Fade?': True,
+                                 'Zone Label': 'HH'})
+        series.at['Previous Bar'] = (4, 10, 2, 8)
 
-    # Exercise
-    estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
+        true_pnl = 3 - 11 * pct_spread
 
-    # Verify
-    assert estimated_pnl == true_pnl
+        # Exercise
+        estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
 
+        # Verify
+        assert estimated_pnl == true_pnl
 
-def test__estimate_pnl__bh_fade():
-    """Test gap fading pnl with there is a BH fade"""
-    # Setup
-    pct_spread = 0.01
-    series = pd.Series(data={'Open': 9, 'High': 15, 'Low': 7, 'Close': 13,
-                             'Gap': 1, 'Previous Bar': '', '1-Bar Fade?': True,
-                             'Zone Label': 'BH'})
-    series.at['Previous Bar'] = (4, 10, 2, 8)
-    true_pnl = 1 - 9 * pct_spread
-    # Exercise
-    estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
-    # Verify
-    assert estimated_pnl == estimated_pnl
+    def test__estimate_pnl__bh_fade(self):
+        """Test gap fading pnl with there is a BH fade"""
+        # Setup
+        pct_spread = 0.01
+        series = pd.Series(data={'Open': 9, 'High': 15, 'Low': 7, 'Close': 13,
+                                 'Gap': 1, 'Previous Bar': '', '1-Bar Fade?': True,
+                                 'Zone Label': 'BH'})
+        series.at['Previous Bar'] = (4, 10, 2, 8)
+        true_pnl = 1 - 9 * pct_spread
+        # Exercise
+        estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
+        # Verify
+        assert estimated_pnl == estimated_pnl
 
+    def test__estimate_pnl__bb_fade(self):
+        """Test gap fading pnl with there is a BB fade"""
+        # Setup
+        pct_spread = 0.01
+        series = pd.Series(data={'Open': 6, 'High': 12, 'Low': 3, 'Close': 9,
+                                 'Gap': -2, 'Previous Bar': '', '1-Bar Fade?': True,
+                                 'Zone Label': 'BB'})
+        series.at['Previous Bar'] = (4, 10, 2, 8)
+        true_pnl = 2 - 6 * pct_spread
+        # Exercise
+        estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
+        # Verify
+        assert estimated_pnl == true_pnl
 
-def test__estimate_pnl__bb_fade():
-    """Test gap fading pnl with there is a BB fade"""
-    # Setup
-    pct_spread = 0.01
-    series = pd.Series(data={'Open': 6, 'High': 12, 'Low': 3, 'Close': 9,
-                             'Gap': -2, 'Previous Bar': '', '1-Bar Fade?': True,
-                             'Zone Label': 'BB'})
-    series.at['Previous Bar'] = (4, 10, 2, 8)
-    true_pnl =  2 - 6 * pct_spread
-    # Exercise
-    estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
-    # Verify
-    assert estimated_pnl == true_pnl
+    def test__estimate_pnl__hh_no_fade(self):
+        """Test gap fading pnl with there is a HH and no fade"""
+        # Setup
+        pct_spread = 0.01
+        series = pd.Series(data={'Open': 14, 'High': 20, 'Low': 12, 'Close': 17,
+                                 'Gap': 6, 'Previous Bar': '', '1-Bar Fade?': False,
+                                 'Zone Label': 'HH'})
+        series.at['Previous Bar'] = (4, 10, 2, 8)
+        true_pnl = 14 * (1 - pct_spread) - min(22, 17)
+        # Exercise
+        estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
+        # Verify
+        assert estimated_pnl == true_pnl
 
+    def test__estimate_pnl__bh_no_fade(self):
+        """Test gap fading pnl with there is a BH and no fade"""
+        # Setup
+        pct_spread = 0.01
+        series = pd.Series(data={'Open': 10, 'High': 16, 'Low': 9, 'Close': 13,
+                                 'Gap': 3, 'Previous Bar': '', '1-Bar Fade?': False,
+                                 'Zone Label': 'BH'})
+        series.at['Previous Bar'] = (4, 11, 2, 8)
+        true_pnl = 1.1      # because stoploss is activated and was placed at 1.1
+        # Exercise
+        estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
+        # Verify
+        assert_almost_equal(estimated_pnl, true_pnl)
 
-def test__estimate_pnl__hh_no_fade():
-    """Test gap fading pnl with there is a HH and no fade"""
-    # Setup
-    pct_spread = 0.01
-    series = pd.Series(data={'Open': 14, 'High': 20, 'Low': 12, 'Close': 17,
-                             'Gap': 6, 'Previous Bar': '', '1-Bar Fade?': False,
-                             'Zone Label': 'HH'})
-    series.at['Previous Bar'] = (4, 10, 2, 8)
-    true_pnl =  14 * (1 - pct_spread) - min(22, 17)
-    # Exercise
-    estimated_pnl = fxutils.estimate_pnl(series, pct_spread=pct_spread)
-    # Verify
-    assert estimated_pnl == true_pnl
+    def test__estimate_pnl__bb_no_fade(self):
+        """Test gap fading pnl with there is a BB and no fade"""
+        # Setup
+        pct_spread = 0.01
+        # Zone BB - No Fade
+        series = pd.Series(data={'Open': 10, 'High': 16, 'Low': 1, 'Close': 7,
+                                 'Gap': -9, 'Previous Bar': '', '1-Bar Fade?': False,
+                                 'Zone Label': 'BB'})
+        series.at['Previous Bar'] = (4, 21, 2, 19)
+        true_pnl = 3.1      # because stoploss is activated and was placed at 3.1
+        # Exercise
+        estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
+        # Verify
+        assert_almost_equal(estimated_pnl, true_pnl)
 
+    def test__estimate_pnl__bl_no_fade(self):
+        """Test gap fading pnl with there is a BL and no fade"""
+        # Setup
+        pct_spread = 0.01
+        series = pd.Series(data={'Open': 10, 'High': 16, 'Low': 1, 'Close': 7,
+                                 'Gap': -8, 'Previous Bar': '', '1-Bar Fade?': False,
+                                 'Zone Label': 'BL'})
+        series.at['Previous Bar'] = (17, 20, 8, 18)
+        true_pnl = 2.1      # because stoploss is activated and was placed at 2.1
+        # Exercise
+        estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
+        # Verify
+        assert_almost_equal(estimated_pnl, true_pnl)
 
-def test__estimate_pnl__bh_no_fade():
-    """Test gap fading pnl with there is a BH and no fade"""
-    # Setup
-    pct_spread = 0.01
-    series = pd.Series(data={'Open': 10, 'High': 16, 'Low': 9, 'Close': 13,
-                             'Gap': 3, 'Previous Bar': '', '1-Bar Fade?': False,
-                             'Zone Label': 'BH'})
-    series.at['Previous Bar'] = (4, 11, 2, 8)
-    true_pnl = 1.1      # because stoploss is activated and was placed at 1.1
-    # Exercise
-    estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
-    # Verify
-    assert_almost_equal(estimated_pnl, true_pnl)
-
-
-def test__estimate_pnl__bb_no_fade():
-    """Test gap fading pnl with there is a BB and no fade"""
-    #Setup
-    pct_spread = 0.01
-    # Zone BB - No Fade
-    series = pd.Series(data={'Open': 10, 'High': 16, 'Low': 1, 'Close': 7,
-                             'Gap': -9, 'Previous Bar': '', '1-Bar Fade?': False,
-                             'Zone Label': 'BB'})
-    series.at['Previous Bar'] = (4, 21, 2, 19)
-    true_pnl = 3.1      # because stoploss is activated and was placed at 3.1
-    # Exercise
-    estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
-    # Verify
-    assert_almost_equal(estimated_pnl, true_pnl)
-
-
-def test__estimate_pnl__bl_no_fade():
-    """Test gap fading pnl with there is a BL and no fade"""
-    # Setup
-    pct_spread = 0.01
-    series = pd.Series(data={'Open': 10, 'High': 16, 'Low': 1, 'Close': 7,
-                             'Gap': -8, 'Previous Bar': '', '1-Bar Fade?': False,
-                             'Zone Label': 'BL'})
-    series.at['Previous Bar'] = (17, 20, 8, 18)
-    true_pnl = 2.1      # because stoploss is activated and was placed at 2.1
-    # Exercise
-    estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
-    # Verify
-    assert_almost_equal(estimated_pnl, true_pnl)
-
-
-def test__estimate_pnl__ll_no_fade():
-    """Test gap fading pnl with there is a LL and no fade"""
-    # Setup
-    pct_spread = 0.01
-    series = pd.Series(data={'Open': 20, 'High': 26, 'Low': 11, 'Close': 17,
-                             'Gap': -8, 'Previous Bar': '', '1-Bar Fade?': False,
-                             'Zone Label': 'LL'})
-    series.at['Previous Bar'] = (27, 30, 21, 28)
-    true_pnl = 3.2      # because stoploss is activated and was placed at 2.1
-    # Exercise
-    estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
-    # Verify
-    assert_almost_equal(estimated_pnl, true_pnl)
+    def test__estimate_pnl__ll_no_fade(self):
+        """Test gap fading pnl with there is a LL and no fade"""
+        # Setup
+        pct_spread = 0.01
+        series = pd.Series(data={'Open': 20, 'High': 26, 'Low': 11, 'Close': 17,
+                                 'Gap': -8, 'Previous Bar': '', '1-Bar Fade?': False,
+                                 'Zone Label': 'LL'})
+        series.at['Previous Bar'] = (27, 30, 21, 28)
+        true_pnl = 3.2      # because stoploss is activated and was placed at 2.1
+        # Exercise
+        estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
+        # Verify
+        assert_almost_equal(estimated_pnl, true_pnl)
