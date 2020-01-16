@@ -232,6 +232,7 @@ def display_df(df, mrows=None, show_info=False):
 
 
 def str_date(d):
+    # ToDo: add some test on parameters passed and also define the formating (YY-mm-dd or YYYY-mm-dd, ...)
     return f'{d.year}-{d.month}-{d.day}'
 
 
