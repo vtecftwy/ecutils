@@ -8,6 +8,7 @@ Link to this scrip by using a Symlink:
 """
 
 import configparser
+import http.client
 import json
 import logging
 import matplotlib.pyplot as plt
@@ -928,20 +929,21 @@ def load_file_from_url(target_url, filename, verbose=False):
     """
 
     try:
-        response = urllib.request.urlopen(target_url)
+        response = urllib.request.urlopen(target_url, timeout=120)
         # https://docs.python.org/3.5/library/urllib.request.html
         # also could use http.client library: conn = http.client.HTTPConnection() and conn.request('GET', '/')
         # https://docs.python.org/3.5/library/http.client.html#http.client.HTTPResponse
 
     except urllib.error.URLError as err:
+        print_log('request failed', verbose=verbose)
         if hasattr(err, 'code'):
             print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
         if hasattr(err, 'reason'):
             print_log(f'Error: {err.reason}. Failed URL request for {target_url}.', verbose=verbose)
         print('URLError!!!')
         return False
-    except urllib.error.HTTPError as err:
-        if hasattr(err, 'code'):
+    except http.client.HTTPError as err:
+        if hasattr(err, 'code', verbose=verbose):
             print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
         if hasattr(err, 'reason'):
             print_log(f'Error: {err.reason}. Failed URL request for {target_url}.', verbose=verbose)
@@ -949,8 +951,24 @@ def load_file_from_url(target_url, filename, verbose=False):
         return False
 
     print_log(f'  - Server HTTP response code: {response.code}', verbose=verbose)
-    downloaded_file = response.read()
+
+    try:
+        downloaded_file = response.read()
+    except urllib.error.URLError as err:
+        print_log('response.read failed')
+        if hasattr(err, 'code'):
+            print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
+        return False
+    except http.client.HTTPError as err:
+        print_log('response.read failed')
+        if hasattr(err, 'code'):
+            print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
+        if hasattr(err, 'reason'):
+            print_log(f'Error: {err.reason}. Failed URL request for {target_url}.', verbose=verbose)
+        return False
+
     print_log(f'  - Done downloading data from {target_url}', verbose=verbose)
+
     with open(filename, 'wb') as f:
         f.write(downloaded_file)
         # print_log(f'  - Done writing data into file {filename}', verbose=verbose)
@@ -987,7 +1005,8 @@ def throttle_api(delay=20):
     print_log(f'  - Awaking from {delay} sec throttle phase\n', verbose=verbose)
 
 
-def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=None, verbose=False):
+def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=None,
+                           skip_existing=False, verbose=False):
     """
     Get instrument pricing data from alphavantage for default pairs and tf or specified ones.
 
@@ -1066,6 +1085,11 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
             base_currency = pair[3:]
             filename = f'{target_currency}{base_currency}_{tf_name}_{now_string}.csv'
             filepath = alphavantage_folder / filename
+
+            if skip_existing and filepath.exists():
+                print_log(f"{filepath.name} already exists, skipping this download", verbose=verbose)
+                continue
+
             url = 'https://www.alphavantage.co/query?function=' + alphavantage_tf_parameter \
                   + '&from_symbol=' + target_currency \
                   + '&to_symbol=' + base_currency \
@@ -1078,11 +1102,12 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
                                                          filename=str(name_file_to_download),
                                                          verbose=verbose)
 
-            file_downloaded_correctly = not file_contains_error_message(filename=name_file_to_download,
-                                                                        forced_error=forced_file_error)
-
             if load_from_url_succeeded is True:
                 print_log(f'  - Done writing data into {filename}.', verbose=verbose)
+
+                file_downloaded_correctly = not file_contains_error_message(filename=name_file_to_download,
+                                                                            forced_error=forced_file_error)
+
                 if file_downloaded_correctly is False:
                     downloads_to_retry_dict[name_file_to_download] = {'url': url,
                                                                       'pair': pair,
@@ -1110,10 +1135,9 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
                                                          filename=filename,
                                                          verbose=verbose)
 
-            file_downloaded_correctly = not file_contains_error_message(filename=filename,
-                                                                        forced_error=forced_file_error)
-
             if (not load_from_url_succeeded) or (not file_downloaded_correctly):
+                file_downloaded_correctly = not file_contains_error_message(filename=filename,
+                                                                            forced_error=forced_file_error)
                 failed_download_dict[filename] = {'pair': values['pair'],
                                                   'tf': values['tf'],
                                                   'mode': values['mode'],
@@ -1649,20 +1673,21 @@ def graph_zone_probabilities(prob_per_momzone):
 
 if __name__ == '__main__':
 
+    update_alphavantage_fx(pairs=["GBPUSD"], timeframes=["60min"], alphavantage_mode="full", verbose=True)
 
-    data = np.random.random(size=60)
-    start = datetime(year=2010, month=1, day=1)
-    from datetime import timedelta
-    interval = timedelta(days=1)
-    idx = [start + i * 2 * interval for i in range(60)]
-    df = pd.DataFrame(data=data, index=idx, columns=['a'])
-    print(df.shape)
-
-    delta = 3
-    print(start + delta * interval)
-    df2 = safe_sampling(df, start + delta * interval, start + 10 * interval)
-    df3 = safe_sampling(df, '2010-01-04', '2010-01-25')
-    print(df3.shape)
-    print(df3)
+    # data = np.random.random(size=60)
+    # start = datetime(year=2010, month=1, day=1)
+    # from datetime import timedelta
+    # interval = timedelta(days=1)
+    # idx = [start + i * 2 * interval for i in range(60)]
+    # df = pd.DataFrame(data=data, index=idx, columns=['a'])
+    # print(df.shape)
+    #
+    # delta = 3
+    # print(start + delta * interval)
+    # df2 = safe_sampling(df, start + delta * interval, start + 10 * interval)
+    # df3 = safe_sampling(df, '2010-01-04', '2010-01-25')
+    # print(df3.shape)
+    # print(df3)
 
     pass
