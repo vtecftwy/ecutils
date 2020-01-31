@@ -8,6 +8,7 @@ Link to this scrip by using a Symlink:
 """
 
 import configparser
+import datetime as dt
 import http.client
 import json
 import logging
@@ -16,6 +17,8 @@ import numpy as np
 import os
 import pandas as pd
 import pkg_resources
+import socket
+import ssl
 import time
 import urllib.request
 
@@ -918,78 +921,95 @@ def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=
 # --------------------------------------------
 
 
-def load_file_from_url(target_url, filename, verbose=False):
+def load_file_from_url(target_url, filepath, verbose=False):
     """
     Download file from passed 'target_url' using request.urlopen method. Save file as filename
 
     :param      (str) target_url: format is http://... or https://....
-    :param      (Path) filename:
+    :param      (Path) filepath: Path to the file
     :param      (bool) verbose: True for more comments. Default is None
     :return:    True if operation did not raise any issue. False otherwise.
     """
 
-    try:
-        response = urllib.request.urlopen(target_url, timeout=120)
-        # https://docs.python.org/3.5/library/urllib.request.html
-        # also could use http.client library: conn = http.client.HTTPConnection() and conn.request('GET', '/')
-        # https://docs.python.org/3.5/library/http.client.html#http.client.HTTPResponse
+    def try_internet_access(function_to_apply, *args, **kwargs):
+        """Wrapper function to handle exceptions when accessing URL
 
-    except urllib.error.URLError as err:
-        print_log('request failed', verbose=verbose)
-        if hasattr(err, 'code'):
-            print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
-        if hasattr(err, 'reason'):
-            print_log(f'Error: {err.reason}. Failed URL request for {target_url}.', verbose=verbose)
-        print('URLError!!!')
-        return False
-    except http.client.HTTPError as err:
-        if hasattr(err, 'code', verbose=verbose):
-            print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
-        if hasattr(err, 'reason'):
-            print_log(f'Error: {err.reason}. Failed URL request for {target_url}.', verbose=verbose)
-        print('HTTPError!!!')
-        return False
+        Technical references:
+            - https://docs.python.org/3.6/library/urllib.request.html
+            - also could use http.client library: conn = http.client.HTTPConnection() and conn.request('GET', '/')
+            - https://docs.python.org/3.6/library/http.client.html#http.client.HTTPResponse
+        """
+        try:
+            results = function_to_apply(*args, **kwargs)
+        except urllib.error.URLError as err:
+            # https://docs.python.org/3.6/library/urllib.error.html#module-urllib.error
+            # https://docs.python.org/3.6/library/urllib.error.html#urllib.error.URLError
+            if hasattr(err, 'code'):
+                print_log(f'  >> URLError: {err.code}. URL: {target_url}.', verbose=verbose)
+            if hasattr(err, 'reason'):
+                print_log(f'  >> URLError: {err.reason}. URL: {target_url}.', verbose=verbose)
+            return False
+        except urllib.error.HTTPError as err:
+            # https://docs.python.org/3.6/library/urllib.error.html
+            # https://docs.python.org/3.6/library/urllib.error.html#urllib.error.HTTPError
+            if hasattr(err, 'code', verbose=verbose):
+                print_log(f'  >> HTTPError: {err.code}. URL: {target_url}.', verbose=verbose)
+            if hasattr(err, 'reason'):
+                print_log(f'  >> HTTPError: {err.reason}. URL: {target_url}.', verbose=verbose)
+            return False
+        except ssl.SSLError as err:
+            # https://docs.python.org/3.6/library/ssl.html
+            # https://docs.python.org/3.6/library/ssl.html#ssl.SSLError
+            print_log(f"  >> ssl.SSLError: {err}")
+            return False
+        except socket.timeout as err:
+            # https://stackoverflow.com/questions/45774126/catching-socket-timeout-the-read-operation-timed-out-in-python
+            # https://docs.python.org/3.6/library/socket.html#exceptions
+            print_log(f"  >> socket.timeout error: {err}")
+            return False
+        except http.client.HTTPException as err:
+            # https://docs.python.org/3.6/library/http.client.html#http.client.HTTPException
+            print_log(f"  http.client.HTTPException: {err}>> ", verbose=verbose)
+            return False
+        else:
+            return results
 
+    print_log(f'  - Contacting server at {target_url}', verbose=verbose)
+    response = try_internet_access(urllib.request.urlopen, target_url, timeout=60)
+    # try: response = urllib.request.urlopen(target_url, timeout=60)
+    if response is False:
+        return False
     print_log(f'  - Server HTTP response code: {response.code}', verbose=verbose)
 
-    try:
-        downloaded_file = response.read()
-    except urllib.error.URLError as err:
-        print_log('response.read failed')
-        if hasattr(err, 'code'):
-            print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
+    print_log(f'  - Downloading data', verbose=verbose)
+    downloaded_file = try_internet_access(response.read)
+    # try: downloaded_file = response.read()
+    if downloaded_file is False:
+        # To Do: remove the partially downloaded file if it exists so that next attempt will not skip the pair
         return False
-    except http.client.HTTPError as err:
-        print_log('response.read failed')
-        if hasattr(err, 'code'):
-            print_log(f'Error: {err.code}. Failed URL request for {target_url}.', verbose=verbose)
-        if hasattr(err, 'reason'):
-            print_log(f'Error: {err.reason}. Failed URL request for {target_url}.', verbose=verbose)
-        return False
+    print_log(f'  - Done downloading data', verbose=verbose)
 
-    print_log(f'  - Done downloading data from {target_url}', verbose=verbose)
-
-    with open(filename, 'wb') as f:
+    with open(filepath, 'wb') as f:
         f.write(downloaded_file)
         # print_log(f'  - Done writing data into file {filename}', verbose=verbose)
     return True
 
 
-def file_contains_error_message(filename, test_type='alphavantage', forced_error=False):
+def file_contains_error_message(filepath, test_type='alphavantage', forced_error=False):
     """
     Check content of file to identify error messages.
 
     E.g. "Error Message": "Invalid API call. Please retry or visit the documentation
     (https://www.alphavantage.co/documentation/) for FX_Daily"
 
-    :param      filename: name of the file to test
+    :param      filepath: name of the file to test
     :param      test_type: name of API to test for
     :param      forced_error: force an error message for debugging
 
     :return:    True is no error, False is error
     """
 
-    with open(filename, 'rt') as f:
+    with open(filepath, 'rt') as f:
         error_1 = '"Error Message"'
         error_2 = 'Our standard API call frequency'
         contains_error_1 = any(error_1 in line for line in f.readlines())
@@ -1014,8 +1034,8 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
                                     default = 'compact
     :param pairs: (optional)        list: ['EURUSD', 'USDJPY'].
                                     default is full list of pairs
-    :param timeframes: (optional)   list: Subset of ['1m', '1w', '1d', '60min', '30min', '15min', '5min', '1min']
-                                    default is ['1d', '60min', '30min']
+    :param timeframes: (optional)   list: Subset of ['M', 'W', 'D', 'H1', 'M30', 'M15', 'M5', 'M1']
+                                    default is ['D', 'H1', 'M30']
     :param verbose: (optional)      boolean: True to log info in console.
 
     :return:                        None
@@ -1026,30 +1046,19 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
         pairs = forex_alphavantage
         pairs.sort()
     if timeframes is None:
-        timeframes = ['1d', '60min', '30min']
+        timeframes = ['D', 'H1', 'M30']
 
     SECONDS_TO_SLEEP = 20  # Std API call frequency is 5 calls per minute and 500 calls per day
     number_pairs = len(pairs)
     number_timeframes = len(timeframes)
-    # ToDo: align this timeframe_dict with the info on source_dict above !
-    # timeframe_dict = {'M1': {'name': 'FX_INTRADAY_1min', 'param': 'FX_INTRADAY&interval=1min', 'mode': 'full'},
-    #                   'M2': {'name': 'FX_INTRADAY_5min', 'param': 'FX_INTRADAY&interval=5min', 'mode': 'full'},
-    #                   'M15': {'name': 'FX_INTRADAY_15min', 'param': 'FX_INTRADAY&interval=15min', 'mode': 'full'},
-    #                   'M30': {'name': 'FX_INTRADAY_30min', 'param': 'FX_INTRADAY&interval=30min', 'mode': 'full'},
-    #                   'H1': {'name': 'FX_INTRADAY_60min', 'param': 'FX_INTRADAY&interval=60min', 'mode': 'full'},
-    #                   'D': {'name': 'FX_DAILY', 'param': 'FX_DAILY', 'mode': 'compact'},
-    #                   'W': {'name': 'FX_WEEKLY', 'param': 'FX_WEEKLY', 'mode': 'compact'},
-    #                   'M': {'name': 'FX_MONTHLY', 'param': 'FX_MONTHLY', 'mode': 'compact'},
-    #                   }
-
-    timeframe_dict = {'1min': {'name': 'FX_INTRADAY_1min', 'param': 'FX_INTRADAY&interval=1min', 'mode': 'full'},
-                      '5min': {'name': 'FX_INTRADAY_5min', 'param': 'FX_INTRADAY&interval=5min', 'mode': 'full'},
-                      '15min': {'name': 'FX_INTRADAY_15min', 'param': 'FX_INTRADAY&interval=15min', 'mode': 'full'},
-                      '30min': {'name': 'FX_INTRADAY_30min', 'param': 'FX_INTRADAY&interval=30min', 'mode': 'full'},
-                      '60min': {'name': 'FX_INTRADAY_60min', 'param': 'FX_INTRADAY&interval=60min', 'mode': 'full'},
-                      '1d': {'name': 'FX_DAILY', 'param': 'FX_DAILY', 'mode': 'compact'},
-                      '1w': {'name': 'FX_WEEKLY', 'param': 'FX_WEEKLY', 'mode': 'compact'},
-                      '1m': {'name': 'FX_MONTHLY', 'param': 'FX_MONTHLY', 'mode': 'compact'},
+    timeframe_dict = {'M1': {'name': 'FX_INTRADAY_1min', 'param': 'FX_INTRADAY&interval=1min', 'mode': 'full'},
+                      'M2': {'name': 'FX_INTRADAY_5min', 'param': 'FX_INTRADAY&interval=5min', 'mode': 'full'},
+                      'M15': {'name': 'FX_INTRADAY_15min', 'param': 'FX_INTRADAY&interval=15min', 'mode': 'full'},
+                      'M30': {'name': 'FX_INTRADAY_30min', 'param': 'FX_INTRADAY&interval=30min', 'mode': 'full'},
+                      'H1': {'name': 'FX_INTRADAY_60min', 'param': 'FX_INTRADAY&interval=60min', 'mode': 'full'},
+                      'D': {'name': 'FX_DAILY', 'param': 'FX_DAILY', 'mode': 'compact'},
+                      'W': {'name': 'FX_WEEKLY', 'param': 'FX_WEEKLY', 'mode': 'compact'},
+                      'M': {'name': 'FX_MONTHLY', 'param': 'FX_MONTHLY', 'mode': 'compact'},
                       }
 
     print_log(f'Get new data for selected pairs ({number_pairs}) and timeframes ({number_timeframes}):',
@@ -1087,7 +1096,7 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
             filepath = alphavantage_folder / filename
 
             if skip_existing and filepath.exists():
-                print_log(f"{filepath.name} already exists, skipping this download", verbose=verbose)
+                print_log(f"  - {filepath.name} already exists, skipping this download", verbose=verbose)
                 continue
 
             url = 'https://www.alphavantage.co/query?function=' + alphavantage_tf_parameter \
@@ -1096,26 +1105,28 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
                   + '&outputsize=' + mode \
                   + '&apikey=' + alphavantage_api_key \
                   + '&datatype=csv'
-            name_file_to_download = str(filepath.absolute())
 
             load_from_url_succeeded = load_file_from_url(target_url=url,
-                                                         filename=str(name_file_to_download),
+                                                         filepath=filepath,
                                                          verbose=verbose)
 
             if load_from_url_succeeded is True:
                 print_log(f'  - Done writing data into {filename}.', verbose=verbose)
 
-                file_downloaded_correctly = not file_contains_error_message(filename=name_file_to_download,
+                file_downloaded_correctly = not file_contains_error_message(filepath=filepath,
                                                                             forced_error=forced_file_error)
 
                 if file_downloaded_correctly is False:
-                    downloads_to_retry_dict[name_file_to_download] = {'url': url,
+                    path_file_to_download = str(filepath.absolute())
+                    downloads_to_retry_dict[path_file_to_download] = {'url': url,
                                                                       'pair': pair,
                                                                       'tf': tf,
                                                                       'mode': mode,
                                                                       'count': 0,
                                                                       }
-                    print_log(f'  - !!!! File is not correct. Pair added to retry list.', verbose=verbose)
+                    print_log(f'  - !!!! File is not correct. Deleting file and pair added to retry list.', verbose=verbose)
+                    if filepath.isfile():
+                        os.remove(filepath)
 
             else:
                 print_log(f'  - Failed GET to {url}.', verbose=verbose)
@@ -1127,21 +1138,22 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
         print_log(f'Starting retry for failed pair downloads', verbose=verbose)
 
         instruction_list = []
-        for filename, values in downloads_to_retry_dict.items():
+        for path, values in downloads_to_retry_dict.items():
+            filepath = Path(path)
             string_to_print = f'\n  Retry for {values["pair"]}'
             print_log(string_to_print, verbose=verbose)
 
             load_from_url_succeeded = load_file_from_url(target_url=values['url'],
-                                                         filename=filename,
+                                                         filepath=filepath,
                                                          verbose=verbose)
 
             if (not load_from_url_succeeded) or (not file_downloaded_correctly):
-                file_downloaded_correctly = not file_contains_error_message(filename=filename,
+                file_downloaded_correctly = not file_contains_error_message(filepath=filepath,
                                                                             forced_error=forced_file_error)
-                failed_download_dict[filename] = {'pair': values['pair'],
-                                                  'tf': values['tf'],
-                                                  'mode': values['mode'],
-                                                  }
+                failed_download_dict[path] = {'pair': values['pair'],
+                                              'tf': values['tf'],
+                                              'mode': values['mode'],
+                                              }
                 print_log(f'  - !!!! File is incorrect a second time.', verbose=True)
                 print_log(f'  - !!!! To retry manually, instructions are at the end of this log', verbose=True)
 
@@ -1165,7 +1177,6 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
     print_log(f'\nCompleted alphavantage price update\n', verbose=verbose)
 
     return None
-
 
 # def update_alphavantage_stocks(alphavantage_mode='compact', ticker=None, timeframes=None, verbose=False)
 
@@ -1210,7 +1221,7 @@ def resample_ohlcv(df, rule_str='W-FRI'):
     return ohlcv_df
 
 
-def autocorrelation_ohlv(series, max_lag, ohlc='Close', **kwarg):
+def autocorrelation_ohlcv(series, max_lag, ohlc='Close', **kwarg):
     """
     Return autocorrelation for the passed series, applied on O, H, L or O.
 
@@ -1673,7 +1684,8 @@ def graph_zone_probabilities(prob_per_momzone):
 
 if __name__ == '__main__':
 
-    update_alphavantage_fx(pairs=["GBPUSD"], timeframes=["60min"], alphavantage_mode="full", verbose=True)
+    logging.basicConfig(level=logging.INFO)
+    update_alphavantage_fx(pairs=["GBPUSD"], timeframes=["M1"], alphavantage_mode="compact", verbose=True)
 
     # data = np.random.random(size=60)
     # start = datetime(year=2010, month=1, day=1)
