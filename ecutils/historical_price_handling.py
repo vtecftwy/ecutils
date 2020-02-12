@@ -236,6 +236,7 @@ def display_df(df, mrows=None, show_info=False):
 
 
 def str_date(d):
+    """Returns a string formatted as ???"""
     # ToDo: add some test on parameters passed and also define the formating (YY-mm-dd or YYYY-mm-dd, ...)
     return f'{d.year}-{d.month}-{d.day}'
 
@@ -1685,7 +1686,7 @@ def graph_zone_probabilities(prob_per_momzone):
 if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
-    update_alphavantage_fx(pairs=["GBPUSD"], timeframes=["M1"], alphavantage_mode="compact", verbose=True)
+    # update_alphavantage_fx(pairs=["GBPUSD"], timeframes=["M1"], alphavantage_mode="compact", verbose=True)
 
     # data = np.random.random(size=60)
     # start = datetime(year=2010, month=1, day=1)
