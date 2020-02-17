@@ -1031,15 +1031,18 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
     """
     Get instrument pricing data from alphavantage for default pairs and tf or specified ones.
 
-    :param alphavantage_mode:       str 'full' or 'compact'
-                                    default = 'compact
-    :param pairs: (optional)        list: ['EURUSD', 'USDJPY'].
-                                    default is full list of pairs
-    :param timeframes: (optional)   list: Subset of ['M', 'W', 'D', 'H1', 'M30', 'M15', 'M5', 'M1']
-                                    default is ['D', 'H1', 'M30']
-    :param verbose: (optional)      boolean: True to log info in console.
+    alphavantage_mode:          str 'full' or 'compact'
+                                default = 'compact
+    pairs: (optional)           list: ['EURUSD', 'USDJPY'].
+                                default is full list of pairs
+    timeframes: (optional)      list: Subset of ['M', 'W', 'D', 'H1', 'M30', 'M15', 'M5', 'M1']
+                                default is ['D', 'H1', 'M30']
+    skip_existing: (optional)   boolean. If True, skip the download of a file in case of pre-existing file with the
+                                same name. Used to speed up re-updated of historical data when done the same day.
+                                default is False
+    verbose: (optional)         boolean: True to log info in console.
 
-    :return:                        None
+    return:                  None
     """
 
     print_log(f'Starting alphavantage price update', verbose=verbose)
