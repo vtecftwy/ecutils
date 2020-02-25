@@ -8,12 +8,16 @@ Currently to be installed in `develop` mode:
 
 ## Modules:
 ### General use:
+- general_utils
 - ipython_utils
 
 ### Algotrading and financial analysis:
-- historical_price_handling
+- financial_utils
 - mintos_utils
 
-### Machine learning:
+### Data Science and Machine learning:
+- eda_stats_utils
 - fastai_utils (WIP)
 
+### Handling of images
+- image_utils
