@@ -21,6 +21,7 @@ import socket
 import ssl
 import time
 import urllib.request
+import warnings
 
 from datetime import datetime
 from pathlib import Path
@@ -236,9 +237,12 @@ def display_df(df, mrows=None, show_info=False):
 
 
 def str_date(d):
-    """Returns a string formatted as ???"""
-    # ToDo: add some test on parameters passed and also define the formating (YY-mm-dd or YYYY-mm-dd, ...)
-    return f'{d.year}-{d.month}-{d.day}'
+    """DEPRECATED: Returns a string formatted as yy-mm-dd e.g. 1998-03-24."""
+    msg = f"\nThe function <str_data()> is deprecated. \n"\
+          f"Use the standard strftime() function instead: datetime.datetime.strftime('%Y-%m-%d') \n"\
+          f"See documentation here: https://docs.python.org/3.6/library/datetime.html#strftime-and-strptime-behavior"
+    warnings.warn(msg, DeprecationWarning)
+    return d.strftime('%Y-%m-%d')
 
 
 def safe_sampling(df, first=None, last=None):
@@ -259,6 +263,23 @@ def safe_sampling(df, first=None, last=None):
 
     sample = df.loc[max(first, earliest):min(last, latest), :].copy()
     return sample
+
+
+def exclude_idx_from_df(df_with_idx_to_exclude, df_to_filter):
+    """
+    Excludes rows in df_to_filter that index values also in index of df_with_idx_to_exclude.
+
+    Extracts both DataFrames index, transforms them into sets and filters df_to_filter with the df2_index excl. df1.index
+    Returns the filtered DataFrame
+    Parameters:
+        df_with_idx_to_exclude: DataFrame   the DataFrame whose index will be excluded from df_to_filter
+        df_to_filter: DataFrame             the DataFrame that will be filtered.
+    """
+    idx_to_exclude = df_with_idx_to_exclude.index
+    idx_to_filter = df_to_filter.index
+    filtered_idx = list(set(idx_to_filter).difference(set(idx_to_exclude)))
+    return df_to_filter.loc[filtered_idx, :]
+
 
 # --------------------------------------------------------------------------------------------------------------------
 # ---- Functions to handle historical price files.
@@ -601,7 +622,7 @@ def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, ti
     if drive == 'NAS':
         prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source][
             'directory']
-        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\\Financial Data\\Historical Prices Datasets') / sources_dict[data_source]['directory']
     elif drive == 'project':
         project_root = get_module_root_path()
         prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
@@ -609,12 +630,6 @@ def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, ti
     else:
         msg = f'value for drive: {drive} is not recognized'
         raise ValueError(msg)
-
-    def exclude_idx_in_dataset(dataset, df):
-        ds_idx = dataset.index
-        df_idx = df.index
-        filtered_idx = list(set(df_idx).difference(set(ds_idx)))
-        return df.loc[filtered_idx, :]
 
     for ticker in ticker_list:
         for timeframe in timeframe_list:
@@ -644,7 +659,8 @@ def update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, ti
                 alpha_full_ds = pd.DataFrame(columns=alphadict[list_of_files[0]].columns)
 
             for file_name, df in alphadict.items():
-                filtered_df = exclude_idx_in_dataset(alpha_full_ds, df.iloc[:-1, :])
+                filtered_df = exclude_idx_from_df(df_with_idx_to_exclude=alpha_full_ds,
+                                                  df_to_filter=df.iloc[:-1, :])
                 print_log(f' - Updating with {file_name}')
                 print_log(
                     f'   Dataset: {alpha_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
@@ -692,7 +708,7 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
     if drive == 'NAS':
         prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source][
             'directory']
-        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\\Financial Data\\Historical Prices Datasets') / sources_dict[data_source]['directory']
     elif drive == 'project':
         project_root = get_module_root_path()
         prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
@@ -700,13 +716,6 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
     else:
         msg = f'value for drive: {drive} is not recognized'
         raise ValueError(msg)
-
-    def exclude_idx_in_dataset(dataset, df):
-        # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
-        ds_idx = dataset.index
-        df_idx = df.index
-        filtered_idx = list(set(df_idx).difference(set(ds_idx)))
-        return df.loc[filtered_idx, :]
 
     for ticker in ticker_list:
         for timeframe in timeframe_list:
@@ -736,7 +745,8 @@ def update_price_datasets_mt4(ticker_list=None, timeframe_list=None,
 
             for file_name in files_to_process:
                 df = mt4dict[file_name]
-                filtered_df = exclude_idx_in_dataset(mt4_full_ds, df)
+                filtered_df = exclude_idx_from_df(df_with_idx_to_exclude=mt4_full_ds,
+                                                  df_to_filter=df)
                 print_log(f' - Updating with {file_name}')
                 print_log(
                     f'   Dataset: {mt4_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
@@ -786,7 +796,7 @@ def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
     if drive == 'NAS':
         prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source][
             'directory']
-        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\\Financial Data\\Historical Prices Datasets') / sources_dict[data_source]['directory']
     elif drive == 'project':
         project_root = get_module_root_path()
         prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
@@ -794,13 +804,6 @@ def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
     else:
         msg = f'value for drive: {drive} is not recognized'
         raise ValueError(msg)
-
-    def exclude_idx_in_dataset(dataset, df):
-        # ToDo: refactor this by bringing this function to higher level in both this fct and alphavantage function
-        ds_idx = dataset.index
-        df_idx = df.index
-        filtered_idx = list(set(df_idx).difference(set(ds_idx)))
-        return df.loc[filtered_idx, :]
 
     for ticker in ticker_list:
         for timeframe in timeframe_list:
@@ -830,7 +833,8 @@ def update_price_datasets_yahoo(ticker_list=None, timeframe_list=None,
 
             for file_name in files_to_process:
                 df = yhodict[file_name]
-                filtered_df = exclude_idx_in_dataset(yho_full_ds, df)
+                filtered_df = exclude_idx_from_df(df_with_idx_to_exclude=yho_full_ds,
+                                                  df_to_filter=df)
                 print_log(f' - Updating with {file_name}')
                 print_log(
                     f'   Dataset: {yho_full_ds.shape[0]}. File: {df.shape[0]}. Added {filtered_df.shape[0]} rows.')
@@ -858,7 +862,7 @@ def get_dataset(ticker=None, timeframe=None, data_source=None, drive=None, type=
         drive = 'project'
     if drive == 'NAS':
         prices_source_dir = Path('R:\\Financial Data\\Historical Prices Raw Data') / sources_dict[data_source]['directory']
-        datasets_dir = Path('R:\Financial Data\Historical Prices Datasets') / sources_dict[data_source]['directory']
+        datasets_dir = Path('R:\\Financial Data\\Historical Prices Datasets') / sources_dict[data_source]['directory']
     elif drive == 'project':
         project_root = get_module_root_path()
         prices_source_dir = project_root / 'data' / 'raw-data' / sources_dict[data_source]['directory']
@@ -1689,6 +1693,9 @@ def graph_zone_probabilities(prob_per_momzone):
 if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
+    warnings.simplefilter('module')
+
+    # update_price_datasets_alphavantage(ticker_list=None, timeframe_list=None, timefilter='2020')
     # update_alphavantage_fx(pairs=["GBPUSD"], timeframes=["M1"], alphavantage_mode="compact", verbose=True)
 
     # data = np.random.random(size=60)
