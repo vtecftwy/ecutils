@@ -1,7 +1,7 @@
 """
-Utility Functions used in handling and processing images
+Utility Functions that can be used in any context
 
-Includes all stable utility functions for handling and making image processing simpler.
+Includes all stable utility functions that do not fit in other context.
 """
 
 import datetime as dt
@@ -187,3 +187,7 @@ def add_missing_dates_to_exif(path2folder, year=None, maxhours=24, do_not_update
                     print(f"  New EXIF  {'-' * 50}")
                     new_exif_dict = piexif.load(str(jpg.absolute()))
                     pprint(new_exif_dict['Exif'])
+
+
+if __name__ == '__main__':
+    pass
