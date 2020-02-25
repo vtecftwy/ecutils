@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import sys
 
-from ecutils import historical_price_handling as fxutils
+from ecutils import financial_utils as fxutils
 from numpy.testing import assert_almost_equal
 from pathlib import Path
 
@@ -114,7 +114,7 @@ def test__str_date():
     m = 5
     d = 12
     date = dt.datetime(year=y, month=m, day=d)
-    desired_string = f'{y}-{m}-{d}'
+    desired_string = '2000-05-12'
 
     # Exercise
     actual_string = fxutils.str_date(date)
@@ -240,3 +240,61 @@ class TestEstimatePnLFunction:
         estimated_pnl = abs(fxutils.estimate_pnl(series, pct_spread=pct_spread))
         # Verify
         assert_almost_equal(estimated_pnl, true_pnl)
+
+
+class TestExcludeIDXfromDF():
+
+    def test_exclude_idx_from_df_filtered_out(self):
+        """Test that the rows in df_with_idx_to_exclude are filtered out of df_to_filter"""
+        # Setup
+        df1 = pd.DataFrame(data={'a': range(0, 100),
+                                 'b': range(100, 200)},
+                           index=range(0, 100))
+        df2 = pd.DataFrame(data={'a': range(0, 120),
+                                 'b': range(100, 220)},
+                           index=range(0, 120))
+
+        # Exercise
+        result = fxutils.exclude_idx_from_df(df_with_idx_to_exclude=df1, df_to_filter=df2)
+
+        # Verify
+        result_idx_set = set([idx for idx in result.index])
+        true_idx_set = set([idx for idx in range(100, 120)])
+
+        assert result_idx_set == true_idx_set
+
+    def test_exclude_idx_from_df_no_common_idx(self):
+        """Test that the function still works when there is no common index"""
+        # Setup
+        df1 = pd.DataFrame(data={'a': range(0, 100),
+                                 'b': range(100, 200)},
+                           index=range(0, 100))
+        df2 = pd.DataFrame(data={'a': range(200, 220),
+                                 'b': range(200, 220)},
+                           index=range(200, 220))
+
+        # Exercise
+        result = fxutils.exclude_idx_from_df(df_with_idx_to_exclude=df1, df_to_filter=df2)
+
+        # Verify
+        result_idx_set = set([idx for idx in result.index])
+        true_idx_set = set([idx for idx in range(200, 220)])
+
+        assert result_idx_set == true_idx_set
+
+    def test_exclude_idx_from_df_identical_idx(self):
+        """Test that the function still works when both indexes are identical"""
+        # Setup
+        df1 = pd.DataFrame(data={'a': range(0, 100),
+                                 'b': range(100, 200)},
+                           index=range(0, 100))
+        df2 = df1
+
+        # Exercise
+        result = fxutils.exclude_idx_from_df(df_with_idx_to_exclude=df1, df_to_filter=df2)
+
+        # Verify
+        result_idx_set = set([idx for idx in result.index])
+        true_idx_set = set()
+
+        assert result_idx_set == true_idx_set
