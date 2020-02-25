@@ -1129,7 +1129,7 @@ def update_alphavantage_fx(alphavantage_mode='compact', pairs=None, timeframes=N
                                                                       'count': 0,
                                                                       }
                     print_log(f'  - !!!! File is not correct. Deleting file and pair added to retry list.', verbose=verbose)
-                    if filepath.isfile():
+                    if filepath.is_file():
                         os.remove(filepath)
 
             else:
