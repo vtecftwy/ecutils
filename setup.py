@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
  name='ecutils',
- version='0.0.1',
+ version='1.0.0b',
  author='EC',
  author_email='bitbucker@procurasia.com',
  packages=['ecutils'],
