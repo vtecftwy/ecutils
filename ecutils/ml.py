@@ -15,3 +15,7 @@ from pathlib import Path
 from IPython.display import Image, display
 from pprint import pprint
 
+
+if __name__ = "__main__":
+    pass
+
