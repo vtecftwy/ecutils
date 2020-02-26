@@ -1,5 +1,7 @@
 """
-Master Historical Prices Utility Functions
+Financial Utility Functions.
+
+Used for historical price downloads, update of datasets, visualisation of pricing info,
 
 Includes all stable utility functions for handling historical prices.
 Link to this scrip by using a Symlink:
@@ -119,6 +121,7 @@ def load_config(cwdir):
     return: config_dict: configuration dictionary key:value dictionary
     """
     # When method is called from 'ecutils' directly, instead of another package, use config from fx-bt.
+    # Fix me: this will not work in another environment.
     if cwdir.name == 'ecutils': cwdir = Path('D:\\PyProjects\\fx-bt')
 
     cwd_is_config_file_dir = 'config.cfg' in list(f.name for f in cwdir.iterdir() if f.is_file())
@@ -183,6 +186,7 @@ def get_module_root_path(module_root=None):
     current_directory : Path object pointing to the root directory of the folder with name 'module_root'
 
     """
+    # Fix me: This only works because it is hard coded. Refactor to be independent and define requirements.
     if module_root is None:
         module_root = config['module_root_directory']
 
