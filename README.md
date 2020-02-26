@@ -1,10 +1,14 @@
 # ecutils package
-Collection of my utility functions usable across several projects and applications.
+Collection of my utility functions usable across several projects and applications, both locally and on hosted VMs.
+This is provided as it is, feel free to use it but no support is provided.
 
 ## Installation:
-Currently to be installed in `develop` mode:
-- `pip install -e .` from the project folder, or
-- `pip install -e "D:\PyProjects\ec-utils\"`
+Two options:
+- install in `develop` mode from local source:
+    - `pip install -e .` from the project folder, or
+    - `pip install -e "path to source code"`
+- install in from github for hosted VMs:
+    - `pip install git+git:https://github.com/vtecftwy/ecutils.git@public`
 
 ## Modules:
 ### General use:
