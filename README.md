@@ -8,8 +8,8 @@ Two options:
     - `pip install -e .` from the project folder, or
     - `pip install -e "path to local source code directory"`
 - install in from github for hosted VMs:
-    - `pip install git+git:https://github.com/vtecftwy/ecutils.git@master`
-    - `pip install git+git:https://github.com/vtecftwy/ecutils.git@develop`
+    - `pip install git+https://github.com/vtecftwy/ecutils.git@master`
+    - `pip install git+https://github.com/vtecftwy/ecutils.git@develop`
 
 ## Modules:
 ### General use:
