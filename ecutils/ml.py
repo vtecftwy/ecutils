@@ -67,7 +67,7 @@ def set_kaggle_security_key_colab(path_to_config_file=None):
     username = configuration['kaggle']['kaggle_username']
     key = configuration['kaggle']['kaggle_key']
     api_token = {"username": username, "key": key}
-    with open(kaggle / 'kaggle.json', 'w') as file:
+    with open(path_to_kaggle / 'kaggle.json', 'w') as file:
         json.dump(api_token, file)
         os.fchmod(file, 600)
 
