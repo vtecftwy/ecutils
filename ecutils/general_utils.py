@@ -1,14 +1,9 @@
-import configparser
-import logging
-import os
-import pkg_resources
-import time
-from pprint import pprint
+"""
+Not used yet
+"""
+msg = f"This module is not implemented yet"
 
-from datetime import datetime
-from pathlib import Path
-
-
+raise ImportWarning(msg)
 
 
 if __name__ == '__main__':
