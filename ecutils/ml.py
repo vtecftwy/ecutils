@@ -20,7 +20,8 @@ from IPython.display import Image, display
 from pprint import pprint
 from zipfile import ZipFile
 
-__all__ = ['kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_files' ]
+__all__ = ['kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_files', 'are_features_consistent' ]
+
 
 def are_features_consistent(train_df, test_df, dependent_variables=None):
     """Verifies that features in training and test sets are consistent
@@ -100,7 +101,7 @@ def kaggle_list_files(competition_code=None):
         run_cli(f"kaggle competitions files {competition_code}")
 
         print(f"{'=' * 140}")
-        print(f"Make sure to set the parameters for <{kaggle_competion_code}> in next cell:")
+        print(f"Make sure to set the parameters for <{competion_code}> in next cell:")
         print(f" - kaggle_project_folder_name: string with name of the project folder")
         print(f" - train_files: list of files to place into the <train> folder")
         print(f" - test_files: list of files to place into the <test> folder")
@@ -108,7 +109,7 @@ def kaggle_list_files(competition_code=None):
         print(f"{'=' * 140}")
 
 
-def kaggle_download_files(competition_code=None, train_files=[], test_files=[], submit_files=[]):
+def kaggle_download_files(competition_code=None, train_files=[], test_files=[], submit_files=[], project_folder='ds' ):
     """download all files for passed competition, unzip them if required, move them to train, test and submit folders
 
     competition_code: str       code of the kaggle competition
@@ -125,14 +126,14 @@ def kaggle_download_files(competition_code=None, train_files=[], test_files=[], 
                             'submit': submit_files}
 
         # creating a project directory and set paths
-        if not os.path.exists(kaggle_project_folder_name):
-            os.makedirs(kaggle_project_folder_name)
+        if not os.path.exists(project_folder):
+            os.makedirs(project_folder)
 
-        path2datasets = Path(f"/content/{kaggle_project_folder_name}")
+        path2datasets = Path(f"/content/{project_folder}")
         path2datasets_str = str(path2datasets.absolute())
 
         # download all files from kaggle
-        run_cli(f"kaggle competitions download -c {kaggle_competion_code} -p {path2datasets}")
+        run_cli(f"kaggle competitions download -c {competition_code} -p {path2datasets}")
 
         print(f"{'=' * 140}")
         print('Downloaded files:')
@@ -150,8 +151,8 @@ def kaggle_download_files(competition_code=None, train_files=[], test_files=[], 
 
         # Move all data files to the correct data folder
         for dataset_folder, files in list_of_datasets.items():
-            if not os.path.exists(f'{kaggle_project_folder_name}/{dataset_folder}'):
-                os.makedirs(f'{kaggle_project_folder_name}/{dataset_folder}')
+            if not os.path.exists(f'{project_folder}/{dataset_folder}'):
+                os.makedirs(f'{project_folder}/{dataset_folder}')
 
             for f in files:
                 print(f"Moving {f} to {dataset_folder}")
