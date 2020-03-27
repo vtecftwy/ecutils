@@ -101,7 +101,7 @@ def kaggle_list_files(competition_code=None):
         run_cli(f"kaggle competitions files {competition_code}")
 
         print(f"{'=' * 140}")
-        print(f"Make sure to set the parameters for <{competion_code}> in next cell:")
+        print(f"Make sure to set the parameters for <{competition_code}> in next cell:")
         print(f" - kaggle_project_folder_name: string with name of the project folder")
         print(f" - train_files: list of files to place into the <train> folder")
         print(f" - test_files: list of files to place into the <test> folder")
