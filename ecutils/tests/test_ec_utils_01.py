@@ -7,11 +7,12 @@ import sys
 
 from numpy.testing import assert_almost_equal
 from pathlib import Path
+from unittest.mock import patch
 
 from ecutils import ml
 
 
-class TestAreFeaturesConsistent:
+class TestMLAreFeaturesConsistent:
     def test_ml_are_features_consistent_correct_returns_true(self):
         """Test that the function returns True when features are consistent"""
 
@@ -53,3 +54,11 @@ class TestAreFeaturesConsistent:
         assert res
 
         # Cleanup
+
+class TestMLSetupKaggleSecurity:
+    def test_ml_setup_kaggle_security(self):
+        # Setup
+
+        # Exercise
+
+        # Verify

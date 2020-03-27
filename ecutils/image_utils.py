@@ -14,6 +14,7 @@ from pathlib import Path
 from IPython.display import Image, display
 from pprint import pprint
 
+__all__ = ['get_date_from_file_name', 'date_is_within_year', 'exif2dt', 'add_missing_dates_to_exif']
 
 def get_date_from_file_name(path2file, date_pattern=None):
     """Retrieve the date from the file name.

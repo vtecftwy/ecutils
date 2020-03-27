@@ -15,6 +15,7 @@ from pathlib import Path
 from IPython.display import Image, display
 from pprint import pprint
 
+__all__ = ['ecdf']
 
 def ecdf(data, threshold=None, figsize=None):
     """Compute Empirical Cumulative Distribution Function (ECDF).
