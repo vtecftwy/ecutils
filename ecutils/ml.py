@@ -17,6 +17,7 @@ from pathlib import Path
 from IPython.display import Image, display
 from pprint import pprint
 
+__all__ = ['set_kaggle_security_key_colab', ]
 
 def are_features_consistent(train_df, test_df, dependent_variables=None):
     """Verifies that features in training and test sets are consistent
@@ -54,11 +55,11 @@ def set_kaggle_security_key_colab(path_to_config_file=None):
     """
     path_to_kaggle = Path('/root/.kaggle')
     os.makedirs(path_to_kaggle, exist_ok=True)
-
     if path_to_config_file is None:
-        path_to_config_file = Path(f"'content/gdrive/My Drive/config.cfg")
+        path_to_config_file = Path(f"/content/gdrive/My Drive/config.cfg")
     elif isinstance(path_to_config_file, str):
         path_to_config_file = Path(f"/content/gdrive/My Drive/{path_to_config_file}")
+
 
     msg = f"Cannot find file {path_to_config_file}. Please check the path or add the config file at that location"
     assert path_to_config_file.is_file(), msg
@@ -70,7 +71,9 @@ def set_kaggle_security_key_colab(path_to_config_file=None):
     api_token = {"username": username, "key": key}
     with open(path_to_kaggle / 'kaggle.json', 'w') as file:
         json.dump(api_token, file)
-        os.fchmod(file, 600)
+        os.fchmod(file.fileno(), 600)
+
+
 
 
 if __name__ == "__main__":
