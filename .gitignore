@@ -107,6 +107,7 @@ ENV/
 
 
 # Confidential files (api-keys, ...)
+config-api-keys.cfg
 
 
 # Exclude temp files
