@@ -70,7 +70,7 @@ def kaggle_setup_colab(path_to_config_file=None):
     path_to_kaggle = Path('/root/.kaggle')
     os.makedirs(path_to_kaggle, exist_ok=True)
     if path_to_config_file is None:
-        path_to_config_file = Path(f"/content/gdrive/My Drive/config.cfg")
+        path_to_config_file = Path(f"/content/gdrive/My Drive/config-api-keys.cfg")
     elif isinstance(path_to_config_file, str):
         path_to_config_file = Path(f"/content/gdrive/My Drive/{path_to_config_file}")
 
