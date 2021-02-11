@@ -20,7 +20,7 @@ from IPython.display import Image, display
 from pprint import pprint
 from zipfile import ZipFile
 
-__all__ = ['kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_files', 'are_features_consistent' ]
+__all__ = ['kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_competition_files', 'are_features_consistent' ]
 
 
 def are_features_consistent(train_df, test_df, dependent_variables=None):
@@ -91,17 +91,21 @@ def kaggle_setup_colab(path_to_config_file=None):
     run_cli('pip install kaggle --upgrade')
 
 
-def kaggle_list_files(competition_code=None):
-    """List all files available for the passed competition"""
-    if competition_code is None:
-        print(f"competition_code is None, please provide the code of the kaggle competition")
+def kaggle_list_files(code=None, mode='competitions'):
+    """List all files available in the competition or dataset for the passed code"""
+    if code is None:
+        print(f"code is None, please provide the code of the kaggle competition or dataset")
+        return 'Failed'
+    elif mode not in ['competitions', 'datasets']:
+        print(f"mode must be either 'competitions' or 'datasets', not {mode}")
         return 'Failed'
     else:
-        print(f"Listing the files available for <{competition_code}>")
-        run_cli(f"kaggle competitions files {competition_code}")
+        print(f"Listing the files available for {mode}: <{code}>")
+        run_cli(f"kaggle {mode} files {code}")
 
+    if mode == 'competitions':
         print(f"{'=' * 140}")
-        print(f"Make sure to set the parameters for <{competition_code}> in next cell:")
+        print(f"Make sure to set the parameters for <{code}> in next cell:")
         print(f" - kaggle_project_folder_name: string with name of the project folder")
         print(f" - train_files: list of files to place into the <train> folder")
         print(f" - test_files: list of files to place into the <test> folder")
@@ -109,7 +113,7 @@ def kaggle_list_files(competition_code=None):
         print(f"{'=' * 140}")
 
 
-def kaggle_download_files(competition_code=None, train_files=[], test_files=[], submit_files=[], project_folder='ds' ):
+def kaggle_download_competition_files(competition_code=None, train_files=[], test_files=[], submit_files=[], project_folder='ds' ):
     """download all files for passed competition, unzip them if required, move them to train, test and submit folders
 
     competition_code: str       code of the kaggle competition
