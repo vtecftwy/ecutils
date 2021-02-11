@@ -91,6 +91,8 @@ def fastbook_on_colab():
 def kaggle_setup_colab(path_to_config_file=None):
     """Update kaggle API and create security key json file from config file on Google Drive
 
+    Kaggle API documentation: https://github.com/Kaggle/kaggle-api
+
     To access Kaggle with API, a security key needs to be placed in the correct location on colab.
     config.cfg file must include the following lines:
         [kaggle]
