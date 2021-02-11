@@ -2,6 +2,8 @@
 Utility Functions that can be used for Kaggle and other ML uses
 
 Includes all stable utility functions.
+
+Reference for kaggle API: https://github.com/Kaggle/kaggle-api
 """
 
 
@@ -50,6 +52,40 @@ def run_cli(cmd='ls -l'):
     """
     p = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
     print(str(p.stdout, 'utf-8'))
+
+
+def fastbook_on_colab():
+    """
+    Set up environment to run fastbook notebooks for colab
+
+    Code from notebook:
+    # Install fastbook and dependencies
+    !pip install -Uqq fastbook
+
+    # Load utilities and install them
+    !wget -O utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/utils.py
+    !wget -O fastbook_utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/fastbook_utils.py
+
+    from fastbook_utils import *
+    from utils import *
+
+    # Setup My Drive
+    setup_book()
+
+    # Download images and code required for this notebook
+    import os
+    os.makedirs('images', exist_ok=True)
+    !wget -O images/chapter1_cat_example.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/master/nbs/images/chapter1_cat_example.jpg
+    !wget -O images/cat-01.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/cat-01.jpg
+    !wget -O images/cat-02.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/cat-02.jpg
+    !wget -O images/dog-01.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/dog-01.jpg
+    !wget -O images/dog-02.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/dog-01.jpg
+
+    """
+    instructions = ['pip install -Uqq fastbook',
+                    'wget -O utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/utils.py',
+                    'wget -O fastbook_utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/fastbook_utils.py'
+                    ]
 
 
 def kaggle_setup_colab(path_to_config_file=None):
