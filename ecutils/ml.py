@@ -54,6 +54,31 @@ def run_cli(cmd='ls -l'):
     print(str(p.stdout, 'utf-8'))
 
 
+def get_config_value(section, key, path_to_config_file=None):
+    """Returns the value corresponding to the key-value pair in the configuration file (configparser format)
+
+    By defaults, it is assumed that the configuration file is saved on google drive. If not, pass a proper Path object.
+    The configuration file must be in the format of configparser (https://docs.python.org/3/library/configparser.html)
+
+    Parameters:
+        section (str):          name of the section where the key-value pair is stored
+        key (str):              name of the key
+        path_to_config_file(Path or str): path to the configparser configuration file
+
+    Return (str):               value in the key-value pair stored
+    """
+    if path_to_config_file is None:
+        path_to_config_file = Path(f"/content/gdrive/My Drive/config-api-keys.cfg")
+    elif isinstance(path_to_config_file, str):
+        path_to_config_file = Path(f"/content/gdrive/My Drive/{path_to_config_file}")
+
+    msg = f"Cannot find file {path_to_config_file}. Please check the path or add the config file at that location"
+    assert path_to_config_file.is_file(), msg
+
+    configuration = configparser.ConfigParser()
+    configuration.read(path_to_config_file)
+    return configuration[section][key]
+
 def fastbook_on_colab():
     """
     Set up environment to run fastbook notebooks for colab
@@ -107,19 +132,10 @@ def kaggle_setup_colab(path_to_config_file=None):
     # Create API security key file
     path_to_kaggle = Path('/root/.kaggle')
     os.makedirs(path_to_kaggle, exist_ok=True)
-    if path_to_config_file is None:
-        path_to_config_file = Path(f"/content/gdrive/My Drive/config-api-keys.cfg")
-    elif isinstance(path_to_config_file, str):
-        path_to_config_file = Path(f"/content/gdrive/My Drive/{path_to_config_file}")
 
+    username = get_config_value('kaggle', 'kaggle_username', path_to_config_file=path_to_config_file)
+    key = get_config_value('kaggle', 'kaggle_key', path_to_config_file=path_to_config_file)
 
-    msg = f"Cannot find file {path_to_config_file}. Please check the path or add the config file at that location"
-    assert path_to_config_file.is_file(), msg
-
-    configuration = configparser.ConfigParser()
-    configuration.read(path_to_config_file)
-    username = configuration['kaggle']['kaggle_username']
-    key = configuration['kaggle']['kaggle_key']
     api_token = {"username": username, "key": key}
     with open(path_to_kaggle / 'kaggle.json', 'w') as file:
         json.dump(api_token, file)

@@ -3,7 +3,7 @@ import inspect
 import pytest
 import numpy as np
 import pandas as pd
-import sys
+import pkg_resources
 
 from numpy.testing import assert_almost_equal
 from pathlib import Path
@@ -55,10 +55,19 @@ class TestMLAreFeaturesConsistent:
 
         # Cleanup
 
+
 class TestMLSetupKaggleSecurity:
     def test_ml_setup_kaggle_security(self):
+        """Test """
         # Setup
+        p2config = Path(pkg_resources.resource_filename(__name__, '/fixed-assets/config-api-keys.cfg'))
 
         # Exercise
+        kaggle_username = ml.get_config_value(section='kaggle', key='kaggle_username', path_to_config_file=p2config)
+        kaggle_key = ml.get_config_value(section='kaggle', key='kaggle_key', path_to_config_file=p2config)
+        azure_key = ml.get_config_value(section='azure', key='fastai-image-search-sh-1', path_to_config_file=p2config)
 
         # Verify
+        assert kaggle_username == 'dummy_kaggle_user'
+        assert kaggle_key == 'dummy_kaggle_key'
+        assert azure_key == 'dummy_azure_key_01'
