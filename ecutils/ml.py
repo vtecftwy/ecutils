@@ -79,6 +79,7 @@ def get_config_value(section, key, path_to_config_file=None):
     configuration.read(path_to_config_file)
     return configuration[section][key]
 
+
 def fastbook_on_colab():
     """
     Set up environment to run fastbook notebooks for colab
