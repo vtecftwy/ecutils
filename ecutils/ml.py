@@ -143,7 +143,7 @@ def kaggle_setup_colab(path_to_config_file=None):
         os.fchmod(file.fileno(), 600)
 
     # Update kaggle API software
-    run_cli('pip install kaggle --upgrade')
+    run_cli('pip install -Uqq kaggle --upgrade')
 
 
 def kaggle_list_files(code=None, mode='competitions'):
