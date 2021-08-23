@@ -17,12 +17,16 @@ import pandas as pd
 import shutil
 import subprocess
 
-from pathlib import Path
 from IPython.display import Image, display
+from pathlib import Path
 from pprint import pprint
+from scipy import stats
+from scipy.cluster import hierarchy as hc
 from zipfile import ZipFile
 
-__all__ = ['kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_competition_files', 'are_features_consistent' ]
+__all__ = ['kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_competition_files',
+           'are_features_consistent', 'cluster_columns', 'run_cli'
+          ]
 
 
 def are_features_consistent(train_df, test_df, dependent_variables=None):
@@ -43,6 +47,19 @@ def are_features_consistent(train_df, test_df, dependent_variables=None):
     assert features_diff == set(), f"Discrepancy between training and test feature set: {features_diff}"
 
     return True
+
+
+def cluster_columns(df, figsize=(10,6), font_size=12):
+    """Plot dendogram based on columns' spearman correlation coefficients
+
+    First seen on fastai repository
+    """
+    corr = np.round(stats.spearmanr(df).correlation, 4)
+    corr_condensed = hc.distance.squareform(1-corr)
+    z = hc.linkage(corr_condensed, method='average')
+    fig = plt.figure(figsize=figsize)
+    hc.dendrogram(z, labels=df.columns, orientation='left', leaf_font_size=font_size)
+    plt.show()
 
 
 def run_cli(cmd='ls -l'):
