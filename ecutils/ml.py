@@ -136,6 +136,10 @@ def kaggle_setup_colab(path_to_config_file=None):
 
     Kaggle API documentation: https://github.com/Kaggle/kaggle-api
 
+    Kaggle API Token to be placed as a json file at the following location:
+          ~/.kaggle/kaggle.json
+          %HOMEPATH%\.kaggle\kaggle.json
+
     To access Kaggle with API, a security key needs to be placed in the correct location on colab.
     config.cfg file must include the following lines:
         [kaggle]
