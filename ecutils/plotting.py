@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.colors as colors
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 
@@ -22,8 +24,6 @@ cmaps['Miscellaneous'] = [
             'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern',
             'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg',
             'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar']
-
-# cmaps['Favs'] = ['Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1', 'Set2', 'Set3', 'tab10', 'tab20', 'tab20b', 'tab20c']
 
 
 def plot_cmap_collections(cmap_collections=None):
@@ -69,3 +69,37 @@ def plot_color_bar(cmap, figsize=15, series=None):
     ax.set_xticks(series)
     ax.set_axis_off()
     plt.show()
+
+
+def get_color_mapper(series, cmap='tab10'):
+    """Return color mapper based on a color map and a series of values
+
+    Used to assure coherent colors for different plots.
+    Usage:
+        clr_mapper = get_color_mapper([1, 2, 3, 4], cmap='Paired)
+        clr_mapper.to_rgba(2) returns the appropriated value
+
+    Example: Getting the same color as the one used for a clustering model and use to plot other values
+            clustering = DBSCAN()
+            clusters = clustering.fit_predict(embeds)
+            cluster_ids = np.unique(clusters)
+            cmap='Paired'
+            plt.scatter(embeds[:, 0], embeds[:, 1], c=clusters, cmap=cmap)
+            plt.colorbar()
+
+            clr_mapper = get_color_mapper(cluster_ids, cmap=cmap)
+
+            #   Plot another feature broken down as per the clustering
+            featname = 'name of the feature to plot'
+            for c in c_list:
+                mask = df.cluster == c
+                df[f"{featname}_{c}"] = df.loc[:, featname]
+                df.loc[~mask, f"{featname}_{c}"] = np.nan
+                ax.plot(df[f"{featname}_{c}"], label=str(c), c=clr_mapper.to_rgba(c))
+            ax.set_title(f'{featname} w/ clusters highligthed')
+            ax.legend()
+            plt.show()
+    """
+    minimum, maximum = min(series), max(series)
+    norm = colors.Normalize(vmin=minimum, vmax=maximum, clip=True)
+    return cm.ScalarMappable(norm=norm, cmap=cm.get_cmap(cmap))
