@@ -17,6 +17,26 @@ from pprint import pprint
 
 __all__ = ['ecdf']
 
+
+def pandas_all_cols_and_rows(f):
+    def wrapper(*args, **kwargs):
+        max_rows = pd.options.display.max_rows
+        max_cols = pd.options.display.max_columns
+        pd.options.display.max_rows = None
+        pd.options.display.max_columns = None
+        f(*args, **kwargs)
+        pd.options.display.max_rows = max_rows
+        pd.options.display.max_columns = max_cols
+
+    return wrapper
+
+
+@pandas_all_cols_and_rows
+def display_full_df(df):
+    # todo: assert this is a DataFrame
+    display(df)
+
+
 def ecdf(data, threshold=None, figsize=None):
     """Compute Empirical Cumulative Distribution Function (ECDF).
     
