@@ -12,6 +12,9 @@ cmaps['Sequential'] = [
             'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
             'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
             'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']
+cmaps['Diverging'] = [
+            'PiYG', 'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu',
+            'RdYlBu', 'RdYlGn', 'Spectral', 'coolwarm', 'bwr', 'seismic']
 cmaps['Sequential (2)'] = [
             'binary', 'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink',
             'spring', 'summer', 'autumn', 'winter', 'cool', 'Wistia',
@@ -28,7 +31,7 @@ cmaps['Miscellaneous'] = [
 
 def plot_cmap_collections(cmap_collections=None):
     """Plot all color maps in the collections """
-    if cmap_collections is None: cmap_categories = cmaps.keys()
+    if cmap_collections is None: cmap_collections = cmaps.keys()
     cmap_lists = [cmap_list for cmap_cat, cmap_list in cmaps.items() if cmap_cat in cmap_collections]
     nrows = max(len(cmap_list) for cmap_cat, cmap_list in cmaps.items() if cmap_cat in cmap_collections)
     gradient = np.linspace(0, 1, 256)
