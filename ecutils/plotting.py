@@ -1,8 +1,20 @@
+"""
+Utility Functions that can be used to manage colors and other plotting tools
+
+Includes all stable utility functions.
+"""
+
 import numpy as np
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from collections import OrderedDict
+
+
+__all__ = [
+    'plot_cmap_collections', 'plot_color_bar', 'get_color_mapper'
+          ]
+
 
 cmaps = OrderedDict()
 

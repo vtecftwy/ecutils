@@ -1,7 +1,7 @@
 """
-Utility Functions that can be used in any context
+Utility Functions to work with images
 
-Includes all stable utility functions that do not fit in other context.
+Includes all stable utility functions.
 """
 
 import datetime as dt
