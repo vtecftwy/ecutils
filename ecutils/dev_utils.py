@@ -14,7 +14,7 @@ __all__ = ['stack_trace', 'stack_trace_jupyter']
 
 class StackTrace():
     """Capture and prints information on all stack frame executed"""
-    def __init__(self, with_call=True, with_return=False, with_exception=False, max_depth=-1):
+    def __init__(self, with_call=True, with_return=True, with_exception=True, max_depth=-1):
         self._frame_dict = {}
         self._options = set()
         self._max_depth = max_depth
