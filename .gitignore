@@ -103,7 +103,7 @@ ENV/
 
 # My Local Environment
 .idea/
-
+.vscode/
 
 
 # Confidential files (api-keys, ...)
