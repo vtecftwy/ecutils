@@ -9,10 +9,11 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from collections import OrderedDict
+from itertools import combinations
 
 
 __all__ = [
-    'plot_cmap_collections', 'plot_color_bar', 'get_color_mapper'
+    'plot_cmap_collections', 'plot_color_bar', 'get_color_mapper', 'plot_feature_scatter'
           ]
 
 
@@ -118,3 +119,31 @@ def get_color_mapper(series, cmap='tab10'):
     minimum, maximum = min(series), max(series)
     norm = colors.Normalize(vmin=minimum, vmax=maximum, clip=True)
     return cm.ScalarMappable(norm=norm, cmap=cm.get_cmap(cmap))
+
+
+def plot_feature_scatter(X, y, n_plots, axes_per_row=3, axes_size=5):
+    """Plots n_plots scatter plots of random combinations of two features out of X
+    
+    Randomly selects `n_plots` pairs out of all possible combinations of features pairs for the dataset X.T
+
+    X, y:           the dataset. X.shape[1] is used to set the total number of features
+    n_plots:        the number of feature pairs to plot as a scatter plot
+    axes_per_row:   the number of axes per row to plot. number of rows will be calculated accordingly
+                    default value is 3 axes per row
+    axes_size:      the size of one axes. figsize will be (ncols * axes_size, nrows * axes_size)
+                    default value is 5
+    """
+
+    pairs = np.array(list(combinations(range(X.shape[1]), 2)))
+    idxs = np.random.randint(pairs.shape[0], size=n_plots)
+    
+    ncols = axes_per_row
+    nrows = n_plots // axes_per_row + (1 if n_plots % axes_per_row > 0 else 0)
+    fig, axs = plt.subplots(nrows, ncols, figsize=(ncols*axes_size, nrows*axes_size))
+    for (d1, d2), ax in zip(pairs[idxs, :], axs.reshape(ncols * nrows)):
+        ax.scatter(X[:, d1], X[:, d2], c=y)
+        ax.set_title(f"X_{min(d1, d2)} and X_{max(d1, d2)}")
+        ax.set_xlabel(f"X_{d1}")
+        ax.set_ylabel(f"X_{d2}")
+    
+    plt.show()
