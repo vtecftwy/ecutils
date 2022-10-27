@@ -1,0 +1,10 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - dev_utils.ipynb
+      - eda_stats_utils.ipynb
+      - image_utils.ipynb
+      - ipython.ipynb
+      - ml.ipynb
+      - plotting.ipynb
