@@ -1,0 +1,9 @@
+project:
+  output-dir: docs
+
+website:
+  title: "ecutils"
+  site-url: "https://vtecftwy.github.io/ecutils/"
+  description: "Set of utility functions used on regular basis"
+  repo-branch: master
+  repo-url: "https://github.com/vtecftwy/ecutils/tree/master/"
