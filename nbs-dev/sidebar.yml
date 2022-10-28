@@ -2,9 +2,9 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - dev_utils.ipynb
-      - eda_stats_utils.ipynb
-      - image_utils.ipynb
-      - ipython.ipynb
-      - ml.ipynb
-      - plotting.ipynb
+      - 0_01_ipython.ipynb
+      - 0_02_plotting.ipynb
+      - 1_01_eda_stats_utils.ipynb
+      - 1_02_ml.ipynb
+      - 2_01_image_utils.ipynb
+      - 9_01_dev_utils.ipynb
