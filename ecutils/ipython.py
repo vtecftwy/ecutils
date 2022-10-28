@@ -6,54 +6,32 @@ from IPython.core.getipython import get_ipython
 from IPython.display import display, Markdown, display_markdown
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import sys
 
 # %% auto 0
 __all__ = ['display_mds', 'display_dfs', 'nb_setup']
 
-# %% ../nbs-dev/0_01_ipython.ipynb 3
-def display_mds(*strings):
-    """
-    Utility function to display several strings formatted in markdown format
-
-    :param strings: any number of strings with text in markdown format
-    :return: None
-    """
+# %% ../nbs-dev/0_01_ipython.ipynb 4
+def display_mds(*strings:str # any number of strings with text in markdown format
+               ):
+    """Utility function to display several strings formatted in markdown format"""
     for string in strings:
         display_markdown(Markdown(data=string))
 
-# %% ../nbs-dev/0_01_ipython.ipynb 4
-def display_dfs(*dfs):
-    """
-    Utility function to display several DataFrame with one operations
-    :param dfs: any number of Pandas DataFrames
-    :return: None
-    """
+# %% ../nbs-dev/0_01_ipython.ipynb 7
+def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
+               ):
+    """Display several DataFrame at once"""
     for df in dfs:
         display(df)
 
-# %% ../nbs-dev/0_01_ipython.ipynb 5
-def nb_setup(autoreload=True, paths=None):
-    """Use in first cell of nb for setting up autoreload, paths, ...
-
-    By default, nb_setup() loads and set autoreload and adds a path to a directory named 'src'
-    at the same level as where the notebook directory is located.
-
-    By default, nb_setup assumes the following file structure:
-
-    project_directory
-          | --- notebooks
-          |        | --- current_nb.ipynb
-          |        | --- ...
-          |
-          |--- src
-          |     | --- scripts_to_import.py
-          |     | --- ...
-          |
-          |--- data
-          |     |
-          |     | ...
-    """
+# %% ../nbs-dev/0_01_ipython.ipynb 9
+def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
+             paths:list(Path) = None   # Paths to add to the path environment variable
+            ):
+    """Use in first cell of nb for setting up autoreload, paths, ... """
 #   Add paths. Default is 'src' if it exists
     if paths is None:
         p = Path('../src').resolve().absolute()

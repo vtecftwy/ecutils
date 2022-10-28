@@ -7,6 +7,7 @@ from pathlib import Path
 from pprint import pprint
 from scipy import stats
 from scipy.cluster import hierarchy as hc
+from typing import Any
 from zipfile import ZipFile
 
 import configparser
@@ -24,31 +25,28 @@ __all__ = ['are_features_consistent', 'cluster_columns', 'run_cli', 'get_config_
            'kaggle_list_files', 'kaggle_download_competition_files']
 
 # %% ../nbs-dev/1_02_ml.ipynb 4
-def are_features_consistent(train_df, test_df, dependent_variables=None):
-    """Verifies that features in training and test sets are consistent
-
-    Training set and test set should have the same features/columns, except for the dependent variables
-
-    train_dr: pd.DataFrame      training dataset
-    test_df:  pd.DataFrame      test dataset
-    dependent_variables: list   list of column names for the dependent variables
-    """
+def are_features_consistent(train_df:pd.DataFrame,   # Training dataset DataFrame 
+                            test_df:pd.DataFrame, # Testing dataset DataFrame 
+                            dependent_variables:list(str) = None # List of column name(s) for dependent variables 
+                           )-> bool :  # True if features in train and test datasets are consistent, False otherwise
+    """Verifies that features in training and test sets are consistent"""
     if dependent_variables is None:
         features_training_set = train_df.columns
     else:
         features_training_set = train_df.drop(dependent_variables, axis=1).columns
     features_test_set = test_df.columns
     features_diff = set(features_training_set).symmetric_difference(features_test_set)
-    assert features_diff == set(), f"Discrepancy between training and test feature set: {features_diff}"
+    if not features_diff == set():
+        raise ValueError(f"Discrepancy between training and test feature set: {features_diff}")
 
     return True
 
-# %% ../nbs-dev/1_02_ml.ipynb 5
-def cluster_columns(df, figsize=(10,6), font_size=12):
-    """Plot dendogram based on columns' spearman correlation coefficients
-
-    First seen on fastai repository
-    """
+# %% ../nbs-dev/1_02_ml.ipynb 14
+def cluster_columns(df:pd.DataFrame,  # Multi-feature dataset with column names
+                    figsize:tuple(int, int) = (10,6), # Size of the figure
+                    font_size:int = 12    # Font size for the chart
+                   ):
+    """Plot dendogram based on columns' spearman correlation coefficients"""
     corr = np.round(stats.spearmanr(df).correlation, 4)
     corr_condensed = hc.distance.squareform(1-corr)
     z = hc.linkage(corr_condensed, method='average')
@@ -56,29 +54,19 @@ def cluster_columns(df, figsize=(10,6), font_size=12):
     hc.dendrogram(z, labels=df.columns, orientation='left', leaf_font_size=font_size)
     plt.show()
 
-# %% ../nbs-dev/1_02_ml.ipynb 6
-def run_cli(cmd='ls -l'):
-    """Wrapper to use subprocess.run with passed command, and print the shell messages
-
-    cmd: str    cli command to execute
-    """
+# %% ../nbs-dev/1_02_ml.ipynb 17
+def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
+           ):
+    """Wrapper to use subprocess.run with passed command, and print the shell messages"""
     p = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
     print(str(p.stdout, 'utf-8'))
 
-# %% ../nbs-dev/1_02_ml.ipynb 7
-def get_config_value(section, key, path_to_config_file=None):
-    """Returns the value corresponding to the key-value pair in the configuration file (configparser format)
-
-    By defaults, it is assumed that the configuration file is saved on google drive. If not, pass a proper Path object.
-    The configuration file must be in the format of configparser (https://docs.python.org/3/library/configparser.html)
-
-    Parameters:
-        section (str):          name of the section where the key-value pair is stored
-        key (str):              name of the key
-        path_to_config_file(Path or str): path to the configparser configuration file
-
-    Return (str):               value in the key-value pair stored
-    """
+# %% ../nbs-dev/1_02_ml.ipynb 19
+def get_config_value(section:str,                        # section in the configparser cfg file
+                     key:str,                            # key in the selected section
+                     path_to_config_file:Path|str=None   # path to the cfg file
+                    )-> Any :                            # the value corresponding to section - key - value 
+    """Returns the value corresponding to the key-value pair in the configuration file (configparser format)"""
     if path_to_config_file is None:
         path_to_config_file = Path(f"/content/gdrive/My Drive/config-api-keys.cfg")
     elif isinstance(path_to_config_file, str):
@@ -91,61 +79,18 @@ def get_config_value(section, key, path_to_config_file=None):
     configuration.read(path_to_config_file)
     return configuration[section][key]
 
-# %% ../nbs-dev/1_02_ml.ipynb 8
+# %% ../nbs-dev/1_02_ml.ipynb 23
 def fastbook_on_colab():
-    """
-    Set up environment to run fastbook notebooks for colab
-
-    Code from notebook:
-    # Install fastbook and dependencies
-    !pip install -Uqq fastbook
-
-    # Load utilities and install them
-    !wget -O utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/utils.py
-    !wget -O fastbook_utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/fastbook_utils.py
-
-    from fastbook_utils import *
-    from utils import *
-
-    # Setup My Drive
-    setup_book()
-
-    # Download images and code required for this notebook
-    import os
-    os.makedirs('images', exist_ok=True)
-    !wget -O images/chapter1_cat_example.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/master/nbs/images/chapter1_cat_example.jpg
-    !wget -O images/cat-01.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/cat-01.jpg
-    !wget -O images/cat-02.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/cat-02.jpg
-    !wget -O images/dog-01.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/dog-01.jpg
-    !wget -O images/dog-02.jpg https://raw.githubusercontent.com/vtecftwy/fastai-course-v4/walk-thru/nbs/images/dog-01.jpg
-
-    """
+    """Set up environment to run fastbook notebooks for colab"""
     instructions = ['pip install -Uqq fastbook',
                     'wget -O utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/utils.py',
                     'wget -O fastbook_utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/fastbook_utils.py'
                     ]
 
-# %% ../nbs-dev/1_02_ml.ipynb 9
-def kaggle_setup_colab(path_to_config_file=None):
-    """Update kaggle API and create security key json file from config file on Google Drive
-
-    Kaggle API documentation: https://github.com/Kaggle/kaggle-api
-
-    Kaggle API Token to be placed as a json file at the following location:
-          ~/.kaggle/kaggle.json
-          %HOMEPATH%\.kaggle\kaggle.json
-
-    To access Kaggle with API, a security key needs to be placed in the correct location on colab.
-    config.cfg file must include the following lines:
-        [kaggle]
-            kaggle_username = kaggle_user_name
-            kaggle_key = API key provided by kaggle
-
-        Info on how to get your api key (kaggle.json) here: https://github.com/Kaggle/kaggle-api#api-credentials
-
-    path_to_config_file: str or Path:   path to the configuration file (e.g. config.cfg)
-
-    """
+# %% ../nbs-dev/1_02_ml.ipynb 25
+def kaggle_setup_colab(path_to_config_file:Path|str = None      # path to the configuration file (e.g. config.cfg)
+                      ):
+    """Update kaggle API and create security key json file from config file on Google Drive"""
     # Create API security key file
     path_to_kaggle = Path('/root/.kaggle')
     os.makedirs(path_to_kaggle, exist_ok=True)
@@ -161,8 +106,10 @@ def kaggle_setup_colab(path_to_config_file=None):
     # Update kaggle API software
     run_cli('pip install -Uqq kaggle --upgrade')
 
-# %% ../nbs-dev/1_02_ml.ipynb 10
-def kaggle_list_files(code=None, mode='competitions'):
+# %% ../nbs-dev/1_02_ml.ipynb 27
+def kaggle_list_files(code:str = None,          # code for the kaggle competition or dataset
+                      mode:str ='competitions'  # mode: `competitions` or `datasets`
+                     ):
     """List all files available in the competition or dataset for the passed code"""
     if code is None:
         print(f"code is None, please provide the code of the kaggle competition or dataset")
@@ -183,8 +130,14 @@ def kaggle_list_files(code=None, mode='competitions'):
         print(f" - submit_files: list of files to place into the <submit> folder")
         print(f"{'=' * 140}")
 
-# %% ../nbs-dev/1_02_ml.ipynb 11
-def kaggle_download_competition_files(competition_code=None, train_files=[], test_files=[], submit_files=[], project_folder='ds' ):
+# %% ../nbs-dev/1_02_ml.ipynb 28
+def kaggle_download_competition_files(
+    competition_code:str = None, 
+    train_files:list() = [], 
+    test_files:list = [], 
+    submit_files:list = [], 
+    project_folder:str = 'ds'
+    ):
     """download all files for passed competition, unzip them if required, move them to train, test and submit folders
 
     competition_code: str       code of the kaggle competition

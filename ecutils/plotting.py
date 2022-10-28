@@ -39,17 +39,18 @@ cmaps['Miscellaneous'] = [
             'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar']
 
 # %% ../nbs-dev/0_02_plotting.ipynb 4
-def plot_cmap_collections(cmap_collections=None):
+def plot_cmap_collections(
+    cmap_collections:str|list(str) = None  # list of color map collections to display (from cmaps.keys())
+                         )-> None :
     """Plot all color maps in the collections """
     if cmap_collections is None: cmap_collections = cmaps.keys()
     cmap_lists = [cmap_list for cmap_cat, cmap_list in cmaps.items() if cmap_cat in cmap_collections]
-    nrows = max(len(cmap_list) for cmap_cat, cmap_list in cmaps.items() if cmap_cat in cmap_collections)
     gradient = np.linspace(0, 1, 256)
     gradient = np.vstack((gradient, gradient))
 
     def plot_color_gradients(cmap_category, cmap_list, nrows):
-        fig, axes = plt.subplots(nrows=nrows)
-        fig.subplots_adjust(top=0.95, bottom=0.01, left=0.2, right=0.99)
+        fig, axes = plt.subplots(nrows=nrows, ncols=1, figsize=(8, nrows * 0.3))
+        fig.subplots_adjust(top=0.75, bottom=0.01, left=0.2, right=0.99)
         axes[0].set_title(cmap_category + ' colormaps', fontsize=14)
 
         for ax, name in zip(axes, cmap_list):
@@ -64,19 +65,22 @@ def plot_cmap_collections(cmap_collections=None):
             ax.set_axis_off()
 
     for cmap_category, cmap_list in zip(cmap_collections, cmap_lists):
-        plot_color_gradients(cmap_category, cmap_list, nrows)
+        n_color_bars = len(cmap_list)
+        plot_color_gradients(cmap_category, cmap_list, n_color_bars)
 
     plt.show()
 
-# %% ../nbs-dev/0_02_plotting.ipynb 7
-def plot_color_bar(cmap, figsize=15, series=None):
+# %% ../nbs-dev/0_02_plotting.ipynb 16
+def plot_color_bar(cmap:str,                        # string name of one of the cmaps 
+                   series:list(int|float) = None    # series of numerical values to show for each color
+                  ):
     """Plots a color bar with value overlay"""
     if series is None: series = range(10)
-    gradient = np.linspace(0, 1, len(series))
+    n_elements = len(series)
+    gradient = np.linspace(0, 1, n_elements)
     gradient = np.vstack((gradient, gradient))
-    _, ax = plt.subplots(figsize=(figsize,1))
+    _, ax = plt.subplots(figsize=(min(n_elements, 18),1))
     ax.imshow(gradient, aspect='auto', cmap=plt.get_cmap(cmap))
-    # ax.scatter([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], c='#ffffff')
     for i, val in enumerate(series):
         ax.text(i, .7, str(val), color='#ffffff', fontsize='medium', fontweight=500, horizontalalignment='center')
 
@@ -84,14 +88,16 @@ def plot_color_bar(cmap, figsize=15, series=None):
     ax.set_axis_off()
     plt.show()
 
-# %% ../nbs-dev/0_02_plotting.ipynb 9
-def get_color_mapper(series, cmap='tab10'):
+# %% ../nbs-dev/0_02_plotting.ipynb 20
+def get_color_mapper(series:list(int|float),    # series of values to map to colors  
+                     cmap:str = 'tab10'         # name of the cmap to use
+                    ):
     """Return color mapper based on a color map and a series of values"""
     minimum, maximum = min(series), max(series)
     norm = colors.Normalize(vmin=minimum, vmax=maximum, clip=True)
     return cm.ScalarMappable(norm=norm, cmap=cm.get_cmap(cmap))
 
-# %% ../nbs-dev/0_02_plotting.ipynb 13
+# %% ../nbs-dev/0_02_plotting.ipynb 24
 def plot_feature_scatter(X:np.array,              # data used to create plots
                          y:np.array|None = None,  # target values
                          n_plots:int = 2,         # number of scatter plots to create
