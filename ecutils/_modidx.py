@@ -43,5 +43,4 @@ d = { 'settings': { 'branch': 'master',
             'ecutils.plotting': { 'ecutils.plotting.get_color_mapper': ('plotting.html#get_color_mapper', 'ecutils/plotting.py'),
                                   'ecutils.plotting.plot_cmap_collections': ('plotting.html#plot_cmap_collections', 'ecutils/plotting.py'),
                                   'ecutils.plotting.plot_color_bar': ('plotting.html#plot_color_bar', 'ecutils/plotting.py'),
-                                  'ecutils.plotting.plot_feature_scatter': ('plotting.html#plot_feature_scatter', 'ecutils/plotting.py')},
-            'ecutils.tests.test_ec_utils_01': {}}}
+                                  'ecutils.plotting.plot_feature_scatter': ('plotting.html#plot_feature_scatter', 'ecutils/plotting.py')}}}
