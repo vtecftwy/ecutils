@@ -14,8 +14,9 @@ import sys
 __all__ = ['display_mds', 'display_dfs', 'nb_setup', 'colab_install_project_code']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 4
-def display_mds(*strings:str # any number of strings with text in markdown format
-               ):
+def display_mds(
+    *strings:str # any number of strings with text in markdown format
+):
     """Utility function to display several strings formatted in markdown format"""
     for string in strings:
         display_markdown(Markdown(data=string))
