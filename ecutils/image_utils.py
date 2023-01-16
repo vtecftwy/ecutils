@@ -48,12 +48,12 @@ def get_date_from_file_name(
     else:
         return False
 
-# %% ../nbs-dev/2_01_image_utils.ipynb 5
+# %% ../nbs-dev/2_01_image_utils.ipynb 6
 def date_is_within_year(date, year):
     """True if the passed date (datetime) is within year, False otherwise"""
     return date.year == year
 
-# %% ../nbs-dev/2_01_image_utils.ipynb 6
+# %% ../nbs-dev/2_01_image_utils.ipynb 7
 def exif2dt(exif_d):
     """Transform a date in bytes format from EXIF into datetime format
 
@@ -70,29 +70,15 @@ def exif2dt(exif_d):
         else:
             return dt.datetime(year=int(y), month=int(m), day=int(d))
 
-# %% ../nbs-dev/2_01_image_utils.ipynb 7
-def add_missing_dates_to_exif(path2folder, year=None, maxhours=24, do_not_update_exif=False, verbose=False):
-    """Add missing EXIF original and digitized dates, based on file creation or date in file name.
-    In order to better control the data changes and avoid mistaken exif updates, the process is done on
-    a year by year basis, i.e. a specific year needs to be passed to the function and only dates within the passed
-    year will be updated. All other dates will be disregarded.
-
-    path2folder: ............. pathlib.Path: object pointing to the folder holding all jpg photos to handle
-    year: .................... int: year used to filter all dates
-    maxhours: ................ int: maximum acceptable difference (in hours) between exif dates and file dates
-    do_not_update_exif: ...... bool: flag to prevent updating the exif file, used in debugging or testing
-    verbose: ................. bool: flag to print original, updated and retrieved updated EXIF info
-
-    Logic of the function:
-    1. Retrieve EXIF info from image
-    2. When there is no EXIF.DatetimeOriginal in the image EXIF:
-        - use date from file name if exists, else
-        - use date from creation or modification, whichever is earlier
-    3. When there is an EXIF.DatetimeOriginal, compare with date from file, if any:
-        - if difference < maxhours, do nothing
-        - if difference >= maxhours, use date from filename
-    4. If the date extracted from file name or file creation/modification date is not in passed year, skipped any change
-    """
+# %% ../nbs-dev/2_01_image_utils.ipynb 8
+def add_missing_dates_to_exif(
+    path2folder:Path,                # Path to the folder holding all jpg photos to handle 
+    year:int = None,                 # year used to filter all dates
+    maxhours:int = 24,               # maximum acceptable difference (in hours) between exif dates and file dates 
+    do_not_update_exif:bool = False, # when Trud, prevent updating the exif file; used in debugging or testing
+    verbose:bool = False             # when True, print original, updated and retrieved updated EXIF info
+):
+    """Add missing EXIF original and digitized dates, based on file creation or date in file name."""
 
     if year is None:
         year = dt.datetime.now().year

@@ -26,11 +26,11 @@ __all__ = ['are_features_consistent', 'cluster_columns', 'run_cli', 'get_config_
 
 # %% ../nbs-dev/1_02_ml.ipynb 5
 def are_features_consistent(
-    train_df:pd.DataFrame,   # Training dataset DataFrame 
-    test_df:pd.DataFrame, # Testing dataset DataFrame 
+    train_df:pd.DataFrame,               # Training dataset DataFrame 
+    test_df:pd.DataFrame,                # Testing dataset DataFrame 
     dependent_variables:list(str) = None # List of column name(s) for dependent variables 
-)-> bool :  # True if features in train and test datasets are consistent, False otherwise
-    """Verifies that features in training and test sets are consistent"""
+)-> bool :                               # True if features in train and test datasets are consistent, False otherwise
+    """Verify that features/columns in training and test sets are consistent"""
     if dependent_variables is None:
         features_training_set = train_df.columns
     else:
@@ -47,7 +47,7 @@ def cluster_columns(df:pd.DataFrame,  # Multi-feature dataset with column names
                     figsize:tuple(int, int) = (10,6), # Size of the figure
                     font_size:int = 12    # Font size for the chart
                    ):
-    """Plot dendogram based on columns' spearman correlation coefficients"""
+    """Plot dendogram based on Dataframe's columns' spearman correlation coefficients"""
     corr = np.round(stats.spearmanr(df).correlation, 4)
     corr_condensed = hc.distance.squareform(1-corr)
     z = hc.linkage(corr_condensed, method='average')

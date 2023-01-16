@@ -42,7 +42,7 @@ cmaps['Miscellaneous'] = [
 def plot_cmap_collections(
     cmap_collections:str|list(str) = None  # list of color map collections to display (from cmaps.keys())
                          )-> None :
-    """Plot all color maps in the collections """
+    """Plot all color maps in the collections passed as cmap_collections"""
     if cmap_collections is None: cmap_collections = cmaps.keys()
     cmap_lists = [cmap_list for cmap_cat, cmap_list in cmaps.items() if cmap_cat in cmap_collections]
     gradient = np.linspace(0, 1, 256)
@@ -70,7 +70,7 @@ def plot_cmap_collections(
 
     plt.show()
 
-# %% ../nbs-dev/0_02_plotting.ipynb 17
+# %% ../nbs-dev/0_02_plotting.ipynb 16
 def plot_color_bar(cmap:str,                        # string name of one of the cmaps 
                    series:list(int|float) = None    # series of numerical values to show for each color
                   ):
@@ -88,7 +88,7 @@ def plot_color_bar(cmap:str,                        # string name of one of the 
     ax.set_axis_off()
     plt.show()
 
-# %% ../nbs-dev/0_02_plotting.ipynb 21
+# %% ../nbs-dev/0_02_plotting.ipynb 20
 def get_color_mapper(
     series:list(int|float),    # series of values to map to colors  
     cmap:str = 'tab10'         # name of the cmap to use
@@ -98,7 +98,7 @@ def get_color_mapper(
     norm = colors.Normalize(vmin=minimum, vmax=maximum, clip=True)
     return cm.ScalarMappable(norm=norm, cmap=cm.get_cmap(cmap))
 
-# %% ../nbs-dev/0_02_plotting.ipynb 25
+# %% ../nbs-dev/0_02_plotting.ipynb 24
 def plot_feature_scatter(
     X:np.array,              # data used to create plots
     y:np.array|None = None,  # target values

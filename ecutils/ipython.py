@@ -17,14 +17,14 @@ __all__ = ['display_mds', 'display_dfs', 'nb_setup', 'colab_install_project_code
 def display_mds(
     *strings:str # any number of strings with text in markdown format
 ):
-    """Utility function to display several strings formatted in markdown format"""
+    """Display one or several strings formatted in markdown format"""
     for string in strings:
         display_markdown(Markdown(data=string))
 
 # %% ../nbs-dev/0_01_ipython.ipynb 7
 def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
                ):
-    """Display several DataFrame at once"""
+    """Display one or several DataFrame in a single cell output"""
     for df in dfs:
         display(df)
 
@@ -32,7 +32,7 @@ def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
 def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
              paths:list(Path) = None   # Paths to add to the path environment variable
             ):
-    """Use in first cell of nb for setting up autoreload, paths, ... """
+    """Use in first cell of notebook to set autoreload, and paths"""
 #   Add paths. Default is 'src' if it exists
     if paths is None:
         p = Path('../src').resolve().absolute()
@@ -56,7 +56,7 @@ def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
 def colab_install_project_code(
     package_name:str # project package name, e.g. git+https://github.com/vtecftwy/metagentools.git@main
 ):
-    """When nb running on colab, pip install the project code package"""
+    """When nb is running on colab, pip install the project code package"""
     try:
         from google.colab import drive
         ON_COLAB = True

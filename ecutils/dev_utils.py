@@ -12,7 +12,7 @@ __all__ = ['StackTrace', 'StackTraceJupyter', 'stack_trace', 'stack_trace_jupyte
 
 # %% ../nbs-dev/9_01_dev_utils.ipynb 4
 class StackTrace():
-    """Capture and prints information on all stack frame executed"""
+    """Capture and print information on all stack frame executed"""
     def __init__(self, 
                  with_call:bool=True,      
                  with_return:bool=True, 
@@ -67,7 +67,7 @@ class StackTrace():
 
 # %% ../nbs-dev/9_01_dev_utils.ipynb 5
 class StackTraceJupyter(StackTrace):
-    """Prints stack frame information in Jupyter notebook context (filters out jupyter overhead)"""
+    """Print stack frame information in Jupyter notebook context (filters out jupyter overhead)"""
 
     def print_stack_info(self, 
                          co_filename, 

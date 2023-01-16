@@ -34,7 +34,7 @@ def pandas_all_cols_and_rows(f):
 @pandas_all_cols_and_rows
 def display_full_df(df:pd.DataFrame  # DataFrame to display
                    ):
-    """Display a dataframe showing all columns"""
+    """Display a dataframe and shows all columns"""
     if not isinstance(df, pd.DataFrame): raise TypeError('df must me a pandas DataFrame')
     display(df)
 
@@ -43,17 +43,17 @@ def ecdf(
     data:pd.Series|np.array,            # data to analyse 
     threshold:int|None = None,          # cummulative frequency used as threshold. Must be between 0 and 1
     figsize:tuple(int,int)|None = None  # figure size (width, height)
-)-> tuple(np.array, np.array, int):  # sorted data (asc.), cumulative frequencies, last index
-    """Compute Empirical Cumulative Distribution Function (ECDF)."""
+)-> tuple(np.array, np.array, int):     # sorted data (ascending), cumulative frequencies, last index
+    """Compute Empirical Cumulative Distribution Function (ECDF), plot it and returns values."""
 
     n = len(data)
     if threshold is None or int(threshold) == 1:
         last_idx = n -1
     elif 0 < threshold < 1:
-        last_idx = min(int(np.floor(n * threshold)), n) -1
+        last_idx = min(int(np.floor(n * threshold)), n) - 1
     else:
         print(f"threshold = {threshold}. Must be between 0 and 1.\nUsing threshold =  1 instead")
-        last_idx = n -1
+        last_idx = n - 1
 
     # Data to plot on x-axis and y-axis
     x = np.sort(data)
