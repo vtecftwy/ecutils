@@ -11,7 +11,7 @@ import pandas as pd
 import sys
 
 # %% auto 0
-__all__ = ['display_mds', 'display_dfs', 'nb_setup']
+__all__ = ['display_mds', 'display_dfs', 'nb_setup', 'colab_install_project_code']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 4
 def display_mds(*strings:str # any number of strings with text in markdown format
@@ -50,3 +50,22 @@ def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
         ipshell.run_line_magic('load_ext',  'autoreload')
         ipshell.run_line_magic('autoreload', '2')
         print('Set autoreload mode')
+
+# %% ../nbs-dev/0_01_ipython.ipynb 11
+def colab_install_project_code(
+    package_name:str # project package name, e.g. git+https://github.com/vtecftwy/metagentools.git@main
+):
+    """When nb running on colab, pip install the project code package"""
+    try:
+        from google.colab import drive
+        ON_COLAB = True
+        print('The notebook is running on colab')
+        print('Installing project code')
+        cmd = f"pip install -U {package_name}"
+        run(cmd)
+
+    except ModuleNotFoundError:
+        ON_COLAB = False
+        print('The notebook is running locally, will not automatically install project code')
+
+    return ON_COLAB
