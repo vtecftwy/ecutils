@@ -40,8 +40,8 @@ cmaps['Miscellaneous'] = [
 
 # %% ../nbs-dev/0_02_plotting.ipynb 5
 def plot_cmap_collections(
-    cmap_collections:str|list(str) = None  # list of color map collections to display (from cmaps.keys())
-                         )-> None :
+    cmap_collections: str|list(str)=None  # list of color map collections to display (from cmaps.keys())
+):
     """Plot all color maps in the collections passed as cmap_collections"""
     if cmap_collections is None: cmap_collections = cmaps.keys()
     cmap_lists = [cmap_list for cmap_cat, cmap_list in cmaps.items() if cmap_cat in cmap_collections]
@@ -71,9 +71,10 @@ def plot_cmap_collections(
     plt.show()
 
 # %% ../nbs-dev/0_02_plotting.ipynb 16
-def plot_color_bar(cmap:str,                        # string name of one of the cmaps 
-                   series:list(int|float) = None    # series of numerical values to show for each color
-                  ):
+def plot_color_bar(
+    cmap:str,                        # string name of one of the cmaps 
+    series:list(int|float) = None    # series of numerical values to show for each color
+):
     """Plots a color bar with value overlay"""
     if series is None: series = range(10)
     n_elements = len(series)
