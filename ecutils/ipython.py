@@ -58,24 +58,26 @@ def colab_install_project_code(
 
 # %% ../nbs-dev/0_01_ipython.ipynb 9
 def files_in_tree(
-    path: str|Path,        # path to the directory to scan  
-    pattern: str = ''      # pattern (glob style) to match in file name to filter the content
+    path: str|Path,               # path to the directory to scan  
+    pattern: str|None = None      # pattern (glob style) to match in file name to filter the content
 ):
     """List files in directory and its subdiretories, print tree starting from parent directory"""
+    pattern = '*' if pattern is None else f"*{pattern}*"
     parents = [p.name for p in path.parents]
     paths = []
     pad = ' ' * 2
     idx = 0
     print(f"{parents[0]}")
     print(f"{pad}|--{path.name}")
-    for f in [p for p in path.glob(f"*{pattern}*") if p.is_file()]:
+    for f in [p for p in path.glob(pattern) if p.is_file()]:
         paths.append(f)
         print(f"{pad}|{pad*2}|--{f.name} ({idx})")
         idx += 1
-    for d in [p for p in path.glob(f"*{pattern}*") if p.is_dir()]:
-        for f in d.iterdir():
+    for d in [p for p in path.iterdir() if p.is_dir()]:
+        print(f"{pad}|{pad*2}|--{d.name}")
+        for f in [p for p in d.glob(pattern) if p.is_file()]:
             paths.append(f)
-            print(f"{pad}|{pad*2}|--{f.name} ({idx})")
+            print(f"{pad}|{pad*2}|{pad*2}|--{f.name} ({idx})")
             idx += 1
     return paths
 
