@@ -11,24 +11,9 @@ import pandas as pd
 import sys
 
 # %% auto 0
-__all__ = ['display_mds', 'display_dfs', 'nb_setup', 'colab_install_project_code']
+__all__ = ['nb_setup', 'colab_install_project_code', 'display_mds', 'display_dfs']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 4
-def display_mds(
-    *strings:str # any number of strings with text in markdown format
-):
-    """Display one or several strings formatted in markdown format"""
-    for string in strings:
-        display_markdown(Markdown(data=string))
-
-# %% ../nbs-dev/0_01_ipython.ipynb 7
-def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
-               ):
-    """Display one or several DataFrame in a single cell output"""
-    for df in dfs:
-        display(df)
-
-# %% ../nbs-dev/0_01_ipython.ipynb 9
 def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
              paths:list(Path) = None   # Paths to add to the path environment variable
             ):
@@ -52,7 +37,7 @@ def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
         ipshell.run_line_magic('autoreload', '2')
         print('Set autoreload mode')
 
-# %% ../nbs-dev/0_01_ipython.ipynb 11
+# %% ../nbs-dev/0_01_ipython.ipynb 6
 def colab_install_project_code(
     package_name:str # project package name, e.g. git+https://github.com/vtecftwy/metagentools.git@main
 ):
@@ -70,3 +55,18 @@ def colab_install_project_code(
         print('The notebook is running locally, will not automatically install project code')
 
     return ON_COLAB
+
+# %% ../nbs-dev/0_01_ipython.ipynb 12
+def display_mds(
+    *strings:str # any number of strings with text in markdown format
+):
+    """Display one or several strings formatted in markdown format"""
+    for string in strings:
+        display_markdown(Markdown(data=string))
+
+# %% ../nbs-dev/0_01_ipython.ipynb 15
+def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
+               ):
+    """Display one or several DataFrame in a single cell output"""
+    for df in dfs:
+        display(df)
