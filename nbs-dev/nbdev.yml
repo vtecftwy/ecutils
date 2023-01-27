@@ -2,7 +2,7 @@ project:
   output-dir: _docs
 
 website:
-  title: "ec_utils"
+  title: "ecutilities"
   site-url: "https://vtecftwy.github.io/ecutils"
   description: "Set of utility functions used on regular basis"
   repo-branch: master
