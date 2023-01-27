@@ -1,6 +1,13 @@
-_docs/
+# nbdev related folders and files
 _proc/
-
+_quarto.yml
+sidebar.yml
+Gemfile.lock
+token
+_docs/
+conda/
+.last_checked
+.gitconfig
 *.bak
 .gitattributes
 .last_checked
