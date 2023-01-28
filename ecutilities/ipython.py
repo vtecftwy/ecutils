@@ -2,11 +2,12 @@
 
 # %% ../nbs-dev/0_01_ipython.ipynb 2
 from __future__ import annotations
+from functools import wraps
 from IPython.core.getipython import get_ipython
 from IPython.display import display, Markdown, display_markdown
 from pathlib import Path
-from typing import Any, Optional
-from .core import validate_path
+from typing import Any, Callable, Optional
+from .core import validate_path, validate_type
 
 import configparser
 import numpy as np
@@ -15,7 +16,8 @@ import subprocess
 import sys
 
 # %% auto 0
-__all__ = ['nb_setup', 'colab_install_project_code', 'display_mds', 'display_dfs', 'run_cli']
+__all__ = ['nb_setup', 'colab_install_project_code', 'display_mds', 'display_dfs', 'df_all_cols_and_rows', 'display_full_df',
+           'run_cli']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 5
 def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
@@ -75,7 +77,34 @@ def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
     for df in dfs:
         display(df)
 
-# %% ../nbs-dev/0_01_ipython.ipynb 19
+# %% ../nbs-dev/0_01_ipython.ipynb 18
+def df_all_cols_and_rows(
+    f:Callable,   # function to apply the decorator ti
+)-> Callable:     # decorated function
+    """decorator function forcing all rows and columns of `DataFrames` to be displayed in the wrapped function"""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        max_rows = pd.options.display.max_rows
+        max_cols = pd.options.display.max_columns
+        pd.options.display.max_rows = None
+        pd.options.display.max_columns = None
+        f(*args, **kwargs)
+        pd.options.display.max_rows = max_rows
+        pd.options.display.max_columns = max_cols
+    
+    return wrapper
+
+# %% ../nbs-dev/0_01_ipython.ipynb 22
+@df_all_cols_and_rows
+def display_full_df(
+    df:pd.DataFrame  # DataFrame to display
+):
+    """Display a `DataFrame` showing all rows and columns"""
+#     if not isinstance(df, pd.DataFrame): raise TypeError('df must me a pandas DataFrame')
+    validate_type(df, pd.DataFrame, raise_error=True)
+    display(df)
+
+# %% ../nbs-dev/0_01_ipython.ipynb 28
 def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
            ):
     """Runs a cli command from jupyter notebook and print the shell output message

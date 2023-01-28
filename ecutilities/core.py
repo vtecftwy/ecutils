@@ -6,11 +6,25 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 import configparser
+import numpy as np
 
 # %% auto 0
-__all__ = ['validate_path', 'get_config_value', 'files_in_tree']
+__all__ = ['validate_type', 'validate_path', 'get_config_value', 'files_in_tree']
 
-# %% ../nbs-dev/0_00_core.ipynb 5
+# %% ../nbs-dev/0_00_core.ipynb 6
+def validate_type(
+    obj:Any,                 # object whose type to validate
+    obj_type:type,                # expected type for `obj`
+    raise_error:bool=False,  # when True, raise a ValueError is `obj` is not of the right type
+)-> bool:                    # True when `obj` is of the right type, False otherwise 
+    """Validate that `obj` is of type `obj_type`. Raise error in the negative when `raise_error` is `True`"""
+    if not isinstance(obj_type, type): raise ValueError(f"{obj_type} is not a type")
+    if isinstance(obj, obj_type): return True
+    else:
+        if raise_error: raise ValueError(f"passed object is not of type {obj_type}")
+        else: return False
+
+# %% ../nbs-dev/0_00_core.ipynb 10
 def validate_path(
     path:str|Path,           # path to validate
     path_type:str='file',    # type of the target path: `'file'` or `'dir'`
@@ -25,7 +39,7 @@ def validate_path(
         if raise_error: raise ValueError(f"No file at {path.absolute()}. Check the path")
         else: return False
 
-# %% ../nbs-dev/0_00_core.ipynb 12
+# %% ../nbs-dev/0_00_core.ipynb 17
 def get_config_value(section:str,                        # section in the configparser cfg file
                      key:str,                            # key in the selected section
                      path_to_config_file:Path|str=None   # path to the cfg file
@@ -40,7 +54,7 @@ def get_config_value(section:str,                        # section in the config
     configuration.read(path_to_config_file)
     return configuration[section][key]
 
-# %% ../nbs-dev/0_00_core.ipynb 22
+# %% ../nbs-dev/0_00_core.ipynb 27
 def files_in_tree(
     path: str|Path,               # path to the directory to scan  
     pattern: str|None = None      # pattern (glob style) to match in file name to filter the content

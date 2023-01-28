@@ -17,31 +17,9 @@ import pandas as pd
 import shutil
 
 # %% auto 0
-__all__ = ['pandas_all_cols_and_rows', 'display_full_df', 'ecdf', 'cluster_columns']
+__all__ = ['ecdf', 'cluster_columns']
 
 # %% ../nbs-dev/1_01_eda_stats_utils.ipynb 5
-def pandas_all_cols_and_rows(f):
-    """decorator function to force displaying all columns in a DataFrame"""
-    def wrapper(*args, **kwargs):
-        max_rows = pd.options.display.max_rows
-        max_cols = pd.options.display.max_columns
-        pd.options.display.max_rows = None
-        pd.options.display.max_columns = None
-        f(*args, **kwargs)
-        pd.options.display.max_rows = max_rows
-        pd.options.display.max_columns = max_cols
-    
-    return wrapper
-
-# %% ../nbs-dev/1_01_eda_stats_utils.ipynb 6
-@pandas_all_cols_and_rows
-def display_full_df(df:pd.DataFrame  # DataFrame to display
-                   ):
-    """Display a dataframe and shows all columns"""
-    if not isinstance(df, pd.DataFrame): raise TypeError('df must me a pandas DataFrame')
-    display(df)
-
-# %% ../nbs-dev/1_01_eda_stats_utils.ipynb 10
 def ecdf(
     data:pd.Series|np.ndarray,            # data to analyse 
     threshold:Optional[int] = None,     # cummulative frequency used as threshold. Must be between 0 and 1
@@ -77,7 +55,7 @@ def ecdf(
 
     return x, y, last_idx
 
-# %% ../nbs-dev/1_01_eda_stats_utils.ipynb 23
+# %% ../nbs-dev/1_01_eda_stats_utils.ipynb 18
 def cluster_columns(df:pd.DataFrame,    # Multi-feature dataset with column names
                     figsize:tuple(int, int) = (10,6), # Size of the plotted figure
                     font_size:int = 12    # Font size for the chart on plot

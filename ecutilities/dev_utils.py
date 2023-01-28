@@ -12,7 +12,7 @@ import functools
 # %% auto 0
 __all__ = ['StackTrace', 'StackTraceJupyter', 'stack_trace', 'stack_trace_jupyter']
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 10
+# %% ../nbs-dev/9_01_dev_utils.ipynb 13
 class StackTrace():
     """Callable class acting as `tracefunc` to capture and print information on all stack frame being run"""
     def __init__(self, 
@@ -68,7 +68,7 @@ class StackTrace():
         text = '\t'.join([str(i) for i in ret])
         print(f"{'  ' * depth}{text}")
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 13
+# %% ../nbs-dev/9_01_dev_utils.ipynb 16
 class StackTraceJupyter(StackTrace):
     """Print stack frame information in Jupyter notebook context (filters out jupyter overhead)"""
 
@@ -95,7 +95,7 @@ class StackTraceJupyter(StackTrace):
             text = '\t'.join([str(i) for i in ret])
             print(f"{'  ' * depth}{text}")
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 15
+# %% ../nbs-dev/9_01_dev_utils.ipynb 18
 def stack_trace(**kw):
     """`stack_trace` decorator function"""
     def entangle(func):
@@ -111,9 +111,9 @@ def stack_trace(**kw):
         return wrapper
     return entangle
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 16
+# %% ../nbs-dev/9_01_dev_utils.ipynb 20
 def stack_trace_jupyter(**kw):
-    """`stack_trace_jupyter`  decorator function"""
+    """`stack_trace_jupyter` decorator function"""
     def entangle(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
