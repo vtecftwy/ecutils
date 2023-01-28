@@ -27,18 +27,18 @@ __all__ = ['are_features_consistent', 'kaggle_setup_colab', 'kaggle_list_files',
 
 # %% ../nbs-dev/1_02_ml.ipynb 5
 def are_features_consistent(
-    train_df:pd.DataFrame,                # Training dataset DataFrame 
-    test_df:pd.DataFrame,                 # Testing dataset DataFrame 
+    df1:pd.DataFrame,                 # First set, typically the training set
+    df2:pd.DataFrame,                 # Second set, typically the test set or inference set 
     dependent_variables:list[str] = None, # List of column name(s) for dependent variables
     raise_error:bool = False,             # True to raise an error if not consistent
 )-> bool :                                # True if features in train and test datasets are consistent, False otherwise
     """Verify that features/columns in training and test sets are consistent"""
     if dependent_variables is None:
-        features_training_set = train_df.columns
+        features_df1 = df1.columns
     else:
-        features_training_set = train_df.drop(dependent_variables, axis=1).columns
-    features_test_set = test_df.columns
-    features_diff = set(features_training_set).symmetric_difference(features_test_set)
+        features_df1 = df1.drop(dependent_variables, axis=1).columns
+    features_df2 = df2.columns
+    features_diff = set(features_df1).symmetric_difference(features_df2)
     if features_diff == set():
         return True
     else:
