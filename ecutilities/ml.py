@@ -2,12 +2,13 @@
 
 # %% ../nbs-dev/1_02_ml.ipynb 4
 from __future__ import annotations
+from .ipython import get_config_value
 from IPython.display import Image, display
 from pathlib import Path
 from pprint import pprint
-from scipy import stats
-from scipy.cluster import hierarchy as hc
-from typing import Any
+# from scipy import stats
+# from scipy.cluster import hierarchy as hc
+from typing import Any, List
 from zipfile import ZipFile
 
 import configparser
@@ -21,15 +22,16 @@ import shutil
 import subprocess
 
 # %% auto 0
-__all__ = ['are_features_consistent', 'cluster_columns', 'run_cli', 'get_config_value', 'fastbook_on_colab', 'kaggle_setup_colab',
-           'kaggle_list_files', 'kaggle_download_competition_files']
+__all__ = ['are_features_consistent', 'kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_competition_files',
+           'fastbook_on_colab']
 
 # %% ../nbs-dev/1_02_ml.ipynb 5
 def are_features_consistent(
-    train_df:pd.DataFrame,               # Training dataset DataFrame 
-    test_df:pd.DataFrame,                # Testing dataset DataFrame 
-    dependent_variables:list(str) = None # List of column name(s) for dependent variables 
-)-> bool :                               # True if features in train and test datasets are consistent, False otherwise
+    train_df:pd.DataFrame,                # Training dataset DataFrame 
+    test_df:pd.DataFrame,                 # Testing dataset DataFrame 
+    dependent_variables:list[str] = None, # List of column name(s) for dependent variables
+    raise_error:bool = False,             # True to raise an error if not consistent
+)-> bool :                                # True if features in train and test datasets are consistent, False otherwise
     """Verify that features/columns in training and test sets are consistent"""
     if dependent_variables is None:
         features_training_set = train_df.columns
@@ -37,65 +39,30 @@ def are_features_consistent(
         features_training_set = train_df.drop(dependent_variables, axis=1).columns
     features_test_set = test_df.columns
     features_diff = set(features_training_set).symmetric_difference(features_test_set)
-    if not features_diff == set():
-        raise ValueError(f"Discrepancy between training and test feature set: {features_diff}")
+    if features_diff == set():
+        return True
+    else:
+        if raise_error:
+            raise ValueError(f"Discrepancy between training and test feature set: {features_diff}")
+        else: return False
 
-    return True
-
-# %% ../nbs-dev/1_02_ml.ipynb 14
-def cluster_columns(df:pd.DataFrame,  # Multi-feature dataset with column names
-                    figsize:tuple(int, int) = (10,6), # Size of the figure
-                    font_size:int = 12    # Font size for the chart
-                   ):
-    """Plot dendogram based on Dataframe's columns' spearman correlation coefficients"""
-    corr = np.round(stats.spearmanr(df).correlation, 4)
-    corr_condensed = hc.distance.squareform(1-corr)
-    z = hc.linkage(corr_condensed, method='average')
-    fig = plt.figure(figsize=figsize)
-    hc.dendrogram(z, labels=df.columns, orientation='left', leaf_font_size=font_size)
-    plt.show()
-
-# %% ../nbs-dev/1_02_ml.ipynb 17
-def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
-           ):
-    """Wrapper to use subprocess.run with passed command, and print the shell messages"""
-    p = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
-    print(str(p.stdout, 'utf-8'))
-
-# %% ../nbs-dev/1_02_ml.ipynb 19
-def get_config_value(section:str,                        # section in the configparser cfg file
-                     key:str,                            # key in the selected section
-                     path_to_config_file:Path|str=None   # path to the cfg file
-                    )-> Any :                            # the value corresponding to section - key - value 
-    """Returns the value corresponding to the key-value pair in the configuration file (configparser format)"""
-    if path_to_config_file is None:
-        path_to_config_file = Path(f"/content/gdrive/My Drive/config-api-keys.cfg")
-    elif isinstance(path_to_config_file, str):
-        path_to_config_file = Path(f"/content/gdrive/My Drive/{path_to_config_file}")
-
-    msg = f"Cannot find file {path_to_config_file}. Please check the path or add the config file at that location"
-    assert path_to_config_file.is_file(), msg
-
-    configuration = configparser.ConfigParser()
-    configuration.read(path_to_config_file)
-    return configuration[section][key]
-
-# %% ../nbs-dev/1_02_ml.ipynb 23
-def fastbook_on_colab():
-    """Set up environment to run fastbook notebooks for colab"""
-    instructions = ['pip install -Uqq fastbook',
-                    'wget -O utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/utils.py',
-                    'wget -O fastbook_utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/fastbook_utils.py'
-                    ]
-
-# %% ../nbs-dev/1_02_ml.ipynb 25
+# %% ../nbs-dev/1_02_ml.ipynb 16
 def kaggle_setup_colab(path_to_config_file:Path|str = None      # path to the configuration file (e.g. config.cfg)
                       ):
     """Update kaggle API and create security key json file from config file on Google Drive"""
     # Create API security key file
     path_to_kaggle = Path('/root/.kaggle')
     os.makedirs(path_to_kaggle, exist_ok=True)
-
+    
+    # Validate path_to_config
+    if path_to_config_file is None:
+        path_to_config_file = Path('/content/gdrive/MyDrive/private-across-accounts/config-api-keys.cfg')
+    if isinstance(path_to_config_file, str): 
+        path_to_config_file = Path(path_to_config_file)
+    if not path_to_config_file.is_file():
+        raise ValueError(f"No file at {path_to_config_file.absolute()}. Check the path")
+    
+    # retrieve configuration, create token and save it
     username = get_config_value('kaggle', 'kaggle_username', path_to_config_file=path_to_config_file)
     key = get_config_value('kaggle', 'kaggle_key', path_to_config_file=path_to_config_file)
 
@@ -107,7 +74,7 @@ def kaggle_setup_colab(path_to_config_file:Path|str = None      # path to the co
     # Update kaggle API software
     run_cli('pip install -Uqq kaggle --upgrade')
 
-# %% ../nbs-dev/1_02_ml.ipynb 27
+# %% ../nbs-dev/1_02_ml.ipynb 18
 def kaggle_list_files(code:str = None,          # code for the kaggle competition or dataset
                       mode:str ='competitions'  # mode: `competitions` or `datasets`
                      ):
@@ -131,7 +98,7 @@ def kaggle_list_files(code:str = None,          # code for the kaggle competitio
         print(f" - submit_files: list of files to place into the <submit> folder")
         print(f"{'=' * 140}")
 
-# %% ../nbs-dev/1_02_ml.ipynb 28
+# %% ../nbs-dev/1_02_ml.ipynb 19
 def kaggle_download_competition_files(
     competition_code:str = None, 
     train_files:list() = [], 
@@ -194,3 +161,11 @@ def kaggle_download_competition_files(
 
         print(f"{'=' * 140}")
         print('Done loading Kaggle files and moving them to corresponding folders')
+
+# %% ../nbs-dev/1_02_ml.ipynb 20
+def fastbook_on_colab():
+    """Set up environment to run fastbook notebooks for colab"""
+    instructions = ['pip install -Uqq fastbook',
+                    'wget -O utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/utils.py',
+                    'wget -O fastbook_utils.py https://raw.githubusercontent.com/vtecftwy/fastbook/walk-thru/fastbook_utils.py'
+                    ]

@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from IPython.display import Image, display
 from pprint import pprint
+from scipy import stats
+from scipy.cluster import hierarchy as hc
 
 import datetime as dt
 import matplotlib.pyplot as plt
@@ -14,7 +16,7 @@ import pandas as pd
 import shutil
 
 # %% auto 0
-__all__ = ['pandas_all_cols_and_rows', 'display_full_df', 'ecdf']
+__all__ = ['pandas_all_cols_and_rows', 'display_full_df', 'ecdf', 'cluster_columns']
 
 # %% ../nbs-dev/1_01_eda_stats_utils.ipynb 4
 def pandas_all_cols_and_rows(f):
@@ -73,3 +75,16 @@ def ecdf(
     plt.show()
 
     return x, y, last_idx
+
+# %% ../nbs-dev/1_01_eda_stats_utils.ipynb 18
+def cluster_columns(df:pd.DataFrame,    # Multi-feature dataset with column names
+                    figsize:tuple(int, int) = (10,6), # Size of the plotted figure
+                    font_size:int = 12    # Font size for the chart on plot
+                   ):
+    """Plot dendogram based on Dataframe's columns' spearman correlation coefficients"""
+    corr = np.round(stats.spearmanr(df).correlation, 4)
+    corr_condensed = hc.distance.squareform(1-corr)
+    z = hc.linkage(corr_condensed, method='average')
+    fig = plt.figure(figsize=figsize)
+    hc.dendrogram(z, labels=df.columns, orientation='left', leaf_font_size=font_size)
+    plt.show()

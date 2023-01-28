@@ -5,13 +5,16 @@ from __future__ import annotations
 from IPython.core.getipython import get_ipython
 from IPython.display import display, Markdown, display_markdown
 from pathlib import Path
+from typing import Any, List
 
+import configparser
 import numpy as np
 import pandas as pd
+import subprocess
 import sys
 
 # %% auto 0
-__all__ = ['nb_setup', 'colab_install_project_code', 'files_in_tree', 'display_mds', 'display_dfs']
+__all__ = ['nb_setup', 'colab_install_project_code', 'files_in_tree', 'display_mds', 'display_dfs', 'run_cli', 'get_config_value']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 4
 def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
@@ -95,3 +98,30 @@ def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
     """Display one or several DataFrame in a single cell output"""
     for df in dfs:
         display(df)
+
+# %% ../nbs-dev/0_01_ipython.ipynb 17
+def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
+           ):
+    """Runs a cli command from jupyter notebook and print the shell output message
+    
+    Uses subprocess.run with passed command to run the cli command"""
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
+    print(str(p.stdout, 'utf-8'))
+
+# %% ../nbs-dev/0_01_ipython.ipynb 19
+def get_config_value(section:str,                        # section in the configparser cfg file
+                     key:str,                            # key in the selected section
+                     path_to_config_file:Path|str=None   # path to the cfg file
+                    )-> Any :                            # the value corresponding to section>key>value 
+    """Returns the value corresponding to the key-value pair in the configuration file (configparser format)"""
+    # validate path_to_config_file
+    if path_to_config_file is None:
+        path_to_config_file = Path('/content/gdrive/MyDrive/private-across-accounts/config-api-keys.cfg')
+    if isinstance(path_to_config_file, str): 
+        path_to_config_file = Path(path_to_config_file)
+    if not path_to_config_file.is_file():
+        raise ValueError(f"No file at {path_to_config_file.absolute()}. Check the path")
+
+    configuration = configparser.ConfigParser()
+    configuration.read(path_to_config_file)
+    return configuration[section][key]
