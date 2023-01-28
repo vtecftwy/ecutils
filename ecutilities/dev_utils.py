@@ -2,7 +2,9 @@
 
 # %% ../nbs-dev/9_01_dev_utils.ipynb 3
 from __future__ import annotations
-
+from pathlib import Path
+from typing import Any
+import inspect
 import re
 import sys
 import functools
@@ -10,14 +12,14 @@ import functools
 # %% auto 0
 __all__ = ['StackTrace', 'StackTraceJupyter', 'stack_trace', 'stack_trace_jupyter']
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 4
+# %% ../nbs-dev/9_01_dev_utils.ipynb 10
 class StackTrace():
-    """Capture and print information on all stack frame executed"""
+    """Callable class acting as `tracefunc` to capture and print information on all stack frame being run"""
     def __init__(self, 
-                 with_call:bool=True,      
-                 with_return:bool=True, 
-                 with_exception:bool=True, 
-                 max_depth:int=-1
+                 with_call:bool=True,       # when True, `call` events are traced
+                 with_return:bool=True,     # when True, `return` events are traced
+                 with_exception:bool=True,  # when True, `exceptions` events are traced
+                 max_depth:int=-1           # maximum depth of the trace, default is full depth
                 ):
         self._frame_dict = {}
         self._options = set()
@@ -27,10 +29,11 @@ class StackTrace():
         if with_exception: self._options.add('exception')
 
     def __call__(self, 
-                 frame, 
-                 event, 
-                 arg
+                 frame: inspect.FrameInfo,       # `frame` argument in tracefunc
+                 event:str,   # `event` argument in tracefunc
+                 arg:Any,     # `arg` argument in tracefunc
                 ):
+        """`tracefunc`used in `sys.settrace(tracefunc)`"""
         ret = []
         co_name = frame.f_code.co_name
         co_filename = frame.f_code.co_filename
@@ -44,7 +47,7 @@ class StackTrace():
 
         depth = self._frame_dict[frame]
 
-        if event in self._options and (self._max_depth<0 or depth <= self._max_depth):
+        if event in self._options and (self._max_depth < 0 or depth <= self._max_depth):
             ret.append(co_name)
             ret.append(f'[{event}]')
             if event == 'return':
@@ -57,15 +60,15 @@ class StackTrace():
         return self
 
     def print_stack_info(self, 
-                         co_filename, 
-                         ret, 
-                         depth
+                         co_filename:str|Path, # code file name
+                         ret:bool, # 
+                         depth:int, # depth
                         ):
         """This methods can be overloaded to customize what is printed out"""
         text = '\t'.join([str(i) for i in ret])
         print(f"{'  ' * depth}{text}")
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 5
+# %% ../nbs-dev/9_01_dev_utils.ipynb 13
 class StackTraceJupyter(StackTrace):
     """Print stack frame information in Jupyter notebook context (filters out jupyter overhead)"""
 
@@ -92,9 +95,9 @@ class StackTraceJupyter(StackTrace):
             text = '\t'.join([str(i) for i in ret])
             print(f"{'  ' * depth}{text}")
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 6
+# %% ../nbs-dev/9_01_dev_utils.ipynb 15
 def stack_trace(**kw):
-    """Function for stack_trace decorator"""
+    """`stack_trace` decorator function"""
     def entangle(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -108,9 +111,9 @@ def stack_trace(**kw):
         return wrapper
     return entangle
 
-# %% ../nbs-dev/9_01_dev_utils.ipynb 7
+# %% ../nbs-dev/9_01_dev_utils.ipynb 16
 def stack_trace_jupyter(**kw):
-    """Function for stack_trace_jupyter decorator"""
+    """`stack_trace_jupyter`  decorator function"""
     def entangle(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):

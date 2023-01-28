@@ -2,6 +2,7 @@ website:
   sidebar:
     contents:
       - index.ipynb
+      - 0_00_core.ipynb
       - 0_01_ipython.ipynb
       - 0_02_plotting.ipynb
       - 1_01_eda_stats_utils.ipynb

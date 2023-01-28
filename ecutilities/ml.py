@@ -2,12 +2,9 @@
 
 # %% ../nbs-dev/1_02_ml.ipynb 4
 from __future__ import annotations
-from .ipython import get_config_value
 from IPython.display import Image, display
 from pathlib import Path
 from pprint import pprint
-# from scipy import stats
-# from scipy.cluster import hierarchy as hc
 from typing import Any, List
 from zipfile import ZipFile
 
@@ -25,7 +22,7 @@ import subprocess
 __all__ = ['are_features_consistent', 'kaggle_setup_colab', 'kaggle_list_files', 'kaggle_download_competition_files',
            'fastbook_on_colab']
 
-# %% ../nbs-dev/1_02_ml.ipynb 5
+# %% ../nbs-dev/1_02_ml.ipynb 6
 def are_features_consistent(
     df1:pd.DataFrame,                 # First set, typically the training set
     df2:pd.DataFrame,                 # Second set, typically the test set or inference set 
@@ -46,7 +43,7 @@ def are_features_consistent(
             raise ValueError(f"Discrepancy between training and test feature set: {features_diff}")
         else: return False
 
-# %% ../nbs-dev/1_02_ml.ipynb 16
+# %% ../nbs-dev/1_02_ml.ipynb 18
 def kaggle_setup_colab(path_to_config_file:Path|str = None      # path to the configuration file (e.g. config.cfg)
                       ):
     """Update kaggle API and create security key json file from config file on Google Drive"""
@@ -74,7 +71,7 @@ def kaggle_setup_colab(path_to_config_file:Path|str = None      # path to the co
     # Update kaggle API software
     run_cli('pip install -Uqq kaggle --upgrade')
 
-# %% ../nbs-dev/1_02_ml.ipynb 18
+# %% ../nbs-dev/1_02_ml.ipynb 20
 def kaggle_list_files(code:str = None,          # code for the kaggle competition or dataset
                       mode:str ='competitions'  # mode: `competitions` or `datasets`
                      ):
@@ -98,7 +95,7 @@ def kaggle_list_files(code:str = None,          # code for the kaggle competitio
         print(f" - submit_files: list of files to place into the <submit> folder")
         print(f"{'=' * 140}")
 
-# %% ../nbs-dev/1_02_ml.ipynb 19
+# %% ../nbs-dev/1_02_ml.ipynb 21
 def kaggle_download_competition_files(
     competition_code:str = None, 
     train_files:list() = [], 
@@ -162,7 +159,7 @@ def kaggle_download_competition_files(
         print(f"{'=' * 140}")
         print('Done loading Kaggle files and moving them to corresponding folders')
 
-# %% ../nbs-dev/1_02_ml.ipynb 20
+# %% ../nbs-dev/1_02_ml.ipynb 23
 def fastbook_on_colab():
     """Set up environment to run fastbook notebooks for colab"""
     instructions = ['pip install -Uqq fastbook',

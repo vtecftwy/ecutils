@@ -15,7 +15,7 @@ import shutil
 # %% auto 0
 __all__ = ['get_date_from_file_name', 'date_is_within_year', 'exif2dt', 'add_missing_dates_to_exif']
 
-# %% ../nbs-dev/2_01_image_utils.ipynb 4
+# %% ../nbs-dev/2_01_image_utils.ipynb 5
 def get_date_from_file_name(
     path2file: Path,        # Path to the file
     date_pattern: str=None, # regex pattern for the date, if None, default date pattern is YY-MM-DD
@@ -48,12 +48,12 @@ def get_date_from_file_name(
     else:
         return False
 
-# %% ../nbs-dev/2_01_image_utils.ipynb 6
+# %% ../nbs-dev/2_01_image_utils.ipynb 7
 def date_is_within_year(date, year):
     """True if the passed date (datetime) is within year, False otherwise"""
     return date.year == year
 
-# %% ../nbs-dev/2_01_image_utils.ipynb 7
+# %% ../nbs-dev/2_01_image_utils.ipynb 8
 def exif2dt(exif_d):
     """Transform a date in bytes format from EXIF into datetime format
 
@@ -70,7 +70,7 @@ def exif2dt(exif_d):
         else:
             return dt.datetime(year=int(y), month=int(m), day=int(d))
 
-# %% ../nbs-dev/2_01_image_utils.ipynb 8
+# %% ../nbs-dev/2_01_image_utils.ipynb 9
 def add_missing_dates_to_exif(
     path2folder:Path,                # Path to the folder holding all jpg photos to handle 
     year:int = None,                 # year used to filter all dates

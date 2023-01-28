@@ -11,15 +11,17 @@
 
 **GitHub**
 
-There are two options:
+Two options to get versions which are not yet released on PyPi:
 
-- clone the repo and install in develop mode from local source:
+1.  clone the github [repo](https://github.com/vtecftwy/ecutils) and
+    install it in edit mode from within the cloned repo:
 
 <!-- -->
 
-    pip install -e . from the project folder, or
+    pip install -e .
 
-- install in from github for hosted virtual machines:
+2.  install with pip from the github repo directly for hosted virtual
+    machines:
 
 <!-- -->
 
@@ -29,12 +31,13 @@ There are two options:
 ## Modules:
 
 0.  General use:
+    - `core`
     - `ipython`
     - `plotting`
 1.  Data Science and Machine learning:
     - `eda_stats_utils`
     - `ml`
-2.  Handling of images
+2.  Images
     - `image_utils`
 3.  Development
     - `dev_utils`
