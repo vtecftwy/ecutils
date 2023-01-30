@@ -7,11 +7,12 @@ from typing import Any, List, Optional
 
 import configparser
 import numpy as np
+import sys
 
 # %% auto 0
-__all__ = ['validate_type', 'validate_path', 'get_config_value', 'files_in_tree']
+__all__ = ['validate_type', 'validate_path', 'get_config_value', 'IsLocalMachine', 'files_in_tree']
 
-# %% ../nbs-dev/0_00_core.ipynb 6
+# %% ../nbs-dev/0_00_core.ipynb 5
 def validate_type(
     obj:Any,                 # object whose type to validate
     obj_type:type,                # expected type for `obj`
@@ -24,7 +25,7 @@ def validate_type(
         if raise_error: raise ValueError(f"passed object is not of type {obj_type}")
         else: return False
 
-# %% ../nbs-dev/0_00_core.ipynb 10
+# %% ../nbs-dev/0_00_core.ipynb 9
 def validate_path(
     path:str|Path,           # path to validate
     path_type:str='file',    # type of the target path: `'file'` or `'dir'`
@@ -39,7 +40,7 @@ def validate_path(
         if raise_error: raise ValueError(f"No file at {path.absolute()}. Check the path")
         else: return False
 
-# %% ../nbs-dev/0_00_core.ipynb 17
+# %% ../nbs-dev/0_00_core.ipynb 16
 def get_config_value(section:str,                        # section in the configparser cfg file
                      key:str,                            # key in the selected section
                      path_to_config_file:Path|str=None   # path to the cfg file
@@ -54,7 +55,55 @@ def get_config_value(section:str,                        # section in the config
     configuration.read(path_to_config_file)
     return configuration[section][key]
 
-# %% ../nbs-dev/0_00_core.ipynb 27
+# %% ../nbs-dev/0_00_core.ipynb 23
+class IsLocalMachine:
+    """Callable singleton class to identify if current machine was registered as local machine or not"""
+
+    _instance = None
+    _config_dir = '.ecutilities'
+    _config_fname = 'ecutilities.cfg'
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls.home = Path.home().absolute()
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    @property
+    def os(self): return sys.platform
+    
+    @property
+    def home(self): return Path.hone().absolute()
+    
+    @property
+    def p2config(self): return self.home / self._config_dir / self._config_fname
+    
+    def __call__(self): return self.is_local()
+    
+    def read_config(self):
+        """Read config from the configuration file if it exists and return an empty config in does not"""
+        cfg = configparser.ConfigParser()
+        if self.p2config.is_file(): 
+            cfg.read(self.p2config)
+        else:
+            cfg.add_section('Infra')
+        return cfg
+        
+    def is_local(self):
+        """Return `True` if the current machine was registered as a local machine"""
+        cfg = self.read_config()
+        return cfg['Infra'].getboolean('registered_as_local', False)
+    
+    def register_as_local(self):
+        """Update the configuration file to register the machine as local machine"""
+        cfg = self.read_config()
+        os.makedirs(self.home/self._config_dir, exist_ok=True)
+        cfg['Infra']['registered_as_local'] = 'True'
+        with open(self.p2config, 'w') as fp:
+            cfg.write(fp)
+        return cfg
+
+# %% ../nbs-dev/0_00_core.ipynb 34
 def files_in_tree(
     path: str|Path,               # path to the directory to scan  
     pattern: str|None = None      # pattern (glob style) to match in file name to filter the content

@@ -7,19 +7,28 @@ from IPython.core.getipython import get_ipython
 from IPython.display import display, Markdown, display_markdown
 from pathlib import Path
 from typing import Any, Callable, Optional
-from .core import validate_path, validate_type
+from .core import validate_path, validate_type, IsLocalMachine
 
 import configparser
 import numpy as np
+import os
 import pandas as pd
 import subprocess
-import sys
 
 # %% auto 0
-__all__ = ['nb_setup', 'colab_install_project_code', 'display_mds', 'display_dfs', 'df_all_cols_and_rows', 'display_full_df',
-           'run_cli']
+__all__ = ['run_cli', 'nb_setup', 'cloud_install_project_code', 'display_mds', 'display_dfs', 'df_all_cols_and_rows',
+           'display_full_df']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 5
+def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
+           ):
+    """Runs a cli command from jupyter notebook and print the shell output message
+    
+    Uses subprocess.run with passed command to run the cli command"""
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
+    print(str(p.stdout, 'utf-8'))
+
+# %% ../nbs-dev/0_01_ipython.ipynb 8
 def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
              paths:list(Path) = None   # Paths to add to the path environment variable
             ):
@@ -43,26 +52,36 @@ def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
         ipshell.run_line_magic('autoreload', '2')
         print('Set autoreload mode')
 
-# %% ../nbs-dev/0_01_ipython.ipynb 7
-def colab_install_project_code(
-    package_name:str # project package name, e.g. git+https://github.com/vtecftwy/metagentools.git@main
+# %% ../nbs-dev/0_01_ipython.ipynb 12
+def cloud_install_project_code(
+    package_name:str # project package name, e.g. metagentools or git+https://github.com/repo.git@main
 ):
-    """When nb is running on colab, pip install the project code package"""
+    """When nb is running in the cloud, pip install the project code package"""
+    
+    # test whether it runs on colab
     try:
         from google.colab import drive
-        ON_COLAB = True
+        RUN_LOCALLY = False
         print('The notebook is running on colab')
-        print('Installing project code')
-        cmd = f"pip install -U {package_name}"
-        run(cmd)
 
     except ModuleNotFoundError:
-        ON_COLAB = False
-        print('The notebook is running locally, will not automatically install project code')
+        # not running on colab, testing is it runs on on a local machine
+        RUN_LOCALLY = IsLocalMachine().is_local()
+        
+        if RUN_LOCALLY:
+            print('The notebook is running locally, will not automatically install project code')
+        else:
+            print('The notebook is running on a cloud VM or the machine was not registered as local')
 
-    return ON_COLAB
+    if not RUN_LOCALLY:
+        print(f'Installing project code {package_name}')
+        cmd = f"pip install -U {package_name}"
+        run_cli(cmd)
+        print((f"{package_name} is installed."))
+        
+    return RUN_LOCALLY
 
-# %% ../nbs-dev/0_01_ipython.ipynb 11
+# %% ../nbs-dev/0_01_ipython.ipynb 15
 def display_mds(
     *strings:str|tuple[str] # any number of strings with text in markdown format
 ):
@@ -70,14 +89,14 @@ def display_mds(
     for string in strings:
         display_markdown(Markdown(data=string))
 
-# %% ../nbs-dev/0_01_ipython.ipynb 15
+# %% ../nbs-dev/0_01_ipython.ipynb 19
 def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
                ):
     """Display one or several `pd.DataFrame` in a single cell output"""
     for df in dfs:
         display(df)
 
-# %% ../nbs-dev/0_01_ipython.ipynb 18
+# %% ../nbs-dev/0_01_ipython.ipynb 22
 def df_all_cols_and_rows(
     f:Callable,   # function to apply the decorator ti
 )-> Callable:     # decorated function
@@ -94,7 +113,7 @@ def df_all_cols_and_rows(
     
     return wrapper
 
-# %% ../nbs-dev/0_01_ipython.ipynb 22
+# %% ../nbs-dev/0_01_ipython.ipynb 26
 @df_all_cols_and_rows
 def display_full_df(
     df:pd.DataFrame  # DataFrame to display
@@ -103,12 +122,3 @@ def display_full_df(
 #     if not isinstance(df, pd.DataFrame): raise TypeError('df must me a pandas DataFrame')
     validate_type(df, pd.DataFrame, raise_error=True)
     display(df)
-
-# %% ../nbs-dev/0_01_ipython.ipynb 28
-def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
-           ):
-    """Runs a cli command from jupyter notebook and print the shell output message
-    
-    Uses subprocess.run with passed command to run the cli command"""
-    p = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
-    print(str(p.stdout, 'utf-8'))
