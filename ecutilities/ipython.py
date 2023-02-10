@@ -14,10 +14,11 @@ import numpy as np
 import os
 import pandas as pd
 import subprocess
+import warnings
 
 # %% auto 0
-__all__ = ['run_cli', 'nb_setup', 'cloud_install_project_code', 'display_mds', 'display_dfs', 'df_all_cols_and_rows',
-           'display_full_df']
+__all__ = ['run_cli', 'nb_setup', 'cloud_install_project_code', 'display_mds', 'display_dfs', 'pandas_nrows_ncols',
+           'df_all_cols_and_rows', 'display_full_df']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 5
 def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
@@ -81,7 +82,7 @@ def cloud_install_project_code(
         
     return RUN_LOCALLY
 
-# %% ../nbs-dev/0_01_ipython.ipynb 15
+# %% ../nbs-dev/0_01_ipython.ipynb 16
 def display_mds(
     *strings:str|tuple[str] # any number of strings with text in markdown format
 ):
@@ -89,18 +90,44 @@ def display_mds(
     for string in strings:
         display_markdown(Markdown(data=string))
 
-# %% ../nbs-dev/0_01_ipython.ipynb 19
+# %% ../nbs-dev/0_01_ipython.ipynb 20
 def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
                ):
     """Display one or several `pd.DataFrame` in a single cell output"""
     for df in dfs:
         display(df)
 
-# %% ../nbs-dev/0_01_ipython.ipynb 22
+# %% ../nbs-dev/0_01_ipython.ipynb 23
+class pandas_nrows_ncols:
+    """Context manager to specify a max nbr of rows and cols to apply to Series and DataFrame outputs"""
+    def __init__(
+        self, 
+        nrows:int|None=None, # maximum number of rows to show within the context
+        ncols:int|None=None, # maximum number of columns to show within the context
+    ):
+        self.nrows = nrows
+        self.ncols = ncols
+    
+    def __enter__(self):
+        self.max_rows = pd.options.display.max_rows
+        self.max_cols = pd.options.display.max_columns
+        pd.options.display.max_rows = self.nrows
+        pd.options.display.max_columns = self.ncols
+        return self.max_rows, self.max_cols
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        pd.options.display.max_rows = self.max_rows
+        pd.options.display.max_columns = self.max_cols
+
+# %% ../nbs-dev/0_01_ipython.ipynb 37
 def df_all_cols_and_rows(
     f:Callable,   # function to apply the decorator ti
 )-> Callable:     # decorated function
     """decorator function forcing all rows and columns of `DataFrames` to be displayed in the wrapped function"""
+    
+    msg = 'Decorator is deprecated and will be removed soon. Use context manager `pandas_nrows_ncols` instead.'
+    warnings.warn(msg, category=DeprecationWarning)
+    
     @wraps(f)
     def wrapper(*args, **kwargs):
         max_rows = pd.options.display.max_rows
@@ -113,7 +140,7 @@ def df_all_cols_and_rows(
     
     return wrapper
 
-# %% ../nbs-dev/0_01_ipython.ipynb 26
+# %% ../nbs-dev/0_01_ipython.ipynb 41
 @df_all_cols_and_rows
 def display_full_df(
     df:pd.DataFrame  # DataFrame to display
