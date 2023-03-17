@@ -8,6 +8,7 @@ from pprint import pprint
 from typing import Any, List
 from zipfile import ZipFile
 from .core import get_config_value
+from .ipython import run_cli
 
 import configparser
 import datetime as dt
