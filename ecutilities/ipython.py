@@ -2,6 +2,7 @@
 
 # %% ../nbs-dev/0_01_ipython.ipynb 2
 from __future__ import annotations
+from fastcore.test import test_fail
 from functools import wraps
 from IPython.core.getipython import get_ipython
 from IPython.display import display, Markdown, display_markdown
@@ -99,11 +100,11 @@ def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
 
 # %% ../nbs-dev/0_01_ipython.ipynb 23
 class pandas_nrows_ncols:
-    """Context manager to specify a max nbr of rows and cols to apply to Series and DataFrame outputs"""
+    """Context manager set max number of rows and cols to apply to any output within the context"""
     def __init__(
         self, 
-        nrows:int|None=None, # maximum number of rows to show within the context
-        ncols:int|None=None, # maximum number of columns to show within the context
+        nrows:int|None=None, # max number of rows to show; show all rows if `None`
+        ncols:int|None=None, # max number of columns to show; show all columns if `None`
     ):
         self.nrows = nrows
         self.ncols = ncols
@@ -119,13 +120,13 @@ class pandas_nrows_ncols:
         pd.options.display.max_rows = self.max_rows
         pd.options.display.max_columns = self.max_cols
 
-# %% ../nbs-dev/0_01_ipython.ipynb 37
+# %% ../nbs-dev/0_01_ipython.ipynb 36
 def df_all_cols_and_rows(
     f:Callable,   # function to apply the decorator ti
 )-> Callable:     # decorated function
     """decorator function forcing all rows and columns of `DataFrames` to be displayed in the wrapped function"""
     
-    msg = 'Decorator is deprecated and will be removed soon. Use context manager `pandas_nrows_ncols` instead.'
+    msg = 'This decorator is deprecated. Will be removed soon. Use context manager `pandas_nrows_ncols` instead.'
     warnings.warn(msg, category=DeprecationWarning)
     
     @wraps(f)
@@ -140,12 +141,13 @@ def df_all_cols_and_rows(
     
     return wrapper
 
-# %% ../nbs-dev/0_01_ipython.ipynb 41
-@df_all_cols_and_rows
+# %% ../nbs-dev/0_01_ipython.ipynb 40
 def display_full_df(
-    df:pd.DataFrame  # DataFrame to display
+    df:pd.DataFrame|pd.Series,  # `DataFrame` or `Series` to display
 ):
-    """Display a `DataFrame` showing all rows and columns"""
-#     if not isinstance(df, pd.DataFrame): raise TypeError('df must me a pandas DataFrame')
-    validate_type(df, pd.DataFrame, raise_error=True)
-    display(df)
+    """Display a pandas `DataFrame` or `Series` showing all rows and columns"""
+    if validate_type(df, pd.DataFrame, raise_error=False) or validate_type(df, pd.Series, raise_error=False):
+        with pandas_nrows_ncols():
+            display(df)
+    else:
+        raise TypeError(f"df must me a pandas `DataFrame` or `Series`, not a {type(df)}")
