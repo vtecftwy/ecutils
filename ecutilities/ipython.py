@@ -8,7 +8,7 @@ from IPython.core.getipython import get_ipython
 from IPython.display import display, Markdown, display_markdown
 from pathlib import Path
 from typing import Any, Callable, Optional
-from .core import validate_path, validate_type, IsLocalMachine
+from .core import validate_path, is_type, IsLocalMachine
 
 import configparser
 import numpy as np
@@ -68,7 +68,7 @@ def cloud_install_project_code(
 
     except ModuleNotFoundError:
         # not running on colab, testing is it runs on on a local machine
-        RUN_LOCALLY = IsLocalMachine().is_local()
+        RUN_LOCALLY = IsLocalMachine().is_local
         
         if RUN_LOCALLY:
             print('The notebook is running locally, will not automatically install project code')
@@ -146,7 +146,7 @@ def display_full_df(
     df:pd.DataFrame|pd.Series,  # `DataFrame` or `Series` to display
 ):
     """Display a pandas `DataFrame` or `Series` showing all rows and columns"""
-    if validate_type(df, pd.DataFrame, raise_error=False) or validate_type(df, pd.Series, raise_error=False):
+    if is_type(df, pd.DataFrame, raise_error=False) or is_type(df, pd.Series, raise_error=False):
         with pandas_nrows_ncols():
             display(df)
     else:
