@@ -10,10 +10,10 @@ import numpy as np
 import sys
 
 # %% auto 0
-__all__ = ['validate_type', 'validate_path', 'safe_path', 'get_config_value', 'IsLocalMachine', 'files_in_tree', 'nbs_root_dir']
+__all__ = ['is_type', 'validate_path', 'safe_path', 'get_config_value', 'IsLocalMachine', 'files_in_tree', 'nbs_root_dir']
 
 # %% ../nbs-dev/0_00_core.ipynb 5
-def validate_type(
+def is_type(
     obj:Any,                 # object whose type to validate
     obj_type:type,                # expected type for `obj`
     raise_error:bool=False,  # when True, raise a ValueError is `obj` is not of the right type
@@ -30,7 +30,7 @@ def validate_path(
     path:str|Path,           # path to validate
     path_type:str='file',    # type of the target path: `'file'`, `'dir'` or `'any'`
     raise_error:bool=False,  # when True, raise a ValueError is path does not a file
-)-> Path:                    # True when path is a valid path, False otherwise 
+)-> bool:                    # True when path is a valid path, False otherwise 
     """Validate that path is a Path or str and points to a real file or directory"""
     if isinstance(path, str): 
         path = Path(path)
@@ -46,13 +46,13 @@ def validate_path(
 def safe_path(
     path:str|Path, # path to validate
 )-> Path:          # validated path as a  pathlib.Path
-    """"""
+    """Return a Path object when given a valid path as a string or a Path, raise error otherwise"""
     validate_path(path, path_type='any', raise_error=True)
     if isinstance(path, str): 
         path = Path(path)
     return path
 
-# %% ../nbs-dev/0_00_core.ipynb 23
+# %% ../nbs-dev/0_00_core.ipynb 19
 def get_config_value(section:str,                        # section in the configparser cfg file
                      key:str,                            # key in the selected section
                      path_to_config_file:Path|str=None   # path to the cfg file
@@ -61,16 +61,16 @@ def get_config_value(section:str,                        # section in the config
     # validate path_to_config_file
     if path_to_config_file is None:
         path_to_config_file = Path('/content/gdrive/MyDrive/private-across-accounts/config-api-keys.cfg')
-    validate_path(path_to_config_file)
+    safe_path(path_to_config_file)
 
     configuration = configparser.ConfigParser()
     configuration.read(path_to_config_file)
     return configuration[section][key]
 
-# %% ../nbs-dev/0_00_core.ipynb 30
+# %% ../nbs-dev/0_00_core.ipynb 26
 class IsLocalMachine:
     """Callable singleton class to identify if current machine was registered as local machine or not"""
-
+    
     _instance = None
     _config_dir = '.ecutilities'
     _config_fname = 'ecutilities.cfg'
@@ -90,7 +90,7 @@ class IsLocalMachine:
     @property
     def p2config(self): return self.home / self._config_dir / self._config_fname
     
-    def __call__(self): return self.is_local()
+    def __call__(self): return self.is_local
     
     def read_config(self):
         """Read config from the configuration file if it exists and return an empty config in does not"""
@@ -101,6 +101,7 @@ class IsLocalMachine:
             cfg.add_section('Infra')
         return cfg
         
+    @property
     def is_local(self):
         """Return `True` if the current machine was registered as a local machine"""
         cfg = self.read_config()
@@ -115,7 +116,7 @@ class IsLocalMachine:
             cfg.write(fp)
         return cfg
 
-# %% ../nbs-dev/0_00_core.ipynb 41
+# %% ../nbs-dev/0_00_core.ipynb 37
 def files_in_tree(
     path: str|Path,               # path to the directory to scan  
     pattern: str|None = None      # pattern (glob style) to match in file name to filter the content
@@ -142,15 +143,17 @@ def files_in_tree(
             idx += 1
     return paths
 
-# %% ../nbs-dev/0_00_core.ipynb 46
+# %% ../nbs-dev/0_00_core.ipynb 41
 def nbs_root_dir(
     path:str|Path|None = None, # path from where to seek for notebook parent directory
     pattern:str = 'nbs',       # pattern to identify the nbs directory
 )-> Path:                      # path of the parent directory
-    """Climb the directory tree up to the notebook directory and return its path"""
+    """Climb directory tree up to directory including pattern ('nbs'), and return its path"""
     if path is None: path = Path()
     path = safe_path(path).absolute()
     tree = [path.name] + [p.name for p in path.parents]
     mask = [True if n.startswith(pattern) else False for n in tree]
-    nbs = Path(f"{'../' * (mask.index(True))}").resolve()
+    tree = tree[mask.index(True):]
+    tree.reverse()
+    nbs = Path('/'.join(tree))
     return nbs
