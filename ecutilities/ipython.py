@@ -7,19 +7,17 @@ from functools import wraps
 from IPython.core.getipython import get_ipython
 from IPython.display import display, Markdown, display_markdown
 from pathlib import Path
-from typing import Any, Callable, Optional
-from .core import validate_path, is_type, IsLocalMachine
+from typing import Any, List, Callable, Optional
+from .core import safe_path, path_to_parent_dir, is_type, CurrentMachine
 
-import configparser
 import numpy as np
-import os
 import pandas as pd
+import sys
 import subprocess
 import warnings
 
 # %% auto 0
-__all__ = ['run_cli', 'nb_setup', 'cloud_install_project_code', 'display_mds', 'display_dfs', 'pandas_nrows_ncols',
-           'df_all_cols_and_rows', 'display_full_df']
+__all__ = ['run_cli', 'nb_setup', 'install_code_on_cloud', 'display_mds', 'display_dfs', 'pandas_nrows_ncols', 'display_full_df']
 
 # %% ../nbs-dev/0_01_ipython.ipynb 5
 def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
@@ -31,21 +29,30 @@ def run_cli(cmd:str = 'ls -l'   # command to execute in the cli
     print(str(p.stdout, 'utf-8'))
 
 # %% ../nbs-dev/0_01_ipython.ipynb 8
-def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
-             paths:list(Path) = None   # Paths to add to the path environment variable
-            ):
-    """Use in first cell of notebook to set autoreload, and paths"""
-#   Add paths. Default is 'src' if it exists
-    if paths is None:
-        p = Path('../src').resolve().absolute()
-        if p.is_dir():
-            paths = [str(p)]
-        else:
-            paths=[]
+def nb_setup(
+    autoreload:bool = True,       # True to set autoreload in this notebook
+    paths:List[str|Path] = None   # Paths to add to the path environment variable
+    ):
+    """Use in first cell of notebook to set autoreload, and add system paths
+    
+    Always add a path to 'src' in the project root, if the directory exists
+    """
+    #  Handle paths
+    #  Add src if it exists
+    nbs_root = path_to_parent_dir('nbs')
+    p2src = (nbs_root / '../src').resolve().absolute()
+    if p2src.is_dir():
+        p = str(p2src.absolute())
+        if p not in sys.path:
+            sys.path.insert(0, p)
+            print(f"Added path: {p2src.absolute()}")
+    # Add passed paths
     if paths:
         for p in paths:
-            sys.path.insert(1, str(p))
-        print(f"Added following paths: {','.join(paths)}")
+            if isinstance(p, Path): p = str(p.resolve().absolute())
+            if p not in sys.path:
+                sys.path.insert(1, p)
+                print(f"Added path: {p}")
 
 #   Setup auto reload
     if autoreload:
@@ -54,36 +61,38 @@ def nb_setup(autoreload:bool = True,   # True to set autoreload in this notebook
         ipshell.run_line_magic('autoreload', '2')
         print('Set autoreload mode')
 
-# %% ../nbs-dev/0_01_ipython.ipynb 12
-def cloud_install_project_code(
-    package_name:str # project package name, e.g. metagentools or git+https://github.com/repo.git@main
+# %% ../nbs-dev/0_01_ipython.ipynb 18
+def install_code_on_cloud(
+    package_name:str, # project package name, e.g. metagentools or git+https://github.com/repo.git@main
+    quiet:bool=False # install quietly with Trud
 ):
-    """When nb is running in the cloud, pip install the project code package"""
+    """pip install the project code package, when nb is running in the cloud."""
     
-    # test whether it runs on colab
-    try:
-        from google.colab import drive
-        RUN_LOCALLY = False
-        print('The notebook is running on colab')
+    machine = CurrentMachine()
 
-    except ModuleNotFoundError:
-        # not running on colab, testing is it runs on on a local machine
-        RUN_LOCALLY = IsLocalMachine().is_local
-        
-        if RUN_LOCALLY:
-            print('The notebook is running locally, will not automatically install project code')
-        else:
-            print('The notebook is running on a cloud VM or the machine was not registered as local')
+    if machine.is_colab:
+        CLOUD = True
+        print('The notebook is running on colab.', end=' ')
+        print(f'Will install {package_name}')
+    elif machine.is_kaggle:
+        CLOUD = True
+        print('The notebook is running on kaggle.', end=' ')
+        print(f'Will install {package_name}')
+    elif machine.is_local:
+        CLOUD = False
+        print('The notebook is running locally, will not automatically install project code')
+    else:
+        CLOUD = True
+        print('The notebook is running on a cloud VM or the machine was not registered as local')
+        print(f'Will install {package_name}')
 
-    if not RUN_LOCALLY:
+    if CLOUD:
         print(f'Installing project code {package_name}')
-        cmd = f"pip install -U {package_name}"
+        cmd = f"pip install -{'qq' if quiet else ''}U {package_name}"
         run_cli(cmd)
         print((f"{package_name} is installed."))
-        
-    return RUN_LOCALLY
 
-# %% ../nbs-dev/0_01_ipython.ipynb 16
+# %% ../nbs-dev/0_01_ipython.ipynb 23
 def display_mds(
     *strings:str|tuple[str] # any number of strings with text in markdown format
 ):
@@ -91,16 +100,16 @@ def display_mds(
     for string in strings:
         display_markdown(Markdown(data=string))
 
-# %% ../nbs-dev/0_01_ipython.ipynb 20
+# %% ../nbs-dev/0_01_ipython.ipynb 27
 def display_dfs(*dfs:pd.DataFrame       # any number of Pandas DataFrames
                ):
     """Display one or several `pd.DataFrame` in a single cell output"""
     for df in dfs:
         display(df)
 
-# %% ../nbs-dev/0_01_ipython.ipynb 23
+# %% ../nbs-dev/0_01_ipython.ipynb 30
 class pandas_nrows_ncols:
-    """Context manager set max number of rows and cols to apply to any output within the context"""
+    """Context manager that sets the max number of rows and cols to apply to any output within the context"""
     def __init__(
         self, 
         nrows:int|None=None, # max number of rows to show; show all rows if `None`
@@ -120,28 +129,7 @@ class pandas_nrows_ncols:
         pd.options.display.max_rows = self.max_rows
         pd.options.display.max_columns = self.max_cols
 
-# %% ../nbs-dev/0_01_ipython.ipynb 36
-def df_all_cols_and_rows(
-    f:Callable,   # function to apply the decorator ti
-)-> Callable:     # decorated function
-    """decorator function forcing all rows and columns of `DataFrames` to be displayed in the wrapped function"""
-    
-    msg = 'This decorator is deprecated. Will be removed soon. Use context manager `pandas_nrows_ncols` instead.'
-    warnings.warn(msg, category=DeprecationWarning)
-    
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        max_rows = pd.options.display.max_rows
-        max_cols = pd.options.display.max_columns
-        pd.options.display.max_rows = None
-        pd.options.display.max_columns = None
-        f(*args, **kwargs)
-        pd.options.display.max_rows = max_rows
-        pd.options.display.max_columns = max_cols
-    
-    return wrapper
-
-# %% ../nbs-dev/0_01_ipython.ipynb 40
+# %% ../nbs-dev/0_01_ipython.ipynb 44
 def display_full_df(
     df:pd.DataFrame|pd.Series,  # `DataFrame` or `Series` to display
 ):

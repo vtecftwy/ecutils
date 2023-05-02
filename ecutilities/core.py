@@ -7,15 +7,28 @@ from typing import Any, List, Optional
 
 import configparser
 import numpy as np
+import os
 import sys
+import warnings
+
+# Try to load Google drive package for Google Colab
+try: from google.colab import drive
+except: pass
 
 # %% auto 0
-__all__ = ['is_type', 'validate_path', 'safe_path', 'get_config_value', 'IsLocalMachine', 'files_in_tree', 'nbs_root_dir']
+__all__ = ['CODE_ROOT', 'PACKAGE_ROOT', 'is_type', 'validate_path', 'safe_path', 'get_config_value', 'CurrentMachine',
+           'ProjectFileSystem', 'files_in_tree', 'path_to_parent_dir']
 
-# %% ../nbs-dev/0_00_core.ipynb 5
+# %% ../nbs-dev/0_00_core.ipynb 4
+# Retrieve the package root
+from . import __file__
+CODE_ROOT = Path(__file__).parents[0]
+PACKAGE_ROOT = Path(__file__).parents[1]
+
+# %% ../nbs-dev/0_00_core.ipynb 7
 def is_type(
     obj:Any,                 # object whose type to validate
-    obj_type:type,                # expected type for `obj`
+    obj_type:type,           # expected type for `obj`
     raise_error:bool=False,  # when True, raise a ValueError is `obj` is not of the right type
 )-> bool:                    # True when `obj` is of the right type, False otherwise 
     """Validate that `obj` is of type `obj_type`. Raise error in the negative when `raise_error` is `True`"""
@@ -25,7 +38,7 @@ def is_type(
         if raise_error: raise ValueError(f"passed object is not of type {obj_type}")
         else: return False
 
-# %% ../nbs-dev/0_00_core.ipynb 9
+# %% ../nbs-dev/0_00_core.ipynb 11
 def validate_path(
     path:str|Path,           # path to validate
     path_type:str='file',    # type of the target path: `'file'`, `'dir'` or `'any'`
@@ -42,56 +55,96 @@ def validate_path(
         if raise_error: raise ValueError(f"No file at {path.absolute()}. Check the path")
         else: return False
 
-# %% ../nbs-dev/0_00_core.ipynb 16
+# %% ../nbs-dev/0_00_core.ipynb 18
 def safe_path(
     path:str|Path, # path to validate
-)-> Path:          # validated path as a  pathlib.Path
+)-> Path:          # validated path returned as a pathlib.Path
     """Return a Path object when given a valid path as a string or a Path, raise error otherwise"""
     validate_path(path, path_type='any', raise_error=True)
     if isinstance(path, str): 
         path = Path(path)
     return path
 
-# %% ../nbs-dev/0_00_core.ipynb 19
+# %% ../nbs-dev/0_00_core.ipynb 21
 def get_config_value(section:str,                        # section in the configparser cfg file
                      key:str,                            # key in the selected section
                      path_to_config_file:Path|str=None   # path to the cfg file
                     )-> Any :                            # the value corresponding to section>key>value 
-    """Returns the value corresponding to the key-value pair in the configuration file (configparser format)"""
-    # validate path_to_config_file
+    """Returns the value corresponding to the key-value pair in the configuration file (configparser format)
+    
+    When no path_to_config_file is provided, the function will try to find the file in: the system's `home`, 
+    the parent directory of the current directory, and the Google drive directory mounted to the Colab environment.
+    """
     if path_to_config_file is None:
-        path_to_config_file = Path('/content/gdrive/MyDrive/private-across-accounts/config-api-keys.cfg')
+        # try several possible file locations
+        possible_paths = [
+            Path().home(), 
+            Path('..').resolve(),
+            Path('/content/gdrive/MyDrive/private-across-accounts/config-api-keys.cfg')]
+        for path in possible_paths:
+            if (path/'config-api-keys.cfg').is_file():
+                path_to_config_file = path/'config-api-keys.cfg'
+                break
+            else:
+                raise ValueError(f"No config file found in possible_paths. Please provide a specific path")
     safe_path(path_to_config_file)
+    print(f"Using config file at {path_to_config_file.absolute()}")
 
     configuration = configparser.ConfigParser()
     configuration.read(path_to_config_file)
     return configuration[section][key]
 
-# %% ../nbs-dev/0_00_core.ipynb 26
-class IsLocalMachine:
-    """Callable singleton class to identify if current machine was registered as local machine or not"""
+# %% ../nbs-dev/0_00_core.ipynb 30
+class CurrentMachine:
+    """Callable class to represent info on the current machine. When called, instance return a dict all `attrs`:
+    
+    - `os`
+    - `home` path
+    - `is_local`, `is_colab`, `is_kaggle`
+    - `p2config` path to the config file
+    - `package_root` path to the root of the package root directory
+    """
     
     _instance = None
     _config_dir = '.ecutilities'
     _config_fname = 'ecutilities.cfg'
-    
-    def __new__(cls):
+
+    def __new__(cls, *args, **kwargs):
+        # Create instance if it does not exist yet
         if cls._instance is None:
-            cls.home = Path.home().absolute()
+            cls.home = Path.home().resolve()
+            cls.p2config = cls.home / cls._config_dir / cls._config_fname
+            cls.package_root = Path(__file__).parents[1]
             cls._instance = super().__new__(cls)
         return cls._instance
     
-    @property
-    def os(self): return sys.platform
-    
-    @property
-    def home(self): return Path.hone().absolute()
-    
-    @property
-    def p2config(self): return self.home / self._config_dir / self._config_fname
-    
-    def __call__(self): return self.is_local
-    
+    def __init__(
+        self, 
+        mount_gdrive:bool=True  # True to mount Google Drive if running on Colab
+        ):
+            self.is_colab = 'google.colab' in sys.modules       
+            if self.is_colab and mount_gdrive:
+                drive.mount('/content/gdrive')
+                self.gdrive = Path('/content/gdrive/MyDrive')
+
+            self.is_kaggle = 'kaggle_web_client' in sys.modules
+            if self.is_kaggle:
+                raise NotImplemented(f"ProjectFileSystem is not implemented for Kaggle yet")
+
+            if not self.is_colab and not self.is_kaggle and not self.is_local:
+                msg = """
+                      Code does not seem to run on the cloud but computer is not registered as local
+                      If you are running on a local computer, you must register it as local by running
+                        `ProjectFileSystem().register_as_local()`
+                      before you can use the ProjectFileSystem class.
+                      """
+                warnings.warn(msg, UserWarning)
+
+    def __call__(self): 
+        attrs = 'os home is_local is_colab is_kaggle p2config package_root'.split()
+        d = {k: getattr(self, k,None) for k in attrs}
+        return d
+
     def read_config(self):
         """Read config from the configuration file if it exists and return an empty config in does not"""
         cfg = configparser.ConfigParser()
@@ -100,12 +153,6 @@ class IsLocalMachine:
         else:
             cfg.add_section('Infra')
         return cfg
-        
-    @property
-    def is_local(self):
-        """Return `True` if the current machine was registered as a local machine"""
-        cfg = self.read_config()
-        return cfg['Infra'].getboolean('registered_as_local', False)
     
     def register_as_local(self):
         """Update the configuration file to register the machine as local machine"""
@@ -115,8 +162,86 @@ class IsLocalMachine:
         with open(self.p2config, 'w') as fp:
             cfg.write(fp)
         return cfg
+  
+    def deregister_as_local(self):
+        """Update the configuration file to deregister the machine from local machine status"""
+        cfg = self.read_config()
+        os.makedirs(self.home/self._config_dir, exist_ok=True)
+        cfg['Infra']['registered_as_local'] = 'False'
+        with open(self.p2config, 'w') as fp:
+            cfg.write(fp)
+        return cfg
 
-# %% ../nbs-dev/0_00_core.ipynb 37
+    @property
+    def home(self): return Path.home().absolute()
+    
+    @property
+    def os(self): return sys.platform
+
+    @property
+    def p2config(self): return self.home / self._config_dir / self._config_fname
+           
+    @property
+    def is_local(self):
+        """Return `True` if the current machine was registered as a local machine"""
+        cfg = self.read_config()
+        return cfg['Infra'].getboolean('registered_as_local', False)
+
+
+# %% ../nbs-dev/0_00_core.ipynb 40
+class ProjectFileSystem(CurrentMachine):
+    """Class representing the project file system and key subfolders (data, nbs, src)
+    
+    Set paths to key directories, according to whether the code is running locally or in the cloud.
+    Give access to path to these key folders and information about the environment.
+    """
+
+    _instance = None
+    _config_dir = '.ecutilities'
+    _config_fname = 'ecutilities.cfg'
+    _shared_project_dir = None
+    
+    def create_project_file_system(
+        self, 
+        p2project_root,     # path to project root, where all subfolder will be located
+        overwrite=False     # overwrite current folders if they exist when True (not implemented yet)
+        ):
+        """Create a standard project file system with the following structure:
+        
+        ```
+            project_root
+                |--- data   all data files
+                |--- nbs    all notebooks for work and experiments
+                |--- src    all scripts and code
+        ```
+        """
+        template = 'data nbs src'.split()
+        path = safe_path(p2project_root)
+        os.makedirs(path, exist_ok=True)
+        for subdir in template:
+            print(path/subdir)
+            os.makedirs(path/subdir, exist_ok=True)
+        print(f"Created project file system in {path}")
+
+    @property
+    def project_root(self):
+        #TODO: this code is not correct. It only works when installed in the same folder as the project.
+        if self.is_local:
+            return PACKAGE_ROOT
+        elif self.is_colab:
+            return self.gdrive / self._shared_project_dir
+        elif self.is_kaggle:
+            raise NotImplemented(f"ProjectFileSystem is not implemented for Kaggle yet")
+        else:
+            raise ValueError('Not running locally, on Colab or on Kaggle')
+
+    @property
+    def data(self): return self.project_root / 'data'
+
+    @property
+    def nbs(self): return self.project_root / 'nbs'        
+
+# %% ../nbs-dev/0_00_core.ipynb 45
 def files_in_tree(
     path: str|Path,               # path to the directory to scan  
     pattern: str|None = None      # pattern (glob style) to match in file name to filter the content
@@ -143,12 +268,15 @@ def files_in_tree(
             idx += 1
     return paths
 
-# %% ../nbs-dev/0_00_core.ipynb 41
-def nbs_root_dir(
-    path:str|Path|None = None, # path from where to seek for notebook parent directory
-    pattern:str = 'nbs',       # pattern to identify the nbs directory
+# %% ../nbs-dev/0_00_core.ipynb 50
+def path_to_parent_dir(
+    pattern:str,               # pattern to identify the parent directory
+    path:str|Path|None = None, # optional path from where to seek for parent directory
 )-> Path:                      # path of the parent directory
-    """Climb directory tree up to directory including pattern ('nbs'), and return its path"""
+    """Climb directory tree up to a directory starting with the string `pattern`, and return its path
+    
+    Can pass a starting path to climb from. 
+    """
     if path is None: path = Path()
     path = safe_path(path).absolute()
     tree = [path.name] + [p.name for p in path.parents]
