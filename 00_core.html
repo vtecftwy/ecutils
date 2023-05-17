@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="set of functions and classes used across this package and usable for other packages">
+
+<title>ecutilities - core</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="ecutilities - core">
+<meta property="og:description" content="set of functions and classes used across this package and usable for other packages">
+<meta property="og:site-name" content="ecutilities">
+<meta name="twitter:title" content="ecutilities - core">
+<meta name="twitter:description" content="set of functions and classes used across this package and usable for other packages">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">ecutilities</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./00_core.html"><code>core</code></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>ecutilities</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_core.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><code>core</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_ipython.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>ipython</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_plotting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>plotting</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_eda_stats_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>eda_stats_utils</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>ml</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_image_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>image_utils</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_dev_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>dev_utils</code></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#validation-tools" id="toc-validation-tools" class="nav-link active" data-scroll-target="#validation-tools">Validation tools</a>
+  <ul class="collapse">
+  <li><a href="#is_type" id="toc-is_type" class="nav-link" data-scroll-target="#is_type">is_type</a></li>
+  <li><a href="#validate_path" id="toc-validate_path" class="nav-link" data-scroll-target="#validate_path">validate_path</a></li>
+  <li><a href="#safe_path" id="toc-safe_path" class="nav-link" data-scroll-target="#safe_path">safe_path</a></li>
+  </ul></li>
+  <li><a href="#access-key-files-and-directories" id="toc-access-key-files-and-directories" class="nav-link" data-scroll-target="#access-key-files-and-directories">Access key files and directories</a>
+  <ul class="collapse">
+  <li><a href="#get_config_value" id="toc-get_config_value" class="nav-link" data-scroll-target="#get_config_value">get_config_value</a></li>
+  </ul></li>
+  <li><a href="#setup-utilities" id="toc-setup-utilities" class="nav-link" data-scroll-target="#setup-utilities">Setup utilities</a>
+  <ul class="collapse">
+  <li><a href="#currentmachine" id="toc-currentmachine" class="nav-link" data-scroll-target="#currentmachine">CurrentMachine</a></li>
+  <li><a href="#currentmachine.register_as_local" id="toc-currentmachine.register_as_local" class="nav-link" data-scroll-target="#currentmachine.register_as_local">CurrentMachine.register_as_local</a></li>
+  <li><a href="#projectfilesystem" id="toc-projectfilesystem" class="nav-link" data-scroll-target="#projectfilesystem">ProjectFileSystem</a></li>
+  <li><a href="#projectfilesystem.create_project_file_system" id="toc-projectfilesystem.create_project_file_system" class="nav-link" data-scroll-target="#projectfilesystem.create_project_file_system">ProjectFileSystem.create_project_file_system</a></li>
+  </ul></li>
+  <li><a href="#file-structure-exploration" id="toc-file-structure-exploration" class="nav-link" data-scroll-target="#file-structure-exploration">File structure exploration</a>
+  <ul class="collapse">
+  <li><a href="#files_in_tree" id="toc-files_in_tree" class="nav-link" data-scroll-target="#files_in_tree">files_in_tree</a></li>
+  <li><a href="#path_to_parent_dir" id="toc-path_to_parent_dir" class="nav-link" data-scroll-target="#path_to_parent_dir">path_to_parent_dir</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/vtecftwy/ecutils/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><code>core</code></h1>
+</div>
+
+<div>
+  <div class="description">
+    set of functions and classes used across this package and usable for other packages
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="validation-tools" class="level1">
+<h1>Validation tools</h1>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L29" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="is_type" class="level3">
+<h3 class="anchored" data-anchor-id="is_type">is_type</h3>
+<blockquote class="blockquote">
+<pre><code> is_type (obj:Any, obj_type:type, raise_error:bool=False)</code></pre>
+</blockquote>
+<p>Validate that <code>obj</code> is of type <code>obj_type</code>. Raise error in the negative when <code>raise_error</code> is <code>True</code></p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>obj</td>
+<td>Any</td>
+<td></td>
+<td>object whose type to validate</td>
+</tr>
+<tr class="even">
+<td>obj_type</td>
+<td>type</td>
+<td></td>
+<td>expected type for <code>obj</code></td>
+</tr>
+<tr class="odd">
+<td>raise_error</td>
+<td>bool</td>
+<td>False</td>
+<td>when True, raise a ValueError is <code>obj</code> is not of the right type</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>bool</strong></td>
+<td></td>
+<td><strong>True when <code>obj</code> is of the right type, False otherwise</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>is_type(obj<span class="op">=</span><span class="st">'this is a string'</span>, obj_type<span class="op">=</span><span class="bu">str</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>True</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>is_type(obj<span class="op">=</span>np.ones(shape<span class="op">=</span>(<span class="dv">2</span>,<span class="dv">2</span>)), obj_type<span class="op">=</span>np.ndarray)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>True</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L42" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="validate_path" class="level3">
+<h3 class="anchored" data-anchor-id="validate_path">validate_path</h3>
+<blockquote class="blockquote">
+<pre><code> validate_path (path:str|pathlib.Path, path_type:str='file',
+                raise_error:bool=False)</code></pre>
+</blockquote>
+<p>Validate that path is a Path or str and points to a real file or directory</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>path</td>
+<td>str | Path</td>
+<td></td>
+<td>path to validate</td>
+</tr>
+<tr class="even">
+<td>path_type</td>
+<td>str</td>
+<td>file</td>
+<td>type of the target path: <code>'file'</code>, <code>'dir'</code> or <code>'any'</code></td>
+</tr>
+<tr class="odd">
+<td>raise_error</td>
+<td>bool</td>
+<td>False</td>
+<td>when True, raise a ValueError is path does not a file</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>bool</strong></td>
+<td></td>
+<td><strong>True when path is a valid path, False otherwise</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>path_file <span class="op">=</span> Path(<span class="st">'../data/img/IMG_001_512px.jpg'</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>validate_path(path_file)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>True</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>validate_path(path_file, path_type<span class="op">=</span><span class="st">'any'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>True</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>path_dir <span class="op">=</span> Path(<span class="st">'../data'</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>validate_path(path_dir, path_type<span class="op">=</span><span class="st">'dir'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>True</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>validate_path(path_dir, path_type<span class="op">=</span><span class="st">'any'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>True</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>path_error <span class="op">=</span> Path(<span class="st">'../data/img/IIIMG_001_512px.jpg'</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>validate_path(path_error)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>False</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L59" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="safe_path" class="level3">
+<h3 class="anchored" data-anchor-id="safe_path">safe_path</h3>
+<blockquote class="blockquote">
+<pre><code> safe_path (path:str|pathlib.Path)</code></pre>
+</blockquote>
+<p>Return a Path object when given a valid path as a string or a Path, raise error otherwise</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>path</td>
+<td>str | Path</td>
+<td>path to validate</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>Path</strong></td>
+<td><strong>validated path returned as a pathlib.Path</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="access-key-files-and-directories" class="level1">
+<h1>Access key files and directories</h1>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L69" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="get_config_value" class="level3">
+<h3 class="anchored" data-anchor-id="get_config_value">get_config_value</h3>
+<blockquote class="blockquote">
+<pre><code> get_config_value (section:str, key:str,
+                   path_to_config_file:pathlib.Path|str=None)</code></pre>
+</blockquote>
+<p>Returns the value corresponding to the key-value pair in the configuration file (configparser format)</p>
+<p>When no path_to_config_file is provided, the function will try to find the file in: the system’s <code>home</code>, the parent directory of the current directory, and the Google drive directory mounted to the Colab environment.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>section</td>
+<td>str</td>
+<td></td>
+<td>section in the configparser cfg file</td>
+</tr>
+<tr class="even">
+<td>key</td>
+<td>str</td>
+<td></td>
+<td>key in the selected section</td>
+</tr>
+<tr class="odd">
+<td>path_to_config_file</td>
+<td>Path | str</td>
+<td>None</td>
+<td>path to the cfg file</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>Any</strong></td>
+<td></td>
+<td><strong>the value corresponding to section&gt;key&gt;value</strong></td>
+</tr>
+</tbody>
+</table>
+<p>By defaults (<code>path_to_config_file is None</code>), it is assumed that the configuration file is located in the <code>private-accross-accounts directory</code> on google drive. If not, a path to the file (<code>Path</code> or <code>str</code>) must be provided.</p>
+<p>The configuration file is expected to be in the format used by the standard module <code>configparser</code> <a href="https://docs.python.org/3/library/configparser.html">documentation</a></p>
+<pre class="ascii"><code>    [DEFAULT]
+    key = value
+
+    [section_name]
+    key = value
+
+    [section_name]
+    key = value</code></pre>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>path2cfg <span class="op">=</span> Path(<span class="st">'../config-sample.cfg'</span>).resolve()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> path2cfg.is_file(), <span class="ss">f"</span><span class="sc">{</span>path2cfg<span class="sc">}</span><span class="ss"> is not a file"</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(path2cfg, <span class="st">'r'</span>) <span class="im">as</span> fp:</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(fp.read())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[azure]
+azure-api-key= dummy_api_key_for_azure
+
+[kaggle]
+kaggle_username = not_my_real_kaggle_name
+kaggle_key = dummy_api_key_for_kaggle
+
+[wandb]
+api_key = dummy_api_key_for_wandb
+</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>value <span class="op">=</span> get_config_value(section<span class="op">=</span><span class="st">'azure'</span>, key<span class="op">=</span><span class="st">'azure-api-key'</span>, path_to_config_file<span class="op">=</span>path2cfg)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> value <span class="op">==</span> <span class="st">'dummy_api_key_for_azure'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using config file at /home/vtec/projects/ec-packages/ecutilities/config-sample.cfg</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>value <span class="op">=</span> get_config_value(section<span class="op">=</span><span class="st">'kaggle'</span>, key<span class="op">=</span><span class="st">'kaggle_username'</span>, path_to_config_file<span class="op">=</span>path2cfg)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> value <span class="op">==</span> <span class="st">'not_my_real_kaggle_name'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using config file at /home/vtec/projects/ec-packages/ecutilities/config-sample.cfg</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>value <span class="op">=</span> get_config_value(section<span class="op">=</span><span class="st">'wandb'</span>, key<span class="op">=</span><span class="st">'api_key'</span>, path_to_config_file<span class="op">=</span>path2cfg)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> value <span class="op">==</span> <span class="st">'dummy_api_key_for_wandb'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using config file at /home/vtec/projects/ec-packages/ecutilities/config-sample.cfg</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>value <span class="op">=</span> get_config_value(section<span class="op">=</span><span class="st">'dummy'</span>, key<span class="op">=</span><span class="st">'dummy-user-id'</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> value.startswith(<span class="st">'dummy-userID-from'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using config file at /home/vtec/config-api-keys.cfg</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="setup-utilities" class="level1">
+<h1>Setup utilities</h1>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L98" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="currentmachine" class="level3">
+<h3 class="anchored" data-anchor-id="currentmachine">CurrentMachine</h3>
+<blockquote class="blockquote">
+<pre><code> CurrentMachine (*args, **kwargs)</code></pre>
+</blockquote>
+<p>Callable class to represent info on the current machine. When called, instance return a dict all <code>attrs</code>:</p>
+<ul>
+<li><code>os</code></li>
+<li><code>home</code> path</li>
+<li><code>is_local</code>, <code>is_colab</code>, <code>is_kaggle</code></li>
+<li><code>p2config</code> path to the config file</li>
+<li><code>package_root</code> path to the root of the package root directory</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>machine <span class="op">=</span> CurrentMachine()</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>machine()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'os': 'linux',
+ 'home': Path('/home/vtec'),
+ 'is_local': True,
+ 'is_colab': False,
+ 'is_kaggle': False,
+ 'p2config': Path('/home/vtec/.ecutilities/ecutilities.cfg'),
+ 'package_root': Path('/home/vtec/projects/ec-packages/ecutilities')}</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>machine.is_local, machine.is_colab, machine.is_kaggle</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(False, False, False)</code></pre>
+</div>
+</div>
+<p>This machine is not registered a local machine, but is also not running in the cloud. We should register it as a local machine with <code>register_as_local</code></p>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L157" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="currentmachine.register_as_local" class="level3">
+<h3 class="anchored" data-anchor-id="currentmachine.register_as_local">CurrentMachine.register_as_local</h3>
+<blockquote class="blockquote">
+<pre><code> CurrentMachine.register_as_local ()</code></pre>
+</blockquote>
+<p>Update the configuration file to register the machine as local machine</p>
+<p>Use this method to register the current machine as local machine. Only needs to be used once on a machine. Do not use on cloud VMs</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>machine.register_as_local()</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>machine.is_local, machine.is_colab, machine.is_kaggle</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(True, False, False)</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p><strong>Technical Note</strong>:</p>
+<p>The configuration file is located at a standard location, which varies depending on the OS:</p>
+<ul>
+<li>Windows:
+<ul>
+<li>home is <code>C:\Users\username</code></li>
+<li>application data in <code>C:\Users\username\AppData/Local/...</code> or <code>C:\Users\username\AppData\Roaming\...</code> (see <a href="https://superuser.com/questions/21458/why-are-there-directories-called-local-locallow-and-roaming-under-users-user">StackExchange</a>)</li>
+<li>application also can be loaded under a dedicated directory under <code>C:\Users\username</code> like <code>C:\Users\username\.conda\...</code></li>
+</ul></li>
+<li>Linux:
+<ul>
+<li>home is <code>/home/username</code></li>
+<li>application data in a file or dedicated directory <code>/home/username/</code> s.a.:
+<ul>
+<li>file in home directory, e.g.&nbsp;<code>.gitconfig</code></li>
+<li>file in an application dedicated directory, e.g.&nbsp;<code>/home/username/.conda/...</code></li>
+</ul></li>
+</ul></li>
+</ul>
+<p><code>ecutilities</code> places the configuration file in a dedicated directory in the home directory: - <code>C:\Users\username\.ecutilities\ecutilities.cfg</code> - <code>/home/username/.ecutilities/ecutilities.cfg</code></p>
+<p>Retrieve the OS:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>sys.platform</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="shell"><code>win32           with Windows
+linux           with linux
+darwin          with macOs</code></pre>
+<p>Accessing the correct path depending on the OS:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>Path().home().absolute()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre class="shell"><code>WindowsPath('C:/Users/username') with Windows
+Path('/home/username')           with linux</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L192" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="projectfilesystem" class="level3">
+<h3 class="anchored" data-anchor-id="projectfilesystem">ProjectFileSystem</h3>
+<blockquote class="blockquote">
+<pre><code> ProjectFileSystem (*args, **kwargs)</code></pre>
+</blockquote>
+<p>Class representing the project file system and key subfolders (data, nbs, src)</p>
+<p>Set paths to key directories, according to whether the code is running locally or in the cloud. Give access to path to these key folders and information about the environment.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> ProjectFileSystem()</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>pfs()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'os': 'linux',
+ 'home': Path('/home/vtec'),
+ 'is_local': True,
+ 'is_colab': False,
+ 'is_kaggle': False,
+ 'p2config': Path('/home/vtec/.ecutilities/ecutilities.cfg'),
+ 'package_root': Path('/home/vtec/projects/ec-packages/ecutilities')}</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L204" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="projectfilesystem.create_project_file_system" class="level3">
+<h3 class="anchored" data-anchor-id="projectfilesystem.create_project_file_system">ProjectFileSystem.create_project_file_system</h3>
+<blockquote class="blockquote">
+<pre><code> ProjectFileSystem.create_project_file_system (p2project_root,
+                                               overwrite=False)</code></pre>
+</blockquote>
+<p>Create a standard project file system with the following structure:</p>
+<pre><code>    project_root
+        |--- data   all data files
+        |--- nbs    all notebooks for work and experiments
+        |--- src    all scripts and code</code></pre>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>p2project_root</td>
+<td></td>
+<td></td>
+<td>path to project root, where all subfolder will be located</td>
+</tr>
+<tr class="even">
+<td>overwrite</td>
+<td>bool</td>
+<td>False</td>
+<td>overwrite current folders if they exist when True (not implemented yet)</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>pfs.create_project_file_system(Path(<span class="st">'/home/vtec/projects/ec-packages/ecutilities'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>/home/vtec/projects/ec-packages/ecutilities/data
+/home/vtec/projects/ec-packages/ecutilities/nbs
+/home/vtec/projects/ec-packages/ecutilities/src
+Created project file system in /home/vtec/projects/ec-packages/ecutilities</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="file-structure-exploration" class="level1">
+<h1>File structure exploration</h1>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L245" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="files_in_tree" class="level3">
+<h3 class="anchored" data-anchor-id="files_in_tree">files_in_tree</h3>
+<blockquote class="blockquote">
+<pre><code> files_in_tree (path:str|pathlib.Path, pattern:str|None=None)</code></pre>
+</blockquote>
+<p>List files in directory and its subdiretories, print tree starting from parent directory</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>path</td>
+<td>str | Path</td>
+<td></td>
+<td>path to the directory to scan</td>
+</tr>
+<tr class="even">
+<td>pattern</td>
+<td>str | None</td>
+<td>None</td>
+<td>pattern (glob style) to match in file name to filter the content</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>p2dir <span class="op">=</span> Path(<span class="st">''</span>).resolve()</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(p2dir, <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>files <span class="op">=</span> files_in_tree(p2dir)</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"List of </span><span class="sc">{</span><span class="bu">len</span>(files)<span class="sc">}</span><span class="ss"> files when unfiltered"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>/home/vtec/projects/ec-packages/ecutilities/nbs-dev 
+
+ecutilities
+  |--nbs-dev
+  |    |--0_02_plotting.ipynb (0)
+  |    |--2_01_image_utils.ipynb (1)
+  |    |--1_01_eda_stats_utils.ipynb (2)
+  |    |--0_01_ipython.ipynb (3)
+  |    |--0_00_core.ipynb (4)
+  |    |--.last_checked (5)
+  |    |--sidebar.yml (6)
+  |    |--1_02_ml.ipynb (7)
+  |    |--index.ipynb (8)
+  |    |--nbdev.yml (9)
+  |    |--9_01_dev_utils.ipynb (10)
+  |    |--styles.css (11)
+  |    |--_quarto.yml (12)
+  |    |--.ipynb_checkpoints
+  |    |    |--0_02_plotting-checkpoint.ipynb (13)
+  |    |    |--9_01_dev_utils-checkpoint.ipynb (14)
+  |    |    |--0_01_ipython-checkpoint.ipynb (15)
+  |    |    |--0_00_core-checkpoint.ipynb (16)
+  |    |    |--1_01_eda_stats_utils-checkpoint.ipynb (17)
+  |    |    |--index-checkpoint.ipynb (18)
+  |    |    |--2_01_image_utils-checkpoint.ipynb (19)
+  |    |    |--1_02_ml-checkpoint.ipynb (20)
+List of 21 files when unfiltered</code></pre>
+</div>
+</div>
+<p>Use <code>pattern</code> to filter the paths to return (using <code>glob</code> syntax)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>files <span class="op">=</span> files_in_tree(p2dir, pattern<span class="op">=</span><span class="st">'ipynb'</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"List of </span><span class="sc">{</span><span class="bu">len</span>(files)<span class="sc">}</span><span class="ss"> files when filtered"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ecutilities
+  |--nbs-dev
+  |    |--0_02_plotting.ipynb (0)
+  |    |--2_01_image_utils.ipynb (1)
+  |    |--1_01_eda_stats_utils.ipynb (2)
+  |    |--0_01_ipython.ipynb (3)
+  |    |--0_00_core.ipynb (4)
+  |    |--1_02_ml.ipynb (5)
+  |    |--index.ipynb (6)
+  |    |--9_01_dev_utils.ipynb (7)
+  |    |--.ipynb_checkpoints
+  |    |    |--0_02_plotting-checkpoint.ipynb (8)
+  |    |    |--9_01_dev_utils-checkpoint.ipynb (9)
+  |    |    |--0_01_ipython-checkpoint.ipynb (10)
+  |    |    |--0_00_core-checkpoint.ipynb (11)
+  |    |    |--1_01_eda_stats_utils-checkpoint.ipynb (12)
+  |    |    |--index-checkpoint.ipynb (13)
+  |    |    |--2_01_image_utils-checkpoint.ipynb (14)
+  |    |    |--1_02_ml-checkpoint.ipynb (15)
+List of 16 files when filtered</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/core.py#L272" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="path_to_parent_dir" class="level3">
+<h3 class="anchored" data-anchor-id="path_to_parent_dir">path_to_parent_dir</h3>
+<blockquote class="blockquote">
+<pre><code> path_to_parent_dir (pattern:str, path:str|pathlib.Path|None=None)</code></pre>
+</blockquote>
+<p>Climb directory tree up to a directory starting with <code>pattern</code>, and return its path.</p>
+<ul>
+<li><p>When no directory is found in the tree starting with <code>pattern</code>, return the current directory path.</p></li>
+<li><p>It is possible to pass a <code>path</code> as starting path to climb from.</p></li>
+</ul>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pattern</td>
+<td>str</td>
+<td></td>
+<td>pattern to identify the parent directory</td>
+</tr>
+<tr class="even">
+<td>path</td>
+<td>str | Path | None</td>
+<td>None</td>
+<td>optional path from where to seek for parent directory</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>Path</strong></td>
+<td></td>
+<td><strong>path of the parent directory</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>p2dir <span class="op">=</span> path_to_parent_dir(<span class="st">'nbs'</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'nbs-dev'</span> <span class="kw">in</span> p2dir.parts <span class="kw">and</span> <span class="st">'nbs'</span> <span class="kw">not</span> <span class="kw">in</span> p2dir.parts</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>p2dir</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('/home/vtec/projects/ec-packages/ecutilities/nbs-dev')</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>p2dir <span class="op">=</span> path_to_parent_dir(<span class="st">'nbs'</span>, Path(<span class="st">'../nbs/sandbox.ipynb'</span>).resolve())</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'nbs'</span> <span class="kw">in</span> p2dir.parts <span class="kw">and</span> <span class="st">'nbs-dev'</span> <span class="kw">not</span> <span class="kw">in</span> p2dir.parts</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>p2dir</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('/home/vtec/projects/ec-packages/ecutilities/nbs')</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>p2dir <span class="op">=</span> path_to_parent_dir(<span class="st">'not-in-tree'</span>).resolve()</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> p2dir <span class="op">==</span> Path().absolute()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>p2project_root <span class="op">=</span> path_to_parent_dir(<span class="st">'ecutilities'</span>)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'ecutilities'</span> <span class="kw">in</span> p2project_root.parts <span class="kw">and</span> <span class="st">'nbs'</span> <span class="kw">not</span> <span class="kw">in</span> p2project_root.parts</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>p2project_root</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('/home/vtec/projects/ec-packages/ecutilities')</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

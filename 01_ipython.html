@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Set of utility functions to be used in Jupyter and Jupyter Lab notebooks.">
+
+<title>ecutilities - ipython</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="ecutilities - ipython">
+<meta property="og:description" content="Set of utility functions to be used in Jupyter and Jupyter Lab notebooks.">
+<meta property="og:site-name" content="ecutilities">
+<meta name="twitter:title" content="ecutilities - ipython">
+<meta name="twitter:description" content="Set of utility functions to be used in Jupyter and Jupyter Lab notebooks.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">ecutilities</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_ipython.html"><code>ipython</code></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>ecutilities</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>core</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_ipython.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><code>ipython</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_plotting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>plotting</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_eda_stats_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>eda_stats_utils</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>ml</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_image_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>image_utils</code></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_dev_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><code>dev_utils</code></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#system-and-cli" id="toc-system-and-cli" class="nav-link active" data-scroll-target="#system-and-cli">System and CLI</a>
+  <ul class="collapse">
+  <li><a href="#run_cli" id="toc-run_cli" class="nav-link" data-scroll-target="#run_cli">run_cli</a></li>
+  </ul></li>
+  <li><a href="#notebook-setup" id="toc-notebook-setup" class="nav-link" data-scroll-target="#notebook-setup">Notebook setup</a>
+  <ul class="collapse">
+  <li><a href="#nb_setup" id="toc-nb_setup" class="nav-link" data-scroll-target="#nb_setup">nb_setup</a></li>
+  <li><a href="#install_code_on_cloud" id="toc-install_code_on_cloud" class="nav-link" data-scroll-target="#install_code_on_cloud">install_code_on_cloud</a></li>
+  </ul></li>
+  <li><a href="#improve-output-cell-formats" id="toc-improve-output-cell-formats" class="nav-link" data-scroll-target="#improve-output-cell-formats">Improve output cell formats</a>
+  <ul class="collapse">
+  <li><a href="#display_mds" id="toc-display_mds" class="nav-link" data-scroll-target="#display_mds">display_mds</a></li>
+  <li><a href="#display_dfs" id="toc-display_dfs" class="nav-link" data-scroll-target="#display_dfs">display_dfs</a></li>
+  <li><a href="#pandas_nrows_ncols" id="toc-pandas_nrows_ncols" class="nav-link" data-scroll-target="#pandas_nrows_ncols">pandas_nrows_ncols</a></li>
+  <li><a href="#display_full_df" id="toc-display_full_df" class="nav-link" data-scroll-target="#display_full_df">display_full_df</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/vtecftwy/ecutils/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><code>ipython</code></h1>
+</div>
+
+<div>
+  <div class="description">
+    Set of utility functions to be used in Jupyter and Jupyter Lab notebooks.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="system-and-cli" class="level1">
+<h1>System and CLI</h1>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/ipython.py#L23" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="run_cli" class="level3">
+<h3 class="anchored" data-anchor-id="run_cli">run_cli</h3>
+<blockquote class="blockquote">
+<pre><code> run_cli (cmd:str='ls -l')</code></pre>
+</blockquote>
+<p>Runs a cli command from jupyter notebook and print the shell output message</p>
+<p>Uses subprocess.run with passed command to run the cli command</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cmd</td>
+<td>str</td>
+<td>ls -l</td>
+<td>command to execute in the cli</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>run_cli(<span class="st">'pwd'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>/home/vtec/projects/ec-packages/ecutilities/nbs-dev
+</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="notebook-setup" class="level1">
+<h1>Notebook setup</h1>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/ipython.py#L32" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="nb_setup" class="level3">
+<h3 class="anchored" data-anchor-id="nb_setup">nb_setup</h3>
+<blockquote class="blockquote">
+<pre><code> nb_setup (autoreload:bool=True, paths:List[str|pathlib.Path]=None)</code></pre>
+</blockquote>
+<p>Use in first cell of notebook to set autoreload, and add system paths</p>
+<p>Always add a path to the directoruy ‘src’ if <code>srs</code> directory exists at the same level as the <code>nbs</code> directory.</p>
+<p>When the notebook is not located in a tree including the name <code>nbs</code>, <code>src</code> directory is searched at the same level as the directory in which the notebook is located.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>autoreload</td>
+<td>bool</td>
+<td>True</td>
+<td>True to set autoreload in this notebook</td>
+</tr>
+<tr class="even">
+<td>paths</td>
+<td>List[str | Path]</td>
+<td>None</td>
+<td>Paths to add to the path environment variable</td>
+</tr>
+</tbody>
+</table>
+<p>By default, <code>ipython.nb_setup()</code> - loads and set <code>autoreload</code> - adds a path to a directory named <code>src</code> when it exists at the same level as where the notebook directory is located. It no such <code>src</code> directory exists, no path is added</p>
+<p><code>ipython.nb_setup</code> assumes the following file structure:</p>
+<pre><code>    project_directory
+          |--- nbs
+          |     | --- current_nb.ipynb
+          |     | --- ...
+          |
+          |--- src
+          |     | --- module_to_import.py
+          |     | --- ...
+          |
+          |--- data
+          |     |
+          |     | ...</code></pre>
+<p>For other file structure, specify paths as a <code>list</code> of <code>Path</code></p>
+<p>Before running <a href="https://vtecftwy.github.io/ecutils/01_ipython.html#nb_setup"><code>nb_setup</code></a>, <code>sys.path</code> does not include the path to the local source directory. After running it, it will be added, unless the directory does not exist.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sys.path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['/home/vtec/projects/ec-packages/ecutilities/nbs-dev',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python310.zip',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/lib-dynload',
+ '',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/site-packages',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/site-packages/PyQt5_sip-12.11.0-py3.10-linux-x86_64.egg',
+ '/home/vtec/projects/ec-packages/ecutilities']</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>nb_setup(autoreload<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Added path: /home/vtec/projects/ec-packages/ecutilities/src</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sys.path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['/home/vtec/projects/ec-packages/ecutilities/src',
+ '/home/vtec/projects/ec-packages/ecutilities/nbs-dev',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python310.zip',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/lib-dynload',
+ '',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/site-packages',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/site-packages/PyQt5_sip-12.11.0-py3.10-linux-x86_64.egg',
+ '/home/vtec/projects/ec-packages/ecutilities']</code></pre>
+</div>
+</div>
+<p>We also can add other specific paths:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>path_to_add <span class="op">=</span> <span class="bu">str</span>(Path(<span class="st">'../nbs'</span>).resolve().absolute())</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>nb_setup(autoreload<span class="op">=</span><span class="va">False</span>, paths<span class="op">=</span>[path_to_add])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Added path: /home/vtec/projects/ec-packages/ecutilities/nbs</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sys.path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['/home/vtec/projects/ec-packages/ecutilities/src',
+ '/home/vtec/projects/ec-packages/ecutilities/nbs',
+ '/home/vtec/projects/ec-packages/ecutilities/nbs-dev',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python310.zip',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/lib-dynload',
+ '',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/site-packages',
+ '/home/vtec/miniconda3/envs/ecutils/lib/python3.10/site-packages/PyQt5_sip-12.11.0-py3.10-linux-x86_64.egg',
+ '/home/vtec/projects/ec-packages/ecutilities']</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/ipython.py#L68" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="install_code_on_cloud" class="level3">
+<h3 class="anchored" data-anchor-id="install_code_on_cloud">install_code_on_cloud</h3>
+<blockquote class="blockquote">
+<pre><code> install_code_on_cloud (package_name:str, quiet:bool=False)</code></pre>
+</blockquote>
+<p>pip install the project code package, when nb is running in the cloud.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>package_name</td>
+<td>str</td>
+<td></td>
+<td>project package name, e.g.&nbsp;metagentools or git+https://github.com/repo.git@main</td>
+</tr>
+<tr class="even">
+<td>quiet</td>
+<td>bool</td>
+<td>False</td>
+<td>install quietly with Trud</td>
+</tr>
+</tbody>
+</table>
+<p>When using colab, kaggle or another cloud VM, specicif code must be installed every time from the Python Package Index (PyPI) or its GitHub repo.</p>
+<p>When running locally, the project code should be pre-installed as part of the environment</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>install_code_on_cloud(package_name<span class="op">=</span><span class="st">'metagentools'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>The notebook is running locally, will not automatically install project code</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="improve-output-cell-formats" class="level1">
+<h1>Improve output cell formats</h1>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/ipython.py#L99" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="display_mds" class="level3">
+<h3 class="anchored" data-anchor-id="display_mds">display_mds</h3>
+<blockquote class="blockquote">
+<pre><code> display_mds (*strings:str|tuple[str])</code></pre>
+</blockquote>
+<p>Display one or several strings formatted in markdown format</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>display_mds(<span class="st">'**bold** and _italic_'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><strong>bold</strong> and <em>italic</em></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>display_mds(<span class="st">'**bold** and _italic_'</span>,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>            <span class="st">'- bullet'</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">'- bullet'</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">'&gt; Note: this is a note'</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><strong>bold</strong> and <em>italic</em></p>
+</div>
+<div class="cell-output cell-output-display">
+<ul>
+<li>bullet</li>
+</ul>
+</div>
+<div class="cell-output cell-output-display">
+<ul>
+<li>bullet</li>
+</ul>
+</div>
+<div class="cell-output cell-output-display">
+<blockquote class="blockquote">
+<p>Note: this is a note</p>
+</blockquote>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/ipython.py#L107" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="display_dfs" class="level3">
+<h3 class="anchored" data-anchor-id="display_dfs">display_dfs</h3>
+<blockquote class="blockquote">
+<pre><code> display_dfs (*dfs:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>Display one or several <code>pd.DataFrame</code> in a single cell output</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>df1 <span class="op">=</span> pd.DataFrame(data<span class="op">=</span>np.random.normal(size<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">5</span>)))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>df2 <span class="op">=</span> pd.DataFrame(data<span class="op">=</span>np.random.normal(size<span class="op">=</span>(<span class="dv">20</span>,<span class="dv">10</span>)))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>display_dfs(df1.head(<span class="dv">3</span>), df2.head(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>-0.404293</td>
+<td>-1.959411</td>
+<td>-0.136628</td>
+<td>0.727151</td>
+<td>-0.595115</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2.404413</td>
+<td>1.958637</td>
+<td>-0.513681</td>
+<td>-1.408594</td>
+<td>0.950348</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1.684596</td>
+<td>-2.020807</td>
+<td>0.395364</td>
+<td>2.704780</td>
+<td>-1.106685</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+<th data-quarto-table-cell-role="th">6</th>
+<th data-quarto-table-cell-role="th">7</th>
+<th data-quarto-table-cell-role="th">8</th>
+<th data-quarto-table-cell-role="th">9</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>-2.236748</td>
+<td>-1.984643</td>
+<td>1.505316</td>
+<td>-0.778855</td>
+<td>0.461898</td>
+<td>-1.497143</td>
+<td>-0.533513</td>
+<td>0.450035</td>
+<td>0.119140</td>
+<td>-0.567164</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1.016743</td>
+<td>-0.181036</td>
+<td>-0.593569</td>
+<td>-1.842810</td>
+<td>1.858056</td>
+<td>0.480069</td>
+<td>0.266183</td>
+<td>1.229341</td>
+<td>0.365643</td>
+<td>-0.231381</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>-0.567689</td>
+<td>1.072291</td>
+<td>0.484437</td>
+<td>-0.224742</td>
+<td>0.624904</td>
+<td>-1.132879</td>
+<td>1.338664</td>
+<td>-0.931461</td>
+<td>-0.035472</td>
+<td>-0.873919</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/ipython.py#L114" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="pandas_nrows_ncols" class="level3">
+<h3 class="anchored" data-anchor-id="pandas_nrows_ncols">pandas_nrows_ncols</h3>
+<blockquote class="blockquote">
+<pre><code> pandas_nrows_ncols (nrows:int|None=None, ncols:int|None=None)</code></pre>
+</blockquote>
+<p>Context manager that sets the max number of rows and cols to apply to any output within the context</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>nrows</td>
+<td>int | None</td>
+<td>None</td>
+<td>max number of rows to show; show all rows if <code>None</code></td>
+</tr>
+<tr class="even">
+<td>ncols</td>
+<td>int | None</td>
+<td>None</td>
+<td>max number of columns to show; show all columns if <code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p>With no context manager, the pandas object are displayed with a maximum of 60 rows and 20 columns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(np.random.randint(low<span class="op">=</span><span class="dv">0</span>, high<span class="op">=</span><span class="dv">100</span>, size<span class="op">=</span>(<span class="dv">3</span>,<span class="dv">50</span>)))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>display(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+<th data-quarto-table-cell-role="th">6</th>
+<th data-quarto-table-cell-role="th">7</th>
+<th data-quarto-table-cell-role="th">8</th>
+<th data-quarto-table-cell-role="th">9</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">40</th>
+<th data-quarto-table-cell-role="th">41</th>
+<th data-quarto-table-cell-role="th">42</th>
+<th data-quarto-table-cell-role="th">43</th>
+<th data-quarto-table-cell-role="th">44</th>
+<th data-quarto-table-cell-role="th">45</th>
+<th data-quarto-table-cell-role="th">46</th>
+<th data-quarto-table-cell-role="th">47</th>
+<th data-quarto-table-cell-role="th">48</th>
+<th data-quarto-table-cell-role="th">49</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>78</td>
+<td>57</td>
+<td>39</td>
+<td>53</td>
+<td>91</td>
+<td>46</td>
+<td>7</td>
+<td>0</td>
+<td>83</td>
+<td>92</td>
+<td>...</td>
+<td>92</td>
+<td>49</td>
+<td>11</td>
+<td>69</td>
+<td>56</td>
+<td>93</td>
+<td>51</td>
+<td>26</td>
+<td>76</td>
+<td>81</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>31</td>
+<td>25</td>
+<td>45</td>
+<td>99</td>
+<td>82</td>
+<td>52</td>
+<td>4</td>
+<td>97</td>
+<td>75</td>
+<td>59</td>
+<td>...</td>
+<td>19</td>
+<td>12</td>
+<td>78</td>
+<td>55</td>
+<td>11</td>
+<td>75</td>
+<td>97</td>
+<td>78</td>
+<td>97</td>
+<td>64</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>38</td>
+<td>91</td>
+<td>62</td>
+<td>45</td>
+<td>95</td>
+<td>97</td>
+<td>97</td>
+<td>35</td>
+<td>46</td>
+<td>24</td>
+<td>...</td>
+<td>6</td>
+<td>64</td>
+<td>31</td>
+<td>59</td>
+<td>0</td>
+<td>83</td>
+<td>17</td>
+<td>21</td>
+<td>54</td>
+<td>47</td>
+</tr>
+</tbody>
+</table>
+
+<p>3 rows × 50 columns</p>
+</div>
+</div>
+</div>
+<p>Using the context manager, all rows and columns will be displayed</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pandas_nrows_ncols():</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    display(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+<th data-quarto-table-cell-role="th">6</th>
+<th data-quarto-table-cell-role="th">7</th>
+<th data-quarto-table-cell-role="th">8</th>
+<th data-quarto-table-cell-role="th">9</th>
+<th data-quarto-table-cell-role="th">10</th>
+<th data-quarto-table-cell-role="th">11</th>
+<th data-quarto-table-cell-role="th">12</th>
+<th data-quarto-table-cell-role="th">13</th>
+<th data-quarto-table-cell-role="th">14</th>
+<th data-quarto-table-cell-role="th">15</th>
+<th data-quarto-table-cell-role="th">16</th>
+<th data-quarto-table-cell-role="th">17</th>
+<th data-quarto-table-cell-role="th">18</th>
+<th data-quarto-table-cell-role="th">19</th>
+<th data-quarto-table-cell-role="th">20</th>
+<th data-quarto-table-cell-role="th">21</th>
+<th data-quarto-table-cell-role="th">22</th>
+<th data-quarto-table-cell-role="th">23</th>
+<th data-quarto-table-cell-role="th">24</th>
+<th data-quarto-table-cell-role="th">25</th>
+<th data-quarto-table-cell-role="th">26</th>
+<th data-quarto-table-cell-role="th">27</th>
+<th data-quarto-table-cell-role="th">28</th>
+<th data-quarto-table-cell-role="th">29</th>
+<th data-quarto-table-cell-role="th">30</th>
+<th data-quarto-table-cell-role="th">31</th>
+<th data-quarto-table-cell-role="th">32</th>
+<th data-quarto-table-cell-role="th">33</th>
+<th data-quarto-table-cell-role="th">34</th>
+<th data-quarto-table-cell-role="th">35</th>
+<th data-quarto-table-cell-role="th">36</th>
+<th data-quarto-table-cell-role="th">37</th>
+<th data-quarto-table-cell-role="th">38</th>
+<th data-quarto-table-cell-role="th">39</th>
+<th data-quarto-table-cell-role="th">40</th>
+<th data-quarto-table-cell-role="th">41</th>
+<th data-quarto-table-cell-role="th">42</th>
+<th data-quarto-table-cell-role="th">43</th>
+<th data-quarto-table-cell-role="th">44</th>
+<th data-quarto-table-cell-role="th">45</th>
+<th data-quarto-table-cell-role="th">46</th>
+<th data-quarto-table-cell-role="th">47</th>
+<th data-quarto-table-cell-role="th">48</th>
+<th data-quarto-table-cell-role="th">49</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>78</td>
+<td>57</td>
+<td>39</td>
+<td>53</td>
+<td>91</td>
+<td>46</td>
+<td>7</td>
+<td>0</td>
+<td>83</td>
+<td>92</td>
+<td>0</td>
+<td>30</td>
+<td>68</td>
+<td>6</td>
+<td>14</td>
+<td>26</td>
+<td>28</td>
+<td>94</td>
+<td>1</td>
+<td>15</td>
+<td>83</td>
+<td>64</td>
+<td>78</td>
+<td>19</td>
+<td>26</td>
+<td>91</td>
+<td>64</td>
+<td>66</td>
+<td>26</td>
+<td>66</td>
+<td>38</td>
+<td>24</td>
+<td>61</td>
+<td>32</td>
+<td>70</td>
+<td>19</td>
+<td>97</td>
+<td>69</td>
+<td>97</td>
+<td>2</td>
+<td>92</td>
+<td>49</td>
+<td>11</td>
+<td>69</td>
+<td>56</td>
+<td>93</td>
+<td>51</td>
+<td>26</td>
+<td>76</td>
+<td>81</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>31</td>
+<td>25</td>
+<td>45</td>
+<td>99</td>
+<td>82</td>
+<td>52</td>
+<td>4</td>
+<td>97</td>
+<td>75</td>
+<td>59</td>
+<td>43</td>
+<td>63</td>
+<td>0</td>
+<td>23</td>
+<td>86</td>
+<td>25</td>
+<td>62</td>
+<td>76</td>
+<td>44</td>
+<td>31</td>
+<td>1</td>
+<td>68</td>
+<td>3</td>
+<td>60</td>
+<td>64</td>
+<td>93</td>
+<td>91</td>
+<td>13</td>
+<td>90</td>
+<td>96</td>
+<td>96</td>
+<td>32</td>
+<td>74</td>
+<td>74</td>
+<td>53</td>
+<td>29</td>
+<td>11</td>
+<td>45</td>
+<td>48</td>
+<td>76</td>
+<td>19</td>
+<td>12</td>
+<td>78</td>
+<td>55</td>
+<td>11</td>
+<td>75</td>
+<td>97</td>
+<td>78</td>
+<td>97</td>
+<td>64</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>38</td>
+<td>91</td>
+<td>62</td>
+<td>45</td>
+<td>95</td>
+<td>97</td>
+<td>97</td>
+<td>35</td>
+<td>46</td>
+<td>24</td>
+<td>89</td>
+<td>17</td>
+<td>95</td>
+<td>89</td>
+<td>57</td>
+<td>85</td>
+<td>18</td>
+<td>68</td>
+<td>94</td>
+<td>91</td>
+<td>40</td>
+<td>77</td>
+<td>66</td>
+<td>95</td>
+<td>98</td>
+<td>19</td>
+<td>65</td>
+<td>82</td>
+<td>89</td>
+<td>45</td>
+<td>75</td>
+<td>18</td>
+<td>35</td>
+<td>60</td>
+<td>65</td>
+<td>53</td>
+<td>7</td>
+<td>37</td>
+<td>96</td>
+<td>74</td>
+<td>6</td>
+<td>64</td>
+<td>31</td>
+<td>59</td>
+<td>0</td>
+<td>83</td>
+<td>17</td>
+<td>21</td>
+<td>54</td>
+<td>47</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>It is also possible to specifically define the number of rows and columns to display</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pandas_nrows_ncols(nrows<span class="op">=</span><span class="dv">2</span>, ncols<span class="op">=</span><span class="dv">6</span>):</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    display(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">47</th>
+<th data-quarto-table-cell-role="th">48</th>
+<th data-quarto-table-cell-role="th">49</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>78</td>
+<td>57</td>
+<td>39</td>
+<td>...</td>
+<td>26</td>
+<td>76</td>
+<td>81</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>38</td>
+<td>91</td>
+<td>62</td>
+<td>...</td>
+<td>21</td>
+<td>54</td>
+<td>47</td>
+</tr>
+</tbody>
+</table>
+
+<p>3 rows × 50 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pandas_nrows_ncols(<span class="dv">2</span>,<span class="dv">6</span>):</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    0   1   2   ...  47  48  49
+0   78  57  39  ...  26  76  81
+..  ..  ..  ..  ...  ..  ..  ..
+2   38  91  62  ...  21  54  47
+
+[3 rows x 50 columns]</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<h3 id="technical-background" class="anchored">Technical background</h3>
+<p>the context manager uses pandas’s <a href="https://pandas.pydata.org/docs/user_guide/options.html"><code>options API</code></a></p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows, pd.options.display.max_columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(60, 20)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>pd.get_option(<span class="st">'display.max_rows'</span>), pd.get_option(<span class="st">'display.max_columns'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(60, 20)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>pd.describe_option(<span class="st">'display.max_rows'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>display.max_rows : int
+    If max_rows is exceeded, switch to truncate view. Depending on
+    `large_repr`, objects are either centrally truncated or printed as
+    a summary view. 'None' value means unlimited.
+
+    In case python/IPython is running in a terminal and `large_repr`
+    equals 'truncate' this can be set to 0 and pandas will auto-detect
+    the height of the terminal and print a truncated object which fits
+    the screen height. The IPython notebook, IPython qtconsole, or
+    IDLE do not run in a terminal and hence it is not possible to do
+    correct auto-detection.
+    [default: 60] [currently: 60]</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>pd.reset_option(<span class="st">'display.max_rows'</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>60</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/vtecftwy/ecutils/blob/master/ecutilities/ipython.py#L136" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="display_full_df" class="level3">
+<h3 class="anchored" data-anchor-id="display_full_df">display_full_df</h3>
+<blockquote class="blockquote">
+<pre><code> display_full_df
+                  (df:pandas.core.frame.DataFrame|pandas.core.series.Serie
+                  s)</code></pre>
+</blockquote>
+<p>Display a pandas <code>DataFrame</code> or <code>Series</code> showing all rows and columns</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>pd.DataFrame | pd.Series</td>
+<td><code>DataFrame</code> or <code>Series</code> to display</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(np.random.randint(low<span class="op">=</span><span class="dv">0</span>, high<span class="op">=</span><span class="dv">100</span>, size<span class="op">=</span>(<span class="dv">3</span>,<span class="dv">50</span>)))</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+<th data-quarto-table-cell-role="th">6</th>
+<th data-quarto-table-cell-role="th">7</th>
+<th data-quarto-table-cell-role="th">8</th>
+<th data-quarto-table-cell-role="th">9</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">40</th>
+<th data-quarto-table-cell-role="th">41</th>
+<th data-quarto-table-cell-role="th">42</th>
+<th data-quarto-table-cell-role="th">43</th>
+<th data-quarto-table-cell-role="th">44</th>
+<th data-quarto-table-cell-role="th">45</th>
+<th data-quarto-table-cell-role="th">46</th>
+<th data-quarto-table-cell-role="th">47</th>
+<th data-quarto-table-cell-role="th">48</th>
+<th data-quarto-table-cell-role="th">49</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>11</td>
+<td>70</td>
+<td>3</td>
+<td>84</td>
+<td>10</td>
+<td>33</td>
+<td>54</td>
+<td>77</td>
+<td>5</td>
+<td>70</td>
+<td>...</td>
+<td>12</td>
+<td>77</td>
+<td>41</td>
+<td>30</td>
+<td>70</td>
+<td>70</td>
+<td>73</td>
+<td>84</td>
+<td>27</td>
+<td>86</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>8</td>
+<td>93</td>
+<td>0</td>
+<td>34</td>
+<td>68</td>
+<td>74</td>
+<td>71</td>
+<td>36</td>
+<td>69</td>
+<td>33</td>
+<td>...</td>
+<td>58</td>
+<td>98</td>
+<td>42</td>
+<td>91</td>
+<td>66</td>
+<td>30</td>
+<td>18</td>
+<td>66</td>
+<td>51</td>
+<td>89</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>24</td>
+<td>75</td>
+<td>2</td>
+<td>94</td>
+<td>63</td>
+<td>88</td>
+<td>49</td>
+<td>83</td>
+<td>91</td>
+<td>14</td>
+<td>...</td>
+<td>15</td>
+<td>17</td>
+<td>24</td>
+<td>74</td>
+<td>19</td>
+<td>64</td>
+<td>57</td>
+<td>92</td>
+<td>23</td>
+<td>70</td>
+</tr>
+</tbody>
+</table>
+
+<p>3 rows × 50 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>display_full_df(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+<th data-quarto-table-cell-role="th">6</th>
+<th data-quarto-table-cell-role="th">7</th>
+<th data-quarto-table-cell-role="th">8</th>
+<th data-quarto-table-cell-role="th">9</th>
+<th data-quarto-table-cell-role="th">10</th>
+<th data-quarto-table-cell-role="th">11</th>
+<th data-quarto-table-cell-role="th">12</th>
+<th data-quarto-table-cell-role="th">13</th>
+<th data-quarto-table-cell-role="th">14</th>
+<th data-quarto-table-cell-role="th">15</th>
+<th data-quarto-table-cell-role="th">16</th>
+<th data-quarto-table-cell-role="th">17</th>
+<th data-quarto-table-cell-role="th">18</th>
+<th data-quarto-table-cell-role="th">19</th>
+<th data-quarto-table-cell-role="th">20</th>
+<th data-quarto-table-cell-role="th">21</th>
+<th data-quarto-table-cell-role="th">22</th>
+<th data-quarto-table-cell-role="th">23</th>
+<th data-quarto-table-cell-role="th">24</th>
+<th data-quarto-table-cell-role="th">25</th>
+<th data-quarto-table-cell-role="th">26</th>
+<th data-quarto-table-cell-role="th">27</th>
+<th data-quarto-table-cell-role="th">28</th>
+<th data-quarto-table-cell-role="th">29</th>
+<th data-quarto-table-cell-role="th">30</th>
+<th data-quarto-table-cell-role="th">31</th>
+<th data-quarto-table-cell-role="th">32</th>
+<th data-quarto-table-cell-role="th">33</th>
+<th data-quarto-table-cell-role="th">34</th>
+<th data-quarto-table-cell-role="th">35</th>
+<th data-quarto-table-cell-role="th">36</th>
+<th data-quarto-table-cell-role="th">37</th>
+<th data-quarto-table-cell-role="th">38</th>
+<th data-quarto-table-cell-role="th">39</th>
+<th data-quarto-table-cell-role="th">40</th>
+<th data-quarto-table-cell-role="th">41</th>
+<th data-quarto-table-cell-role="th">42</th>
+<th data-quarto-table-cell-role="th">43</th>
+<th data-quarto-table-cell-role="th">44</th>
+<th data-quarto-table-cell-role="th">45</th>
+<th data-quarto-table-cell-role="th">46</th>
+<th data-quarto-table-cell-role="th">47</th>
+<th data-quarto-table-cell-role="th">48</th>
+<th data-quarto-table-cell-role="th">49</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>11</td>
+<td>70</td>
+<td>3</td>
+<td>84</td>
+<td>10</td>
+<td>33</td>
+<td>54</td>
+<td>77</td>
+<td>5</td>
+<td>70</td>
+<td>81</td>
+<td>24</td>
+<td>93</td>
+<td>56</td>
+<td>3</td>
+<td>74</td>
+<td>86</td>
+<td>92</td>
+<td>7</td>
+<td>49</td>
+<td>87</td>
+<td>33</td>
+<td>28</td>
+<td>53</td>
+<td>82</td>
+<td>43</td>
+<td>76</td>
+<td>52</td>
+<td>55</td>
+<td>28</td>
+<td>99</td>
+<td>0</td>
+<td>26</td>
+<td>1</td>
+<td>51</td>
+<td>67</td>
+<td>68</td>
+<td>87</td>
+<td>56</td>
+<td>64</td>
+<td>12</td>
+<td>77</td>
+<td>41</td>
+<td>30</td>
+<td>70</td>
+<td>70</td>
+<td>73</td>
+<td>84</td>
+<td>27</td>
+<td>86</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>8</td>
+<td>93</td>
+<td>0</td>
+<td>34</td>
+<td>68</td>
+<td>74</td>
+<td>71</td>
+<td>36</td>
+<td>69</td>
+<td>33</td>
+<td>79</td>
+<td>75</td>
+<td>78</td>
+<td>42</td>
+<td>72</td>
+<td>32</td>
+<td>50</td>
+<td>60</td>
+<td>91</td>
+<td>0</td>
+<td>86</td>
+<td>26</td>
+<td>13</td>
+<td>37</td>
+<td>23</td>
+<td>48</td>
+<td>74</td>
+<td>38</td>
+<td>52</td>
+<td>77</td>
+<td>71</td>
+<td>30</td>
+<td>3</td>
+<td>48</td>
+<td>22</td>
+<td>46</td>
+<td>2</td>
+<td>92</td>
+<td>38</td>
+<td>48</td>
+<td>58</td>
+<td>98</td>
+<td>42</td>
+<td>91</td>
+<td>66</td>
+<td>30</td>
+<td>18</td>
+<td>66</td>
+<td>51</td>
+<td>89</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>24</td>
+<td>75</td>
+<td>2</td>
+<td>94</td>
+<td>63</td>
+<td>88</td>
+<td>49</td>
+<td>83</td>
+<td>91</td>
+<td>14</td>
+<td>16</td>
+<td>65</td>
+<td>65</td>
+<td>16</td>
+<td>37</td>
+<td>92</td>
+<td>67</td>
+<td>90</td>
+<td>47</td>
+<td>40</td>
+<td>39</td>
+<td>50</td>
+<td>7</td>
+<td>61</td>
+<td>93</td>
+<td>18</td>
+<td>43</td>
+<td>86</td>
+<td>6</td>
+<td>25</td>
+<td>39</td>
+<td>39</td>
+<td>91</td>
+<td>75</td>
+<td>43</td>
+<td>13</td>
+<td>11</td>
+<td>88</td>
+<td>6</td>
+<td>91</td>
+<td>15</td>
+<td>17</td>
+<td>24</td>
+<td>74</td>
+<td>19</td>
+<td>64</td>
+<td>57</td>
+<td>92</td>
+<td>23</td>
+<td>70</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>msg <span class="op">=</span> <span class="st">'should raise a TypeError'</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>contains <span class="op">=</span> <span class="st">'df must me a pandas `DataFrame` or `Series`'</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>test_fail(display_full_df, args<span class="op">=</span>[<span class="st">'a string'</span>], msg<span class="op">=</span>msg, contains<span class="op">=</span>contains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
