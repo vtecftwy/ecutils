@@ -273,15 +273,22 @@ def path_to_parent_dir(
     pattern:str,               # pattern to identify the parent directory
     path:str|Path|None = None, # optional path from where to seek for parent directory
 )-> Path:                      # path of the parent directory
-    """Climb directory tree up to a directory starting with the string `pattern`, and return its path
+    """Climb directory tree up to a directory starting with `pattern`, and return its path.
     
-    Can pass a starting path to climb from. 
+    - When no directory is found in the tree starting with `pattern`, return the current directory path.
+    
+    - It is possible to pass a `path` as starting path to climb from. 
     """
     if path is None: path = Path()
     path = safe_path(path).absolute()
     tree = [path.name] + [p.name for p in path.parents]
     mask = [True if n.startswith(pattern) else False for n in tree]
-    tree = tree[mask.index(True):]
-    tree.reverse()
-    nbs = Path('/'.join(tree))
-    return nbs
+    # A parent directory with the pattern is found in the tree, return that directory
+    if any(mask):
+        tree = tree[mask.index(True):]
+        tree.reverse()
+        parent_dir = Path('/'.join(tree))
+    # No parent directory with the pattern is found in the tree, return the current directory
+    else:
+        parent_dir = Path().absolute()
+    return parent_dir

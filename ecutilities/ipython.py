@@ -35,7 +35,10 @@ def nb_setup(
     ):
     """Use in first cell of notebook to set autoreload, and add system paths
     
-    Always add a path to 'src' in the project root, if the directory exists
+    Always add a path to the directoruy 'src' if `srs` directory exists at the same level as the `nbs` directory.
+
+    When the notebook is not located in a tree including the name `nbs`, `src` directory is searched at the same level
+    as the directory in which the notebook is located.
     """
     #  Handle paths
     #  Add src if it exists
